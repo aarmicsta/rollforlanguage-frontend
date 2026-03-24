@@ -118,7 +118,6 @@ const isManagePassivesModalOpen = ref(false)
 
 // 🚦 Action dispatcher
 function handleAction(action?: string) {
-  console.log('NEW SIDEBAR HANDLER FIRED:', action)
   if (!action) return
   switch (action) {
     case 'createClass':
@@ -131,6 +130,7 @@ function handleAction(action?: string) {
       store.refreshPlayableList()
       break
     case 'browseSpecies':
+      console.log('NEW SIDEBAR HANDLER FIRED:', action);
       isBrowseSpeciesModalOpen.value = true
       break
     case 'manageStats':
