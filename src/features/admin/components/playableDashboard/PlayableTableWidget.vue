@@ -1,4 +1,4 @@
-<!-- /src/features/admin/components/playableDashboard/PlayableTableWidget.vue  -->
+<!-- /src/features/admin/components/playableDashboard/PlayableTableWidget.vue -->
 <template>
   <WidgetWrapper title="Playable Species Table" icon="Table">
     <template #hover-tools>
