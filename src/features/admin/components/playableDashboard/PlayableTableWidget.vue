@@ -36,42 +36,29 @@
           <table class="min-w-full text-sm">
             <thead class="bg-gray-100 dark:bg-neutral-800">
               <tr>
+                <th class="px-4 py-2 text-left">Display Name</th>
                 <th class="px-4 py-2 text-left">Name</th>
-                <th class="px-4 py-2 text-left">Tags</th>
-                <th class="px-4 py-2 text-left">Playable</th>
+                <th class="px-4 py-2 text-left">Slug</th>
+                <th class="px-4 py-2 text-left">Active</th>
+                <th class="px-4 py-2 text-left">Sort Order</th>
                 <th class="px-4 py-2 text-left">Last Updated</th>
-                <th class="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="char in classes"
-                :key="char.id"
+                v-for="item in species"
+                :key="item.id"
                 class="border-t dark:border-neutral-700"
               >
-                <td class="px-4 py-2 font-medium">{{ char.name }}</td>
+                <td class="px-4 py-2 font-medium">{{ item.displayName }}</td>
+                <td class="px-4 py-2">{{ item.name }}</td>
+                <td class="px-4 py-2">{{ item.slug }}</td>
                 <td class="px-4 py-2">
-                  <span
-                    v-for="tag in char.tags"
-                    :key="tag"
-                    class="mr-1 inline-block rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900 dark:text-blue-100"
-                  >
-                    {{ tag }}
-                  </span>
+                  {{ item.isActive ? 'Yes' : 'No' }}
                 </td>
+                <td class="px-4 py-2">{{ item.sortOrder ?? '—' }}</td>
                 <td class="px-4 py-2">
-                  {{ char.isPlayable ? 'Yes' : 'No' }}
-                </td>
-                <td class="px-4 py-2">
-                  {{ formatDate(char.updatedAt) }}
-                </td>
-                <td class="px-4 py-2">
-                  <button
-                    @click="store.openEditModal(char)"
-                    class="text-blue-600 hover:underline"
-                  >
-                    Edit
-                  </button>
+                  {{ formatDate(item.updatedAt) }}
                 </td>
               </tr>
             </tbody>
@@ -89,24 +76,24 @@
 import { ref, onMounted, watch } from 'vue'
 import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import { playableClassService } from '@/features/admin/services/playableClassService'
+import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-import type { PlayableClass } from '@/features/admin/types/playableTypes'
+import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 import PlayableClassModal from './PlayableClassModal.vue'
 
 const store = useAdminPlayableStore()
 const modalOpen = ref(false)
-const classes = ref<PlayableClass[]>([])
+const species = ref<PlayableSpeciesBrowseItem[]>([])
 
-async function fetchClasses() {
-  const res = await playableClassService.getPlayableClasses({ page: 1, limit: 50 })
-  classes.value = res.data
+async function fetchSpecies() {
+  const res = await playableSpeciesService.getPlayableSpecies()
+  species.value = res
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString()
+function formatDate(dateStr: string | null) {
+  return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
 }
 
-onMounted(fetchClasses)
-watch(() => store.lastPlayableRefresh, fetchClasses)
+onMounted(fetchSpecies)
+watch(() => store.lastPlayableRefresh, fetchSpecies)
 </script>
