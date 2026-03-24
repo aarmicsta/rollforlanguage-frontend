@@ -130,7 +130,6 @@ function handleAction(action?: string) {
       store.refreshPlayableList()
       break
     case 'browseSpecies':
-      console.log('NEW SIDEBAR HANDLER FIRED:', action);
       isBrowseSpeciesModalOpen.value = true
       break
     case 'manageStats':
@@ -143,7 +142,7 @@ function handleAction(action?: string) {
       emit('openTagsModal')
       break
     default:
-      console.log('NEW DEFAULT HIT:', action)
+      console.log(`Unhandled action: ${action}`)
   }
 }
 </script>
