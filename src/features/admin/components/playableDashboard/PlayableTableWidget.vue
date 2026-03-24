@@ -1,6 +1,6 @@
 <!-- /src/features/admin/components/playableDashboard/PlayableTableWidget.vue -->
 <template>
-  <WidgetWrapper title="Playable Species/Class Table" icon="Table">
+  <WidgetWrapper title="Playable Species Table" icon="Table">
     <template #hover-tools>
       <button
         @click="modalOpen = true"
@@ -11,14 +11,14 @@
     </template>
 
     <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-      View and manage all playable classes.
+      View and manage all playable species.
     </p>
 
     <AdminModal
       :visible="modalOpen"
       @close="modalOpen = false"
       size="6xl"
-      title="Manage Playable Classes"
+      title="Manage Playable Species"
     >
       <div class="space-y-4 text-gray-800 dark:text-gray-100">
         <!-- Create Button -->
