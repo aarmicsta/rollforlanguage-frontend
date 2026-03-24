@@ -50,6 +50,15 @@
     </AdminModal>
 
     <AdminModal
+      title="Browse Species"
+      :visible="isBrowseSpeciesModalOpen"
+      @close="isBrowseSpeciesModalOpen = false"
+      size="5xl"
+    >
+      <PlayableTableWidget />
+    </AdminModal>
+
+    <AdminModal
       title="Manage Passives"
       :visible="isManagePassivesModalOpen"
       @close="isManagePassivesModalOpen = false"
@@ -64,6 +73,7 @@ import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
 import PlayableClassModal from '@/features/admin/components/playableDashboard/PlayableClassModal.vue'
+import PlayableTableWidget from '@/features/admin/components/playableDashboard/PlayableTableWidget.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'
@@ -102,6 +112,7 @@ function toggleSubmenu(tool: AdminDashboardTool) {
 
 // 📦 Modal states
 const isBrowseClassesModalOpen = ref(false)
+const isBrowseSpeciesModalOpen = ref(false)
 const isManageStatsModalOpen = ref(false)
 const isManagePassivesModalOpen = ref(false)
 
@@ -117,6 +128,9 @@ function handleAction(action?: string) {
       break
     case 'refreshClasses':
       store.refreshPlayableList()
+      break
+    case 'browseSpecies':
+      isBrowseSpeciesModalOpen.value = true
       break
     case 'manageStats':
       isManageStatsModalOpen.value = true
