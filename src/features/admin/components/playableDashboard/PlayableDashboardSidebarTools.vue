@@ -118,6 +118,7 @@ const isManagePassivesModalOpen = ref(false)
 
 // 🚦 Action dispatcher
 function handleAction(action?: string) {
+  console.log('NEW SIDEBAR HANDLER FIRED:', action)
   if (!action) return
   switch (action) {
     case 'createClass':
@@ -142,7 +143,7 @@ function handleAction(action?: string) {
       emit('openTagsModal')
       break
     default:
-      console.log(`Unhandled action: ${action}`)
+      console.log('NEW DEFAULT HIT:', action)
   }
 }
 </script>
