@@ -1,6 +1,6 @@
 <!-- /src/features/admin/components/playableDashboard/PlayableTableWidget.vue -->
 <template>
-  <WidgetWrapper title="Playable Class Table" icon="Table">
+  <WidgetWrapper title="Playable Species/Class Table" icon="Table">
     <template #hover-tools>
       <button
         @click="modalOpen = true"
