@@ -14,9 +14,10 @@
       </button>
     </div>
 
-    <div
+    <form
       v-if="editableSpecies"
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
+      @submit.prevent="handleSave"
     >
       <div>
         <label class="mb-1 block text-xs text-gray-500">Display Name</label>
@@ -63,6 +64,7 @@
 
       <div class="flex justify-end gap-2 pt-4">
         <button
+          type="button"
           @click="closeModal"
           class="rounded bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400 dark:bg-neutral-700 dark:text-gray-100 dark:hover:bg-neutral-600"
         >
@@ -70,13 +72,13 @@
         </button>
 
         <button
-          @click="handleSave"
+          type="submit"
           class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
           Save Changes
         </button>
       </div>
-    </div>
+    </form>
 
     <div v-else class="text-sm text-gray-500">
       No species selected.
