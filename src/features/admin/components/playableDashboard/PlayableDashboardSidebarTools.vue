@@ -37,6 +37,7 @@
 
     <!-- Functional modals -->
     <PlayableClassModal />
+    <PlayableSpeciesEditModal />
     <ManageStatsModal :visible="isManageStatsModalOpen" @close="isManageStatsModalOpen = false" />
 
     <!-- Placeholder modals -->
@@ -73,6 +74,7 @@ import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
 import PlayableClassModal from '@/features/admin/components/playableDashboard/PlayableClassModal.vue'
+import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
@@ -146,4 +148,3 @@ function handleAction(action?: string) {
   }
 }
 </script>
-
