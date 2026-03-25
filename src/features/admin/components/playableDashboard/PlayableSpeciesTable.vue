@@ -18,7 +18,8 @@
           <tr
             v-for="item in species"
             :key="item.id"
-            class="border-t dark:border-neutral-700"
+            class="border-t dark:border-neutral-700 hover:bg-gray-100 dark:hover:bg-neutral-800 cursor-pointer"
+            @click="handleRowClick(item)"
           >
             <td class="px-4 py-2 font-medium">{{ item.displayName }}</td>
             <td class="px-4 py-2">{{ item.name }}</td>
@@ -54,6 +55,11 @@ const species = ref<PlayableSpeciesBrowseItem[]>([])
 async function fetchSpecies() {
   const res = await playableSpeciesService.getPlayableSpecies()
   species.value = res
+}
+
+function handleRowClick(item: PlayableSpeciesBrowseItem) {
+  store.selectedPlayable = item as any
+  store.showEditModal = true
 }
 
 function formatDate(dateStr: string | null) {
