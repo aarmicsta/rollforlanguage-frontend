@@ -55,7 +55,7 @@
       @close="isBrowseSpeciesModalOpen = false"
       size="5xl"
     >
-      <PlayableTableWidget />
+      <PlayableSpeciesTable />
     </AdminModal>
 
     <AdminModal
@@ -73,7 +73,7 @@ import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
 import PlayableClassModal from '@/features/admin/components/playableDashboard/PlayableClassModal.vue'
-import PlayableTableWidget from '@/features/admin/components/playableDashboard/PlayableTableWidget.vue'
+import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'

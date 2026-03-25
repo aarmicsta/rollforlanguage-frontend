@@ -81,8 +81,6 @@ import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStor
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 import PlayableClassModal from './PlayableClassModal.vue'
 
-console.log('PlayableTableWidget mounted script loaded')
-
 const store = useAdminPlayableStore()
 const modalOpen = ref(false)
 const species = ref<PlayableSpeciesBrowseItem[]>([])
