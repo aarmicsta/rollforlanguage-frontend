@@ -56,7 +56,7 @@
       @close="isBrowseSpeciesModalOpen = false"
       size="5xl"
     >
-      <PlayableSpeciesTable />
+      <PlayableSpeciesTable @close="isBrowseSpeciesModalOpen = false" />
     </AdminModal>
 
     <AdminModal

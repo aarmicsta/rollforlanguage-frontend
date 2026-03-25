@@ -49,6 +49,10 @@ import { playableSpeciesService } from '@/features/admin/services/playableSpecie
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 
+const emit = defineEmits<{
+  (e: 'close'): void
+}>()
+
 const store = useAdminPlayableStore()
 const species = ref<PlayableSpeciesBrowseItem[]>([])
 
@@ -58,6 +62,7 @@ async function fetchSpecies() {
 }
 
 function handleRowClick(item: PlayableSpeciesBrowseItem) {
+  emit('close')
   store.selectedPlayable = item as any
   store.showEditModal = true
 }
