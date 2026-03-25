@@ -89,6 +89,7 @@ import { ref, watch } from 'vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
+import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
 
 const emit = defineEmits<{
   (e: 'back'): void
@@ -124,7 +125,24 @@ function handleBack() {
   emit('back')
 }
 
-function handleSave() {
-  console.log('Saving species:', editableSpecies.value)
+async function handleSave() {
+  if (!editableSpecies.value) return
+
+  try {
+    store.isSubmitting = true
+    store.submitError = null
+
+    await playableSpeciesService.updatePlayableSpecies(editableSpecies.value.id, {
+      displayName: editableSpecies.value.displayName,
+    })
+
+    store.refreshPlayableList()
+    closeModal()
+  } catch (error) {
+    console.error(error)
+    store.submitError = 'Failed to save playable species changes.'
+  } finally {
+    store.isSubmitting = false
+  }
 }
 </script>

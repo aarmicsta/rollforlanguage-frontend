@@ -18,6 +18,18 @@ export async function getPlayableSpecies(): Promise<PlayableSpecies[]> {
   return response.data
 }
 
+export async function updatePlayableSpecies(
+  id: string,
+  payload: { displayName: string }
+): Promise<{ message: string }> {
+  const response = await axiosInstance.patch(
+    `/admin/playable-species/${id}`,
+    payload
+  )
+  return response.data
+}
+
 export const playableSpeciesService = {
   getPlayableSpecies,
+  updatePlayableSpecies,
 }
