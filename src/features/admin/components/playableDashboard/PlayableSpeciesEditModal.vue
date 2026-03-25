@@ -5,6 +5,15 @@
     size="5xl"
     @close="closeModal"
   >
+    <div class="mb-4">
+      <button
+        @click="handleBack"
+        class="text-sm text-blue-600 hover:underline"
+      >
+        ← Back to Species Table
+      </button>
+    </div>
+
     <div
       v-if="store.selectedPlayable"
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
@@ -60,6 +69,10 @@
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 
+const emit = defineEmits<{
+  (e: 'back'): void
+}>()
+
 const store = useAdminPlayableStore()
 
 function formatDate(dateStr: string | null) {
@@ -70,5 +83,10 @@ function closeModal() {
   store.showEditModal = false
   store.selectedPlayable = null
   store.submitError = null
+}
+
+function handleBack() {
+  store.showEditModal = false
+  emit('back')
 }
 </script>
