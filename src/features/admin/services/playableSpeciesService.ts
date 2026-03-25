@@ -1,10 +1,20 @@
-// src/features/admin/services/playableSpeciesService.ts
-
 import { axiosInstance } from '@/services/axiosInstance'
-import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 
-export async function getPlayableSpecies(): Promise<PlayableSpeciesBrowseItem[]> {
-  const response = await axiosInstance.get<PlayableSpeciesBrowseItem[]>('/admin/playable-species')
+export interface PlayableSpecies {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  iconMediaAssetId: string | null
+  isActive: boolean | null
+  sortOrder: number | null
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+export async function getPlayableSpecies(): Promise<PlayableSpecies[]> {
+  const response = await axiosInstance.get<PlayableSpecies[]>('/admin/playable-species')
   return response.data
 }
 
