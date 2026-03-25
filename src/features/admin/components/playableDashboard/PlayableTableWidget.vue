@@ -87,7 +87,9 @@ const species = ref<PlayableSpeciesBrowseItem[]>([])
 
 async function fetchSpecies() {
   const res = await playableSpeciesService.getPlayableSpecies()
+  console.log('playable species response:', res)
   species.value = res
+  console.log('species.value after assignment:', species.value)
 }
 
 function formatDate(dateStr: string | null) {
