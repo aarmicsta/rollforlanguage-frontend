@@ -37,7 +37,7 @@
 
     <!-- Functional modals -->
     <PlayableClassModal />
-    <PlayableSpeciesEditModal @back="isBrowserSpeciesModalOpen = true" />
+    <PlayableSpeciesEditModal @back="isBrowseSpeciesModalOpen = true" />
     <ManageStatsModal :visible="isManageStatsModalOpen" @close="isManageStatsModalOpen = false" />
 
     <!-- Placeholder modals -->
