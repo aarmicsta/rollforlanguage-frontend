@@ -5,8 +5,53 @@
     size="5xl"
     @close="closeModal"
   >
-    <div class="text-sm text-gray-600 dark:text-gray-300">
-      Playable Species edit modal coming next.
+    <div
+      v-if="store.selectedPlayable"
+      class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
+    >
+      <div>
+        <h2 class="text-lg font-semibold">
+          {{ store.selectedPlayable.displayName }}
+        </h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          {{ store.selectedPlayable.slug }}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-xs text-gray-500">Internal Name</p>
+          <p>{{ store.selectedPlayable.name }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Active</p>
+          <p>
+            {{ store.selectedPlayable.isActive ? 'Yes' : 'No' }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Sort Order</p>
+          <p>{{ store.selectedPlayable.sortOrder ?? '—' }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Last Updated</p>
+          <p>{{ formatDate(store.selectedPlayable.updatedAt) }}</p>
+        </div>
+      </div>
+
+      <div>
+        <p class="text-xs text-gray-500">Description</p>
+        <p class="whitespace-pre-line">
+          {{ store.selectedPlayable.description || '—' }}
+        </p>
+      </div>
+    </div>
+
+    <div v-else class="text-sm text-gray-500">
+      No species selected.
     </div>
   </AdminModal>
 </template>
@@ -16,6 +61,10 @@ import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 
 const store = useAdminPlayableStore()
+
+function formatDate(dateStr: string | null) {
+  return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
+}
 
 function closeModal() {
   store.showEditModal = false
