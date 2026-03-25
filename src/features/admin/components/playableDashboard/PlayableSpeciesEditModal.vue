@@ -60,6 +60,22 @@
           {{ editableSpecies.description || '—' }}
         </p>
       </div>
+
+      <div class="flex justify-end gap-2 pt-4">
+        <button
+          @click="closeModal"
+          class="rounded bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400 dark:bg-neutral-700 dark:text-gray-100 dark:hover:bg-neutral-600"
+        >
+          Cancel
+        </button>
+
+        <button
+          @click="handleSave"
+          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+        >
+          Save Changes
+        </button>
+      </div>
     </div>
 
     <div v-else class="text-sm text-gray-500">
@@ -106,5 +122,9 @@ function handleBack() {
   store.showEditModal = false
   editableSpecies.value = null
   emit('back')
+}
+
+function handleSave() {
+  console.log('Saving species:', editableSpecies.value)
 }
 </script>
