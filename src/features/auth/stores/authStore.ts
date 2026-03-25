@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: (state): boolean => !!state.token,
+    isAuthenticated: (state): boolean => !!state.token && !!state.user,
   },
 
   actions: {
@@ -116,25 +116,38 @@ export const useAuthStore = defineStore('auth', {
       const storedToken = localStorage.getItem(AUTH_TOKEN_KEY)
       const storedRefreshToken = localStorage.getItem(AUTH_REFRESH_TOKEN_KEY)
 
-      if (storedToken) {
+      if (!storedToken) {
+        this.clearAuth()
+        return
+      }
+
+      try {
+        const decoded = jwtDecode<DecodedToken>(storedToken)
+        const now = Math.floor(Date.now() / 1000)
+
+        if (decoded.exp <= now) {
+          this.clearAuth()
+          return
+        }
+
         this.token = storedToken
         this.refreshToken = storedRefreshToken
+        this.user = {
+          id: decoded.id,
+          email: decoded.email,
+          username: decoded.username,
+          roles: [decoded.role],
+          genderIdentity: decoded.genderIdentity || null,
+          pronouns: decoded.pronouns || null,
+        } as User
 
-        try {
-          const decoded = jwtDecode<DecodedToken>(storedToken)
-          this.user = {
-            id: decoded.id,
-            email: decoded.email,
-            username: decoded.username,
-            roles: [decoded.role],
-            genderIdentity: decoded.genderIdentity || null,
-            pronouns: decoded.pronouns || null,
-          } as User
-        } catch {
-          this.user = null
-        }
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(this.user))
+        this.authError = null
+      } catch (error) {
+        console.error('Failed to restore token from storage:', error)
+        this.clearAuth()
       }
-    },
+    }
   },
 })
 
