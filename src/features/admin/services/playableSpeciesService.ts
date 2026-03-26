@@ -23,6 +23,7 @@ export async function updatePlayableSpecies(
   payload: { 
     displayName: string
     description: string | null
+    isActive: boolean
   }
 ): Promise<{
   message: string

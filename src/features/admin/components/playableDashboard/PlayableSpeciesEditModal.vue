@@ -38,10 +38,17 @@
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Active</p>
-          <p>
-            {{ editableSpecies.isActive ? 'Yes' : 'No' }}
-          </p>
+          <label class="mb-1 block text-xs text-gray-500">Active</label>
+          <label class="flex items-center gap-2">
+            <input
+              v-model="editableSpecies.isActive"
+              type="checkbox"
+              class="h-4 w-4"
+              :true-value="true"
+              :false-value="false"
+            />
+            <span>{{ editableSpecies.isActive ? 'Yes' : 'No' }}</span>
+          </label>
         </div>
 
         <div>
@@ -140,6 +147,7 @@ async function handleSave() {
       {
         displayName: editableSpecies.value.displayName,
         description: editableSpecies.value.description ?? null,
+        isActive: editableSpecies.value.isActive ?? false,
       }
     )
 
