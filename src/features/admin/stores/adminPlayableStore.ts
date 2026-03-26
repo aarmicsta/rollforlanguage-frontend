@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PlayableClass } from '@/features/admin/types/playableTypes'
+import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 
 export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   // 🔄 Widget refresh key
   const lastPlayableRefresh = ref(Date.now())
 
-  // 📦 Selected playable class (for edit mode)
-  const selectedPlayable = ref<PlayableClass | null>(null)
+  // 📦 Selected playable Species (for edit mode)
+  const selectedPlayable = ref<PlayableSpeciesBrowseItem | null>(null)
 
   // 🔘 Modal visibility
   const showCreateModal = ref(false)
@@ -29,7 +29,7 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   }
 
   // ✏️ Open modal to edit existing class
-  function openEditModal(playable: PlayableClass) {
+  function openEditModal(playable: PlayableSpeciesBrowseItem) {
     selectedPlayable.value = playable
     showEditModal.value = true
   }

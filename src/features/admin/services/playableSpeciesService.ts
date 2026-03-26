@@ -21,11 +21,15 @@ export async function getPlayableSpecies(): Promise<PlayableSpecies[]> {
 export async function updatePlayableSpecies(
   id: string,
   payload: { displayName: string }
-): Promise<{ message: string }> {
+): Promise<{
+  message: string
+  data: PlayableSpecies | null
+}> {
   const response = await axiosInstance.patch(
     `/admin/playable-species/${id}`,
     payload
   )
+
   return response.data
 }
 

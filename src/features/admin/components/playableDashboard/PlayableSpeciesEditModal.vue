@@ -89,9 +89,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
-import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
+
 
 const emit = defineEmits<{
   (e: 'back'): void
@@ -103,9 +104,7 @@ const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
 watch(
   () => store.selectedPlayable,
   (value) => {
-    editableSpecies.value = value
-      ? { ...(value as PlayableSpeciesBrowseItem) }
-      : null
+    editableSpecies.value = value ? { ...value } : null
   },
   { immediate: true }
 )
