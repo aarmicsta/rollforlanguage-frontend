@@ -10,7 +10,6 @@
             <th class="px-4 py-2 text-left">Name</th>
             <th class="px-4 py-2 text-left">Slug</th>
             <th class="px-4 py-2 text-left">Active</th>
-            <th class="px-4 py-2 text-left">Sort Order</th>
             <th class="px-4 py-2 text-left">Last Updated</th>
           </tr>
         </thead>
@@ -27,13 +26,12 @@
             <td class="px-4 py-2">
               {{ item.isActive ? 'Yes' : 'No' }}
             </td>
-            <td class="px-4 py-2">{{ item.sortOrder ?? '—' }}</td>
             <td class="px-4 py-2">
               {{ formatDate(item.updatedAt) }}
             </td>
           </tr>
           <tr v-if="!species.length">
-            <td colspan="6" class="px-4 py-6 text-center text-gray-500">
+            <td colspan="5" class="px-4 py-6 text-center text-gray-500">
               No playable species found.
             </td>
           </tr>
