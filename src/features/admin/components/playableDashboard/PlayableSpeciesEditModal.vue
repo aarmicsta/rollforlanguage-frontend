@@ -52,11 +52,6 @@
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Sort Order</p>
-          <p>{{ editableSpecies.sortOrder ?? '—' }}</p>
-        </div>
-
-        <div>
           <p class="text-xs text-gray-500">Last Updated</p>
           <p>{{ formatDate(editableSpecies.updatedAt) }}</p>
         </div>
