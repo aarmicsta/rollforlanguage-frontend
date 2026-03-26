@@ -2,8 +2,8 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 
 import AdminLayout from '@/features/admin/layouts/AdminLayout.vue'
-import AdminPlayableView from '@/features/admin/views/AdminPlayableView.vue'
 import AdminDashboardView from '@/features/admin/views/AdminDashboardView.vue'
+import AdminPlayableView from '@/features/admin/views/AdminPlayableView.vue'
 import CampaignManagementView from '@/features/admin/views/CampaignManagementView.vue'
 import ContentManagementView from '@/features/admin/views/ContentManagementView.vue'
 import SystemMonitorView from '@/features/admin/views/SystemMonitorView.vue'
@@ -34,7 +34,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: (to, from, next) => {
       const authStore = useAuthStore()
       if (authStore.isAuthenticated) {
-        next(AppRoutePaths.Dashboard)
+        next(AppRoutePaths.AdminDashboard)
       } else {
         next()
       }
@@ -48,7 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter: (to, from, next) => {
       const authStore = useAuthStore()
       if (authStore.isAuthenticated) {
-        next(AppRoutePaths.Dashboard)
+        next(AppRoutePaths.AdminDashboard)
       } else {
         next()
       }
