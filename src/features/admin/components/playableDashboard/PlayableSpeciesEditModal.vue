@@ -133,9 +133,16 @@ async function handleSave() {
     store.isSubmitting = true
     store.submitError = null
 
-    await playableSpeciesService.updatePlayableSpecies(editableSpecies.value.id, {
-      displayName: editableSpecies.value.displayName,
-    })
+    const response = await playableSpeciesService.updatePlayableSpecies(
+      editableSpecies.value.id,
+      {
+        displayName: editableSpecies.value.displayName,
+      }
+    )
+
+    if (response.data) {
+      store.selectedPlayable = response.data
+    }
 
     store.refreshPlayableList()
     closeModal()
