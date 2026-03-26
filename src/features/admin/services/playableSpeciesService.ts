@@ -20,7 +20,10 @@ export async function getPlayableSpecies(): Promise<PlayableSpecies[]> {
 
 export async function updatePlayableSpecies(
   id: string,
-  payload: { displayName: string }
+  payload: { 
+    displayName: string
+    description: string | null
+  }
 ): Promise<{
   message: string
   data: PlayableSpecies | null

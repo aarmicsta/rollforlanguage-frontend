@@ -56,10 +56,12 @@
       </div>
 
       <div>
-        <p class="text-xs text-gray-500">Description</p>
-        <p class="whitespace-pre-line">
-          {{ editableSpecies.description || '—' }}
-        </p>
+        <label class="mb-1 block text-xs text-gray-500">Description</label>
+        <textarea
+          v-model="editableSpecies.description"
+          rows="5"
+          class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+        />
       </div>
 
       <div class="flex justify-end gap-2 pt-4">
@@ -137,6 +139,7 @@ async function handleSave() {
       editableSpecies.value.id,
       {
         displayName: editableSpecies.value.displayName,
+        description: editableSpecies.value.description ?? null,
       }
     )
 
