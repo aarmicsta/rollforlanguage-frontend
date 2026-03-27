@@ -292,6 +292,7 @@ watch(
 
     try {
       if (!availableTags.value.length) {
+        console.log('Loading available playable tags...')
         await loadAvailableTags()
       }
 
