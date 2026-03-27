@@ -286,10 +286,15 @@ watch(
     if (!value) {
       assignedTags.value = []
       selectedTagIds.value = []
+      availableTags.value = []
       return
     }
 
     try {
+      if (!availableTags.value.length) {
+        await loadAvailableTags()
+      }
+
       const tags = await playableSpeciesService.getPlayableSpeciesTags(value.id)
       assignedTags.value = tags
       selectedTagIds.value = tags.map((tag) => tag.id)
@@ -326,7 +331,6 @@ async function loadAvailableTags() {
 
 onMounted(async () => {
   await loadAvailableTags()
-  console.log('Loaded availableTags:', availableTags.value)
 })
 
 /**
