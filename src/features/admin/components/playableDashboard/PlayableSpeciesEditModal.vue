@@ -324,8 +324,9 @@ async function loadAvailableTags() {
  * inside the watcher.
  */
 
-onMounted(() => {
-  loadAvailableTags()
+onMounted(async () => {
+  await loadAvailableTags()
+  console.log('Loaded availableTags:', availableTags.value)
 })
 
 /**
