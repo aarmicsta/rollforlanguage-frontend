@@ -133,6 +133,16 @@
       </div>
 
       <!--
+        Tag assignment:
+        Reusable assignment-level selector for applying canonical
+        playable tags to this specific species.
+      -->
+      <PlayableTagAssignmentSelector
+        v-model="selectedTagIds"
+        :available-tags="availableTags"
+      />
+
+      <!--
         Action buttons:
         - Cancel closes and resets the modal
         - Save persists current scalar field edits
@@ -167,12 +177,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
   playableSpeciesService,
   type PlayableSpeciesTag,
 } from '@/features/admin/services/playableSpeciesService'
+import {
+  getPlayableTags,
+  type PlayableTag,
+} from '@/features/admin/services/playableTagService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 
@@ -200,15 +215,21 @@ const emit = defineEmits<{
  * This prevents accidental direct mutation of the selected
  * store object while editing.
  *
- * `selectedTagIds` and `assignedTags` are staged here for the
- * next relational-editing increment (species tags). They are
- * not yet rendered in the UI, but are intentionally prepared
- * now to support the upcoming tags workflow.
+ * Tag-related local state is split intentionally:
+ *
+ * `availableTags`
+ * - the full canonical tag list available for assignment
+ * - loaded once from the shared playable tag reference service
+ *
+ * `assignedTags`
+ * - the full tag objects currently assigned to the selected species
+ * - loaded from species-specific assignment endpoints
  */
 const store = useAdminPlayableStore()
 const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
+const availableTags = ref<PlayableTag[]>([])
 
 /**
  * ---------------------------------------------------------
@@ -240,6 +261,17 @@ const assignedTags = ref<PlayableSpeciesTag[]>([])
  * `immediate: true` ensures the modal initializes correctly
  * when opened with a pre-selected species.
  *
+ * Loads the full canonical playable tag list from the shared
+ * tag reference service.
+ *
+ * Important distinction:
+ * - this is the full available option pool
+ * - it is NOT the same thing as the tags currently assigned
+ *   to the selected species
+ *
+ * The selector UI needs both:
+ * - availableTags   -> all assignable options
+ * - selectedTagIds  -> current assignment state
  * Future expansion:
  * - This same pattern will be extended for:
  *   - passives
@@ -269,6 +301,32 @@ watch(
   },
   { immediate: true }
 )
+
+async function loadAvailableTags() {
+  try {
+    availableTags.value = await getPlayableTags(false)
+  } catch (error) {
+    console.error('Failed to load playable tags:', error)
+    availableTags.value = []
+  }
+}
+
+/**
+ * ---------------------------------------------------------
+ * Initial reference-data load
+ * ---------------------------------------------------------
+ *
+ * Load shared canonical tag options once when the modal
+ * component is mounted.
+ *
+ * These options are reused as different species are selected,
+ * while the assigned tag set is refreshed per selected species
+ * inside the watcher.
+ */
+
+onMounted(() => {
+  loadAvailableTags()
+})
 
 /**
  * ---------------------------------------------------------

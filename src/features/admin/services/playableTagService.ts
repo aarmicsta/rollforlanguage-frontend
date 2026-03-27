@@ -2,16 +2,31 @@
 
 import { axiosInstance } from '@/services/axiosInstance'
 
+/**
+ * ---------------------------------------------------------
+ * PlayableTag
+ * ---------------------------------------------------------
+ *
+ * Frontend shape for a canonical playable tag definition as
+ * returned by the current admin tag endpoints.
+ *
+ * Notes:
+ * - `displayName` is the human-facing label shown in admin UI.
+ * - `tagCategory` refers to the semantic grouping of the tag
+ *   (for example: temperament, nature, etc.).
+ * - This is NOT the same thing as "species vs class".
+ * - `sortOrder` may exist for tag-management purposes even if
+ *   not always surfaced in assignment-level UI.
+ */
 export interface PlayableTag {
   id: string
   name: string
-  description?: string
-  isActive: boolean
-  sortOrder: number
-  colorHex?: string
-  category?: 'class' | 'species' // ✅ Add category field
-  createdAt: string
-  updatedAt: string
+  slug: string
+  displayName: string
+  description: string | null
+  tagCategory: string | null
+  isActive: boolean | null
+  sortOrder: number | null
 }
 
 // 🔍 GET all tags (optionally include inactive + filter by category)
