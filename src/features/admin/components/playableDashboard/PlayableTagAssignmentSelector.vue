@@ -29,6 +29,9 @@
 <template>
   <div>
     <label class="mb-1 block text-xs text-gray-500">Tags</label>
+    <p class="text-xs text-red-500">
+        availableTags: {{ availableTags.length }} | selectedTagIds: {{ modelValue.length }}
+    </p>
 
     <div
       class="rounded border px-3 py-3 dark:border-neutral-700"
