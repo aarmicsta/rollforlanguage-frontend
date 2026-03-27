@@ -34,7 +34,7 @@
       class="rounded border px-3 py-3 dark:border-neutral-700"
     >
       <div
-        v-if="availableTags.length"
+        v-if="availableTags && availableTags.length"
         class="flex flex-wrap gap-2"
       >
         <span
