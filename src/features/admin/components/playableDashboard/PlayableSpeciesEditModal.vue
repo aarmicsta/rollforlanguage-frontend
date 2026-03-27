@@ -1,10 +1,43 @@
 <template>
+  <!--
+    =========================================================
+    Playable Species Edit Modal
+    =========================================================
+
+    This modal is the primary admin editing surface for a
+    single playable species record.
+
+    Current responsibilities:
+    - edit core scalar species fields
+      - displayName
+      - description
+      - isActive
+    - show read-only metadata
+      - internal name
+      - slug
+      - updatedAt
+    - prepare local state for future relational editing
+      - assigned tags
+      - selected tag IDs
+
+    Notes:
+    - The modal works from a local editable copy of the selected
+      species so that the table/store object is not mutated
+      directly while the user is editing.
+    - Relational editing (tags, passives, stats) will be layered
+      in incrementally rather than all at once.
+  -->
   <AdminModal
     :visible="store.showEditModal"
     title="Edit Playable Species"
     size="5xl"
     @close="closeModal"
   >
+    <!--
+      Back button:
+      Returns the user to the species browse table without fully
+      resetting the surrounding browse/edit workflow.
+    -->
     <div class="mb-4">
       <button
         @click="handleBack"
@@ -14,11 +47,21 @@
       </button>
     </div>
 
+    <!--
+      Main edit form:
+      Only renders if a species is currently selected and copied
+      into local editable state.
+    -->
     <form
       v-if="editableSpecies"
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
       @submit.prevent="handleSave"
     >
+      <!--
+        Display Name:
+        Primary editable human-facing label for the species.
+        The slug is shown beneath it as a stable reference value.
+      -->
       <div>
         <label class="mb-1 block text-xs text-gray-500">Display Name</label>
         <input
@@ -31,12 +74,27 @@
         </p>
       </div>
 
+      <!--
+        Metadata / quick-edit grid:
+        Mix of read-only informational fields and lightweight
+        editable controls.
+      -->
       <div class="grid grid-cols-2 gap-4">
+        <!--
+          Internal canonical name:
+          Read-only. Useful for admin reference and debugging,
+          but not intended for casual editing in this modal.
+        -->
         <div>
           <p class="text-xs text-gray-500">Internal Name</p>
           <p>{{ editableSpecies.name }}</p>
         </div>
 
+        <!--
+          Active toggle:
+          Editable boolean controlling whether the species is
+          currently active/available in the system.
+        -->
         <div>
           <label class="mb-1 block text-xs text-gray-500">Active</label>
           <label class="flex items-center gap-2">
@@ -51,12 +109,20 @@
           </label>
         </div>
 
+        <!--
+          Last Updated:
+          Read-only timestamp for quick admin visibility.
+        -->
         <div>
           <p class="text-xs text-gray-500">Last Updated</p>
           <p>{{ formatDate(editableSpecies.updatedAt) }}</p>
         </div>
       </div>
 
+      <!--
+        Description:
+        Multi-line editable narrative/summary field for the species.
+      -->
       <div>
         <label class="mb-1 block text-xs text-gray-500">Description</label>
         <textarea
@@ -66,6 +132,11 @@
         />
       </div>
 
+      <!--
+        Action buttons:
+        - Cancel closes and resets the modal
+        - Save persists current scalar field edits
+      -->
       <div class="flex justify-end gap-2 pt-4">
         <button
           type="button"
@@ -84,6 +155,11 @@
       </div>
     </form>
 
+    <!--
+      Empty state:
+      Defensive fallback in case the modal opens without a
+      selected species.
+    -->
     <div v-else class="text-sm text-gray-500">
       No species selected.
     </div>
@@ -93,30 +169,142 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
+import {
+  playableSpeciesService,
+  type PlayableSpeciesTag,
+} from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
 
-
+/**
+ * ---------------------------------------------------------
+ * Emits
+ * ---------------------------------------------------------
+ *
+ * `back` is used to return from the edit modal to the browse
+ * table modal without fully collapsing the browse/edit flow.
+ */
 const emit = defineEmits<{
   (e: 'back'): void
 }>()
 
+/**
+ * ---------------------------------------------------------
+ * Store / Local State
+ * ---------------------------------------------------------
+ *
+ * `store` holds shared modal visibility, selection state,
+ * and submit/loading/error flags.
+ *
+ * `editableSpecies` is a local copy of the selected species.
+ * This prevents accidental direct mutation of the selected
+ * store object while editing.
+ *
+ * `selectedTagIds` and `assignedTags` are staged here for the
+ * next relational-editing increment (species tags). They are
+ * not yet rendered in the UI, but are intentionally prepared
+ * now to support the upcoming tags workflow.
+ */
 const store = useAdminPlayableStore()
 const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
+const selectedTagIds = ref<string[]>([])
+const assignedTags = ref<PlayableSpeciesTag[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Sync selected species + load relational data
+ * ---------------------------------------------------------
+ *
+ * Whenever the selected playable changes:
+ * 1. Copy it into local editable state (scalar fields)
+ * 2. Fetch assigned relational data (currently: tags)
+ * 3. Normalize relational data into local editing models
+ *
+ * Scalar sync:
+ * - Creates a local copy of the selected species to avoid
+ *   mutating shared store state during editing.
+ *
+ * Relational sync (current: tags):
+ * - Fetches assigned tags from the backend
+ * - Stores full tag objects in `assignedTags` (display/use)
+ * - Stores tag IDs in `selectedTagIds` (editing/persistence)
+ *
+ * Why this split?
+ * - Objects are useful for UI display
+ * - IDs are required for backend update payloads
+ *
+ * Reset behavior:
+ * - If no species is selected, all local state is cleared
+ * - If fetch fails, relational state is safely reset
+ *
+ * `immediate: true` ensures the modal initializes correctly
+ * when opened with a pre-selected species.
+ *
+ * Future expansion:
+ * - This same pattern will be extended for:
+ *   - passives
+ *   - stat modifiers
+ */
 
 watch(
   () => store.selectedPlayable,
-  (value) => {
+  async (value) => {
     editableSpecies.value = value ? { ...value } : null
+
+    if (!value) {
+      assignedTags.value = []
+      selectedTagIds.value = []
+      return
+    }
+
+    try {
+      const tags = await playableSpeciesService.getPlayableSpeciesTags(value.id)
+      assignedTags.value = tags
+      selectedTagIds.value = tags.map((tag) => tag.id)
+    } catch (error) {
+      console.error('Failed to load playable species tags:', error)
+      assignedTags.value = []
+      selectedTagIds.value = []
+    }
   },
   { immediate: true }
 )
 
+/**
+ * ---------------------------------------------------------
+ * formatDate
+ * ---------------------------------------------------------
+ *
+ * Lightweight UI formatter for nullable date strings returned
+ * from the backend.
+ */
 function formatDate(dateStr: string | null) {
   return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
 }
 
+/**
+ * ---------------------------------------------------------
+ * closeModal
+ * ---------------------------------------------------------
+ *
+ * Fully closes and resets the edit modal state.
+ *
+ * Used when:
+ * - the user clicks Cancel
+ * - the modal emits a close event
+ * - save completes successfully
+ *
+ * This clears:
+ * - modal visibility
+ * - selected species in store
+ * - local editable copy
+ * - submit error state
+ *
+ * Note:
+ * As relational editing expands, this function should also
+ * reset any additional local relation state (tags, passives,
+ * stats, etc.) to avoid stale modal data between edits.
+ */
 function closeModal() {
   store.showEditModal = false
   store.selectedPlayable = null
@@ -124,12 +312,54 @@ function closeModal() {
   store.submitError = null
 }
 
+/**
+ * ---------------------------------------------------------
+ * handleBack
+ * ---------------------------------------------------------
+ *
+ * Returns the user from edit view back to the browse view
+ * without treating it as a full cancel/reset of the outer
+ * flow.
+ *
+ * This intentionally emits `back` so the parent can reopen
+ * the browse table/modal as needed.
+ */
 function handleBack() {
   store.showEditModal = false
   editableSpecies.value = null
   emit('back')
 }
 
+/**
+ * ---------------------------------------------------------
+ * handleSave
+ * ---------------------------------------------------------
+ *
+ * Persists the currently editable scalar species fields to the
+ * backend via the species PATCH endpoint.
+ *
+ * Current fields saved:
+ * - displayName
+ * - description
+ * - isActive
+ *
+ * Behavior:
+ * 1. enable submitting/loading state
+ * 2. clear prior submit error
+ * 3. send PATCH request
+ * 4. if backend returns updated data, apply it to the store
+ * 5. trigger list refresh
+ * 6. close the modal
+ *
+ * Why use returned backend data?
+ * - keeps frontend aligned with server-confirmed values
+ * - avoids trusting only local form state
+ * - prepares for future reduction of unnecessary refetching
+ *
+ * Note:
+ * Tags are not yet saved here. Relational updates will be
+ * integrated incrementally once the tag editing UI is wired.
+ */
 async function handleSave() {
   if (!editableSpecies.value) return
 
