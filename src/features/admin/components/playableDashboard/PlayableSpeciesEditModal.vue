@@ -453,8 +453,6 @@ async function handleSave() {
       store.selectedPlayable = response.data
     }
 
-    console.log('About to save species tags:', selectedTagIds.value)
-
     store.refreshPlayableList()
     closeModal()
   } catch (error) {
