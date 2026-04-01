@@ -44,6 +44,7 @@
           v-for="tag in availableTags"
           :key="tag.id"
           type="button"
+          :disabled="props.disabled"
           class="inline-flex items-center rounded-full px-3 py-1 text-sm transition"
           :class="
             modelValue.includes(tag.id)
@@ -99,6 +100,7 @@ const props = defineProps<{
     tagCategory: string | null
     isActive: boolean | null
   }>
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{

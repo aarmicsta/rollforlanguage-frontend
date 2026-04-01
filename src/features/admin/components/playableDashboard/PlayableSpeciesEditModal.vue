@@ -67,6 +67,7 @@
         <input
           v-model="editableSpecies.displayName"
           type="text"
+          :disabled="store.isSubmitting"
           class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
         />
         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
@@ -101,6 +102,7 @@
             <input
               v-model="editableSpecies.isActive"
               type="checkbox"
+              :disabled="store.isSubmitting"
               class="h-4 w-4"
               :true-value="true"
               :false-value="false"
@@ -128,6 +130,7 @@
         <textarea
           v-model="editableSpecies.description"
           rows="5"
+          :disabled="store.isSubmitting"
           class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
         />
       </div>
@@ -140,6 +143,7 @@
       <PlayableTagAssignmentSelector
         v-model="selectedTagIds"
         :available-tags="availableTags"
+        :disabled="store.isSubmitting"
       />
 
       <!--
@@ -151,6 +155,7 @@
         <button
           type="button"
           @click="closeModal"
+          :disabled="store.isSubmitting"
           class="rounded bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400 dark:bg-neutral-700 dark:text-gray-100 dark:hover:bg-neutral-600"
         >
           Cancel
@@ -158,9 +163,10 @@
 
         <button
           type="submit"
-          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          :disabled="store.isSubmitting"
+          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Save Changes
+          {{ store.isSubmitting ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
     </form>
@@ -173,11 +179,19 @@
     <div v-else class="text-sm text-gray-500">
       No species selected.
     </div>
+
+    <Toast
+      v-if="showSuccessToast"
+      message="Playable species updated successfully."
+      type="success"
+      @dismiss="showSuccessToast = false"
+    />
   </AdminModal>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import Toast from '@/components/molecules/Toast.vue'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
@@ -230,6 +244,7 @@ const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
+const showSuccessToast = ref(false)
 
 /**
  * ---------------------------------------------------------
@@ -374,6 +389,7 @@ function closeModal() {
   store.selectedPlayable = null
   editableSpecies.value = null
   store.submitError = null
+  showSuccessToast.value = false
 }
 
 /**
@@ -414,7 +430,8 @@ function handleBack() {
  * 4. update species tag assignments (replace-all model)
  * 5. if backend returns updated species data, apply it to the store
  * 6. trigger list refresh
- * 7. close the modal
+ * 7. close/reset modal state
+ * 8. show success toast
  *
  * Why use returned backend data?
  * - keeps frontend aligned with server-confirmed values
@@ -454,7 +471,11 @@ async function handleSave() {
     }
 
     store.refreshPlayableList()
-    closeModal()
+    store.showEditModal = false
+    store.selectedPlayable = null
+    editableSpecies.value = null
+    store.submitError = null
+    showSuccessToast.value = true
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to save playable species changes.'
