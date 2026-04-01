@@ -399,30 +399,32 @@ function handleBack() {
  * handleSave
  * ---------------------------------------------------------
  *
- * Persists the currently editable scalar species fields to the
- * backend via the species PATCH endpoint.
+ * Persists the currently editable species data to the backend.
  *
- * Current fields saved:
+ * Current fields/relations saved:
  * - displayName
  * - description
  * - isActive
+ * - tag assignments
  *
  * Behavior:
  * 1. enable submitting/loading state
  * 2. clear prior submit error
- * 3. send PATCH request
- * 4. if backend returns updated data, apply it to the store
- * 5. trigger list refresh
- * 6. close the modal
+ * 3. update scalar species fields
+ * 4. update species tag assignments (replace-all model)
+ * 5. if backend returns updated species data, apply it to the store
+ * 6. trigger list refresh
+ * 7. close the modal
  *
  * Why use returned backend data?
  * - keeps frontend aligned with server-confirmed values
  * - avoids trusting only local form state
  * - prepares for future reduction of unnecessary refetching
  *
- * Note:
- * Tags are not yet saved here. Relational updates will be
- * integrated incrementally once the tag editing UI is wired.
+ * Tag assignment model:
+ * - `selectedTagIds` represents the full desired tag set
+ * - saving replaces the species's existing tag assignments
+ *   with the currently selected IDs
  */
 async function handleSave() {
   if (!editableSpecies.value) return
@@ -437,6 +439,13 @@ async function handleSave() {
         displayName: editableSpecies.value.displayName,
         description: editableSpecies.value.description ?? null,
         isActive: editableSpecies.value.isActive ?? false,
+      }
+    )
+
+    await playableSpeciesService.updatePlayableSpeciesTags(
+      editableSpecies.value.id,
+      {
+        tagIds: selectedTagIds.value,
       }
     )
 
