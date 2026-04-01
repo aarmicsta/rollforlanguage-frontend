@@ -40,15 +40,17 @@
         v-if="availableTags && availableTags.length"
         class="flex flex-wrap gap-2"
       >
-        <span
+        <button
           v-for="tag in availableTags"
           :key="tag.id"
-          class="inline-flex items-center rounded-full px-3 py-1 text-sm"
+          type="button"
+          class="inline-flex items-center rounded-full px-3 py-1 text-sm transition"
           :class="
             modelValue.includes(tag.id)
               ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
               : 'bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-gray-300'
           "
+          @click="toggleTag(tag.id)"
         >
           {{ tag.displayName }}
           <span
@@ -57,7 +59,7 @@
           >
             ({{ tag.tagCategory }})
           </span>
-        </span>
+        </button>
       </div>
 
       <p
@@ -82,7 +84,14 @@
  * `availableTags`:
  * - the full available canonical tag options the user may assign
  */
-defineProps<{
+/**
+ * ---------------------------------------------------------
+ * Emits
+ * ---------------------------------------------------------
+ *
+ * Emits the updated list of selected tag IDs back to the parent.
+ */
+const props = defineProps<{
   modelValue: string[]
   availableTags: Array<{
     id: string
@@ -92,14 +101,28 @@ defineProps<{
   }>
 }>()
 
-/**
- * ---------------------------------------------------------
- * Emits
- * ---------------------------------------------------------
- *
- * Emits the updated list of selected tag IDs back to the parent.
- */
-defineEmits<{
+const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
 }>()
+
+/**
+ * ---------------------------------------------------------
+ * toggleTag
+ * ---------------------------------------------------------
+ *
+ * Adds or removes a tag ID from the current selection, then
+ * emits the updated full selected ID list back to the parent.
+ *
+ * This component remains UI-only:
+ * - no fetching
+ * - no saving
+ * - no awareness of species vs class
+ */
+function toggleTag(tagId: string) {
+  const next = props.modelValue.includes(tagId)
+    ? props.modelValue.filter((id) => id !== tagId)
+    : [...props.modelValue, tagId]
+
+  emit('update:modelValue', next)
+}
 </script>
