@@ -422,7 +422,6 @@ function handleBack() {
  * 5. if backend returns updated species data, apply it to the store
  * 6. trigger list refresh
  * 7. close/reset modal state
- * 8. show success toast
  *
  * Why use returned backend data?
  * - keeps frontend aligned with server-confirmed values
@@ -462,10 +461,7 @@ async function handleSave() {
     }
 
     store.refreshPlayableList()
-    store.showEditModal = false
-    store.selectedPlayable = null
-    editableSpecies.value = null
-    store.submitError = null
+    closeModal()
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to save playable species changes.'
