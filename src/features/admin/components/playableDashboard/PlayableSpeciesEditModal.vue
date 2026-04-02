@@ -185,6 +185,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
+import { useToastStore } from '@/stores/ui/useToastStore'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
@@ -237,6 +238,17 @@ const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Global UI Feedback
+ * ---------------------------------------------------------
+ *
+ * Toast rendering is owned by the persistent admin layout.
+ * This modal may trigger toast feedback, but does not render
+ * or manage toast lifecycle directly.
+ */
+const toastStore = useToastStore()
 
 /**
  * ---------------------------------------------------------
@@ -462,6 +474,7 @@ async function handleSave() {
 
     store.refreshPlayableList()
     closeModal()
+    toastStore.showToast('Playable species updated successfully.', 'success')
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to save playable species changes.'
