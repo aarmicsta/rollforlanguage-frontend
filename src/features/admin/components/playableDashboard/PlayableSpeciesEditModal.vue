@@ -180,18 +180,11 @@
       No species selected.
     </div>
 
-    <Toast
-      v-if="showSuccessToast"
-      message="Playable species updated successfully."
-      type="success"
-      @dismiss="showSuccessToast = false"
-    />
   </AdminModal>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import Toast from '@/components/molecules/Toast.vue'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
@@ -244,7 +237,6 @@ const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
-const showSuccessToast = ref(false)
 
 /**
  * ---------------------------------------------------------
@@ -389,7 +381,6 @@ function closeModal() {
   store.selectedPlayable = null
   editableSpecies.value = null
   store.submitError = null
-  showSuccessToast.value = false
 }
 
 /**
@@ -475,7 +466,6 @@ async function handleSave() {
     store.selectedPlayable = null
     editableSpecies.value = null
     store.submitError = null
-    showSuccessToast.value = true
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to save playable species changes.'
