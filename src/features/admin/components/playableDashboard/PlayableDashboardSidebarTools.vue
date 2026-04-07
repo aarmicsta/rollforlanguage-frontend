@@ -36,21 +36,22 @@
     </div>
 
     <!-- Functional modals -->
+    <PlayableClassEditModal @back="isBrowseClassesModalOpen = true" />
     <PlayableSpeciesEditModal @back="isBrowseSpeciesModalOpen = true" />
     <ManageStatsModal :visible="isManageStatsModalOpen" @close="isManageStatsModalOpen = false" />
 
     <!-- Placeholder modals -->
     <AdminModal
-      title="Browse Classes"
       :visible="isBrowseClassesModalOpen"
-      @close="isBrowseClassesModalOpen = false"
+      title="Browse Playable Classes"
       size="5xl"
+      @close="isBrowseClassesModalOpen = false"
     >
-      <p class="text-gray-700 dark:text-gray-200">Coming soon: fully featured class table.</p>
+      <PlayableClassTable @close="isBrowseClassesModalOpen = false" />
     </AdminModal>
 
     <AdminModal
-      title="Browse Species"
+      title="Browse Playable Species"
       :visible="isBrowseSpeciesModalOpen"
       @close="isBrowseSpeciesModalOpen = false"
       size="5xl"
@@ -72,6 +73,8 @@
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
+import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
+import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
@@ -80,6 +83,7 @@ import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTo
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+
 
 const emit = defineEmits<{
   (e: 'openTagsModal'): void
