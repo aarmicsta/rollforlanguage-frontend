@@ -12,17 +12,26 @@
     - decouple modal rendering from sidebar controls
 
     Notes:
-    - This container does NOT decide when modals open.
-    - It only reacts to store state.
-    - Sidebar → triggers store
-    - Store → drives this container
+    - Sidebar triggers store actions
+    - Store controls visibility
+    - This container renders modals based on store state
   -->
 
-  <!-- Edit Modals -->
+  <!--
+    ---------------------------------------------------------
+    Create Modals
+    ---------------------------------------------------------
+  -->
+  <PlayableSpeciesCreateModal />
+  <PlayableClassCreateModal />
+
+  <!--
+    ---------------------------------------------------------
+    Edit Modals
+    ---------------------------------------------------------
+  -->
   <PlayableSpeciesEditModal />
   <PlayableClassEditModal />
-
-  <!-- (Future) Create Modals will be mounted here -->
 </template>
 
 <script setup lang="ts">
@@ -32,6 +41,8 @@
  * =========================================================
  */
 
+import PlayableClassCreateModal from '@/features/admin/components/playableDashboard/PlayableClassCreateModal.vue'
 import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
+import PlayableSpeciesCreateModal from '@/features/admin/components/playableDashboard/PlayableSpeciesCreateModal.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 </script>
