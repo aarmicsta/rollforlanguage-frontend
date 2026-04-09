@@ -2,7 +2,11 @@
 <template>
   <WidgetWrapper title="Playable Overview" icon="Table">
     <div class="space-y-4">
-      <!-- Toggle -->
+      <!--
+        ---------------------------------------------------------
+        Entity Type Toggle
+        ---------------------------------------------------------
+      -->
       <div class="flex gap-2">
         <button
           @click="activeType = 'species'"
@@ -29,7 +33,11 @@
         </button>
       </div>
 
-      <!-- Species Summary -->
+      <!--
+        ---------------------------------------------------------
+        Species Summary
+        ---------------------------------------------------------
+      -->
       <div
         v-if="activeType === 'species'"
         class="space-y-2 text-sm text-gray-700 dark:text-gray-300"
@@ -37,7 +45,7 @@
         <p v-if="loadingSpecies">Loading species summary...</p>
 
         <p v-else-if="speciesError" class="text-red-600 dark:text-red-400">
-          Failed to load species summary.
+          {{ speciesError }}
         </p>
 
         <ul v-else class="space-y-1">
@@ -50,29 +58,103 @@
         </ul>
       </div>
 
-      <!-- Classes Summary -->
+      <!--
+        ---------------------------------------------------------
+        Class Summary
+        ---------------------------------------------------------
+      -->
       <div
         v-else
-        class="text-sm text-gray-600 dark:text-gray-300"
+        class="space-y-2 text-sm text-gray-700 dark:text-gray-300"
       >
-        Class summary is not yet implemented.
+        <p v-if="loadingClasses">Loading class summary...</p>
+
+        <p v-else-if="classesError" class="text-red-600 dark:text-red-400">
+          {{ classesError }}
+        </p>
+
+        <ul v-else class="space-y-1">
+          <li><strong>{{ classes.length }}</strong> total classes</li>
+          <li><strong>{{ activeClassesCount }}</strong> active</li>
+          <li><strong>{{ inactiveClassesCount }}</strong> inactive</li>
+          <li>
+            <strong>{{ lastUpdatedClassLabel }}</strong> most recently updated
+          </li>
+        </ul>
       </div>
     </div>
   </WidgetWrapper>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
-import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
-import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
+/**
+ * =========================================================
+ * Playable Table Widget
+ * =========================================================
+ *
+ * Summary widget for Playables admin overview data.
+ *
+ * Responsibilities:
+ * - show high-level summary stats for playable species
+ * - show high-level summary stats for playable classes
+ * - react to the shared Playables refresh trigger
+ *
+ * Notes:
+ * - This widget is display-only.
+ * - It does not manage browse/edit/create workflows.
+ * - Data is fetched from the admin services and reduced into
+ *   simple summary metrics for quick dashboard visibility.
+ */
 
+import { computed, onMounted, ref, watch } from 'vue'
+import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
+import { playableClassService } from '@/features/admin/services/playableClassService'
+import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
+import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import type {
+  PlayableClassBrowseItem,
+  PlayableSpeciesBrowseItem,
+} from '@/features/admin/types/playableTypes'
+
+/**
+ * ---------------------------------------------------------
+ * Store
+ * ---------------------------------------------------------
+ *
+ * Used here only for the shared refresh trigger.
+ */
+const store = useAdminPlayableStore()
+
+/**
+ * ---------------------------------------------------------
+ * Local UI State
+ * ---------------------------------------------------------
+ */
 const activeType = ref<'species' | 'classes'>('species')
 
+/**
+ * ---------------------------------------------------------
+ * Species State
+ * ---------------------------------------------------------
+ */
 const species = ref<PlayableSpeciesBrowseItem[]>([])
 const loadingSpecies = ref(false)
 const speciesError = ref<string | null>(null)
 
+/**
+ * ---------------------------------------------------------
+ * Class State
+ * ---------------------------------------------------------
+ */
+const classes = ref<PlayableClassBrowseItem[]>([])
+const loadingClasses = ref(false)
+const classesError = ref<string | null>(null)
+
+/**
+ * ---------------------------------------------------------
+ * Data Loading
+ * ---------------------------------------------------------
+ */
 async function fetchSpecies() {
   loadingSpecies.value = true
   speciesError.value = null
@@ -88,6 +170,30 @@ async function fetchSpecies() {
   }
 }
 
+async function fetchClasses() {
+  loadingClasses.value = true
+  classesError.value = null
+
+  try {
+    const res = await playableClassService.getPlayableClasses()
+    classes.value = res as PlayableClassBrowseItem[]
+  } catch (error) {
+    console.error(error)
+    classesError.value = 'Failed to load class summary.'
+  } finally {
+    loadingClasses.value = false
+  }
+}
+
+async function fetchAllPlayableSummaries() {
+  await Promise.all([fetchSpecies(), fetchClasses()])
+}
+
+/**
+ * ---------------------------------------------------------
+ * Species Metrics
+ * ---------------------------------------------------------
+ */
 const activeSpeciesCount = computed(() =>
   species.value.filter((item) => item.isActive).length
 )
@@ -109,9 +215,46 @@ const mostRecentlyUpdatedSpecies = computed(() => {
 })
 
 const lastUpdatedSpeciesLabel = computed(() => {
-  const item = mostRecentlyUpdatedSpecies.value
-  return item?.displayName ?? '—'
+  return mostRecentlyUpdatedSpecies.value?.displayName ?? '—'
 })
 
-onMounted(fetchSpecies)
+/**
+ * ---------------------------------------------------------
+ * Class Metrics
+ * ---------------------------------------------------------
+ */
+const activeClassesCount = computed(() =>
+  classes.value.filter((item) => item.isActive).length
+)
+
+const inactiveClassesCount = computed(() =>
+  classes.value.filter((item) => !item.isActive).length
+)
+
+const mostRecentlyUpdatedClass = computed(() => {
+  if (!classes.value.length) return null
+
+  return [...classes.value]
+    .filter((item) => item.updatedAt)
+    .sort((a, b) => {
+      const aTime = a.updatedAt ? new Date(a.updatedAt).getTime() : 0
+      const bTime = b.updatedAt ? new Date(b.updatedAt).getTime() : 0
+      return bTime - aTime
+    })[0] ?? null
+})
+
+const lastUpdatedClassLabel = computed(() => {
+  return mostRecentlyUpdatedClass.value?.displayName ?? '—'
+})
+
+/**
+ * ---------------------------------------------------------
+ * Lifecycle / Refresh Sync
+ * ---------------------------------------------------------
+ *
+ * Load both summaries on mount and whenever the shared
+ * Playables refresh key changes.
+ */
+onMounted(fetchAllPlayableSummaries)
+watch(() => store.lastPlayableRefresh, fetchAllPlayableSummaries)
 </script>
