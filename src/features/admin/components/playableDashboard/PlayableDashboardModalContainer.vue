@@ -41,7 +41,7 @@
  * =========================================================
  */
 
-import PlayableClassCreateModal from '@/features/admin/components/playableDashboard/PlayableClassCreateModal.vue'
+// import PlayableClassCreateModal from '@/features/admin/components/playableDashboard/PlayableClassCreateModal.vue'
 import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
 import PlayableSpeciesCreateModal from '@/features/admin/components/playableDashboard/PlayableSpeciesCreateModal.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
