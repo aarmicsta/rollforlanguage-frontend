@@ -21,7 +21,7 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
     ],
   },
   {
-    name: 'Browse',
+    name: 'Edit',
     icon: 'lucide:list',
     library: 'iconify',
     children: [
