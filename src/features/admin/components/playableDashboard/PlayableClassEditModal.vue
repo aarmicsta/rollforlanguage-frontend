@@ -1,7 +1,6 @@
-<!-- /src/features/admin/components/playableDashboard/PlayableClassEditModal.vue -->
 <template>
   <AdminModal
-    :visible="store.showEditModal"
+    :visible="store.showEditClassModal"
     title="Edit Playable Class"
     size="5xl"
     @close="closeModal"
@@ -103,6 +102,22 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * =========================================================
+ * Playable Class Edit Modal
+ * =========================================================
+ *
+ * Responsibilities:
+ * - edit scalar fields for a playable class
+ * - manage tag assignment for the class
+ * - submit updates to backend services
+ *
+ * Notes:
+ * - visibility is controlled by adminPlayableStore
+ * - selected entity comes from store.selectedClass
+ * - local editable copy is used to prevent direct mutation
+ */
+
 import { onMounted, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
@@ -130,8 +145,13 @@ const availableTags = ref<PlayableTag[]>([])
 
 const toastStore = useToastStore()
 
+/**
+ * ---------------------------------------------------------
+ * Watch: Selected Class
+ * ---------------------------------------------------------
+ */
 watch(
-  () => store.selectedPlayable,
+  () => store.selectedClass,
   async (value) => {
     editableClass.value = value ? { ...value } : null
 
@@ -159,6 +179,11 @@ watch(
   { immediate: true }
 )
 
+/**
+ * ---------------------------------------------------------
+ * Tag Loading
+ * ---------------------------------------------------------
+ */
 async function loadAvailableTags() {
   try {
     availableTags.value = await getPlayableTags(false)
@@ -176,19 +201,27 @@ function formatDate(dateStr: string | null) {
   return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
 }
 
+/**
+ * ---------------------------------------------------------
+ * Modal Controls
+ * ---------------------------------------------------------
+ */
 function closeModal() {
-  store.showEditModal = false
-  store.selectedPlayable = null
+  store.closeEditClassModal()
   editableClass.value = null
-  store.submitError = null
 }
 
 function handleBack() {
-  store.showEditModal = false
+  store.closeEditClassModal()
   editableClass.value = null
   emit('back')
 }
 
+/**
+ * ---------------------------------------------------------
+ * Save Handler
+ * ---------------------------------------------------------
+ */
 async function handleSave() {
   if (!editableClass.value) return
 
@@ -213,7 +246,7 @@ async function handleSave() {
     )
 
     if (response.data) {
-      store.selectedPlayable = response.data
+      store.selectedClass = response.data
     }
 
     store.refreshPlayableList()

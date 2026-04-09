@@ -18,7 +18,7 @@
         <span v-if="tool.children">▸</span>
       </button>
 
-      <!-- Submenu if tool has children -->
+      <!-- Submenu -->
       <div
         v-if="tool.children && openSubmenu === tool.name"
         class="ml-6 mt-2 flex flex-col gap-2"
@@ -35,16 +35,24 @@
       </div>
     </div>
 
-    <!-- Functional modals -->
-    <PlayableClassEditModal @back="isBrowseClassesModalOpen = true" />
-    <PlayableSpeciesEditModal @back="isBrowseSpeciesModalOpen = true" />
-    <ManageStatsModal :visible="isManageStatsModalOpen" @close="isManageStatsModalOpen = false" />
+    <!--
+      =========================================================
+      Sidebar-Scoped Modals (Non-Playables Core)
+      =========================================================
 
-    <!-- Placeholder modals -->
+      These remain here because they are not part of the core
+      Playables CRUD flow (yet).
+    -->
+
+    <ManageStatsModal
+      :visible="isManageStatsModalOpen"
+      @close="isManageStatsModalOpen = false"
+    />
+
     <AdminModal
-      :visible="isBrowseClassesModalOpen"
       title="Browse Playable Classes"
       size="5xl"
+      :visible="isBrowseClassesModalOpen"
       @close="isBrowseClassesModalOpen = false"
     >
       <PlayableClassTable @close="isBrowseClassesModalOpen = false" />
@@ -52,9 +60,9 @@
 
     <AdminModal
       title="Browse Playable Species"
+      size="5xl"
       :visible="isBrowseSpeciesModalOpen"
       @close="isBrowseSpeciesModalOpen = false"
-      size="5xl"
     >
       <PlayableSpeciesTable @close="isBrowseSpeciesModalOpen = false" />
     </AdminModal>
@@ -64,18 +72,34 @@
       :visible="isManagePassivesModalOpen"
       @close="isManagePassivesModalOpen = false"
     >
-      <p class="text-gray-700 dark:text-gray-200">Placeholder for passive ability glossary.</p>
+      <p class="text-gray-700 dark:text-gray-200">
+        Placeholder for passive ability glossary.
+      </p>
     </AdminModal>
   </div>
 </template>
 
 <script setup lang="ts">
+/**
+ * =========================================================
+ * Playable Dashboard Sidebar Tools
+ * =========================================================
+ *
+ * Responsibilities:
+ * - render Playables-specific sidebar tools
+ * - handle submenu expansion/collapse
+ * - dispatch user actions to the store or local modal state
+ *
+ * Notes:
+ * - This component is now strictly a control surface.
+ * - It no longer mounts edit/create modals directly.
+ * - Modal rendering is handled by the Playables modal container.
+ */
+
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
-import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
 import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
-import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
@@ -84,28 +108,45 @@ import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayabl
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-
 const emit = defineEmits<{
   (e: 'openTagsModal'): void
 }>()
 
-// 🎨 Theme injection
+/**
+ * ---------------------------------------------------------
+ * Theme Injection
+ * ---------------------------------------------------------
+ */
 const dashboardThemeRef = inject<import('vue').ComputedRef<DashboardTheme | undefined>>('dashboardTheme')
 const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
 
-// 🧠 Auth logic
+/**
+ * ---------------------------------------------------------
+ * Store / Auth
+ * ---------------------------------------------------------
+ */
 const store = useAdminPlayableStore()
 const { user } = useAuth()
 const userRole = user.value?.roles?.[0] === 'superadmin' ? 'superadmin' : 'admin'
 
-// 📜 Filtered sidebar tools
+/**
+ * ---------------------------------------------------------
+ * Tool Filtering
+ * ---------------------------------------------------------
+ */
 const tools = computed(() =>
   adminPlayableDashboardTools.filter(tool =>
     !tool.roles || tool.roles.includes(userRole)
   )
 )
 
+/**
+ * ---------------------------------------------------------
+ * Submenu State
+ * ---------------------------------------------------------
+ */
 const openSubmenu = ref<string | null>(null)
+
 function toggleSubmenu(tool: AdminDashboardTool) {
   if (!tool.children) {
     handleAction(tool.action)
@@ -114,37 +155,61 @@ function toggleSubmenu(tool: AdminDashboardTool) {
   openSubmenu.value = openSubmenu.value === tool.name ? null : tool.name
 }
 
-// 📦 Modal states
+/**
+ * ---------------------------------------------------------
+ * Local Modal State (Non-CRUD)
+ * ---------------------------------------------------------
+ */
 const isBrowseClassesModalOpen = ref(false)
 const isBrowseSpeciesModalOpen = ref(false)
 const isManageStatsModalOpen = ref(false)
 const isManagePassivesModalOpen = ref(false)
 
-// 🚦 Action dispatcher
+/**
+ * ---------------------------------------------------------
+ * Action Dispatcher
+ * ---------------------------------------------------------
+ *
+ * Routes sidebar actions to:
+ * - store-driven modal flows (create/edit)
+ * - local modal state (browse/stats/passives)
+ */
 function handleAction(action?: string) {
   if (!action) return
+
   switch (action) {
     case 'createClass':
-      store.showCreateModal = true
+      store.openCreateClassModal()
       break
+
+    case 'createSpecies':
+      store.openCreateSpeciesModal()
+      break
+
     case 'browseClasses':
       isBrowseClassesModalOpen.value = true
       break
-    case 'refreshClasses':
-      store.refreshPlayableList()
-      break
+
     case 'browseSpecies':
       isBrowseSpeciesModalOpen.value = true
       break
+
+    case 'refreshClasses':
+      store.refreshPlayableList()
+      break
+
     case 'manageStats':
       isManageStatsModalOpen.value = true
       break
+
     case 'managePassives':
       isManagePassivesModalOpen.value = true
       break
-    // case 'manageTags': // ✅ Unified tag management
+
+    // case 'manageTags':
     //   emit('openTagsModal')
     //   break
+
     default:
       console.log(`Unhandled action: ${action}`)
   }

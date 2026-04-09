@@ -28,7 +28,7 @@
       in incrementally rather than all at once.
   -->
   <AdminModal
-    :visible="store.showEditModal"
+    :visible="store.showEditSpeciesModal"
     title="Edit Playable Species"
     size="5xl"
     @close="closeModal"
@@ -179,7 +179,6 @@
     <div v-else class="text-sm text-gray-500">
       No species selected.
     </div>
-
   </AdminModal>
 </template>
 
@@ -255,7 +254,7 @@ const toastStore = useToastStore()
  * Sync selected species + load relational data
  * ---------------------------------------------------------
  *
- * Whenever the selected playable changes:
+ * Whenever the selected species changes:
  * 1. Copy it into local editable state (scalar fields)
  * 2. Fetch assigned relational data (currently: tags)
  * 3. Normalize relational data into local editing models
@@ -279,26 +278,9 @@ const toastStore = useToastStore()
  *
  * `immediate: true` ensures the modal initializes correctly
  * when opened with a pre-selected species.
- *
- * Loads the full canonical playable tag list from the shared
- * tag reference service.
- *
- * Important distinction:
- * - this is the full available option pool
- * - it is NOT the same thing as the tags currently assigned
- *   to the selected species
- *
- * The selector UI needs both:
- * - availableTags   -> all assignable options
- * - selectedTagIds  -> current assignment state
- * Future expansion:
- * - This same pattern will be extended for:
- *   - passives
- *   - stat modifiers
  */
-
 watch(
-  () => store.selectedPlayable,
+  () => store.selectedSpecies,
   async (value) => {
     editableSpecies.value = value ? { ...value } : null
 
@@ -311,7 +293,6 @@ watch(
 
     try {
       if (!availableTags.value.length) {
-        console.log('Loading available playable tags...')
         await loadAvailableTags()
       }
 
@@ -327,6 +308,23 @@ watch(
   { immediate: true }
 )
 
+/**
+ * ---------------------------------------------------------
+ * loadAvailableTags
+ * ---------------------------------------------------------
+ *
+ * Loads the full canonical playable tag list from the shared
+ * tag reference service.
+ *
+ * Important distinction:
+ * - this is the full available option pool
+ * - it is NOT the same thing as the tags currently assigned
+ *   to the selected species
+ *
+ * The selector UI needs both:
+ * - availableTags   -> all assignable options
+ * - selectedTagIds  -> current assignment state
+ */
 async function loadAvailableTags() {
   try {
     availableTags.value = await getPlayableTags(false)
@@ -348,7 +346,6 @@ async function loadAvailableTags() {
  * while the assigned tag set is refreshed per selected species
  * inside the watcher.
  */
-
 onMounted(async () => {
   await loadAvailableTags()
 })
@@ -389,10 +386,8 @@ function formatDate(dateStr: string | null) {
  * stats, etc.) to avoid stale modal data between edits.
  */
 function closeModal() {
-  store.showEditModal = false
-  store.selectedPlayable = null
+  store.closeEditSpeciesModal()
   editableSpecies.value = null
-  store.submitError = null
 }
 
 /**
@@ -408,7 +403,7 @@ function closeModal() {
  * the browse table/modal as needed.
  */
 function handleBack() {
-  store.showEditModal = false
+  store.closeEditSpeciesModal()
   editableSpecies.value = null
   emit('back')
 }
@@ -469,7 +464,7 @@ async function handleSave() {
     )
 
     if (response.data) {
-      store.selectedPlayable = response.data
+      store.selectedSpecies = response.data
     }
 
     store.refreshPlayableList()
