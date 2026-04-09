@@ -39,12 +39,12 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
       },
     ],
   },
-  {
-    name: 'Manage Tags',
-    icon: 'lucide:tag',
-    library: 'iconify',
-    action: 'manageTags', // ✅ Simplified to a single action
-  },
+  // {
+  //   name: 'Manage Tags',
+  //   icon: 'lucide:tag',
+  //   library: 'iconify',
+  //   action: 'manageTags', // ✅ Simplified to a single action
+  // },
   {
     name: 'Manage Stats',
     icon: 'mdi:chart-timeline-variant',

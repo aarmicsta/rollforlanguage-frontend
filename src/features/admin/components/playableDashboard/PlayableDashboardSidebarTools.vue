@@ -142,9 +142,9 @@ function handleAction(action?: string) {
     case 'managePassives':
       isManagePassivesModalOpen.value = true
       break
-    case 'manageTags': // ✅ Unified tag management
-      emit('openTagsModal')
-      break
+    // case 'manageTags': // ✅ Unified tag management
+    //   emit('openTagsModal')
+    //   break
     default:
       console.log(`Unhandled action: ${action}`)
   }

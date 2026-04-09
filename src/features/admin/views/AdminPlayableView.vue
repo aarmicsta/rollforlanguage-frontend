@@ -7,15 +7,15 @@
     <PlayableMetricsWidget />
 
     <!-- Featured Tags Widget (display-only) -->
-    <FeaturedTagsWidget ref="featuredTagsRef" />
+    <!-- <FeaturedTagsWidget ref="featuredTagsRef" /> -->
 
     <!-- Central Tag Management Modal (sidebar-triggered) -->
-    <ManageTagsModal
+    <!-- <ManageTagsModal
       :visible="props.showTagsModal"
       :default-category="props.defaultCategory"
       @close="emit('update:showTagsModal', false)"
       @refresh="handleTagRefresh"
-    />
+    /> -->
   </DashboardWidgetGrid>
 </template>
 
@@ -24,8 +24,8 @@ import { ref } from 'vue'
 
 // Admin dashboard widgets for managing playable classes & species
 import DashboardWidgetGrid from '@/features/admin/components/dashboard/DashboardWidgetGrid.vue'
-import FeaturedTagsWidget from '@/features/admin/components/playableDashboard/FeaturedTagsWidget.vue'
-import ManageTagsModal from '@/features/admin/components/playableDashboard/ManageTagsModal.vue'
+// import FeaturedTagsWidget from '@/features/admin/components/playableDashboard/FeaturedTagsWidget.vue'
+// import ManageTagsModal from '@/features/admin/components/playableDashboard/ManageTagsModal.vue'
 import PlayableMetricsWidget from '@/features/admin/components/playableDashboard/PlayableMetricsWidget.vue'
 import PlayableTableWidget from '@/features/admin/components/playableDashboard/PlayableTableWidget.vue'
 
