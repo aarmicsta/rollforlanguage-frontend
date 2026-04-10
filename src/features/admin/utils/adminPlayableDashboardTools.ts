@@ -25,6 +25,12 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
         action: 'createStats',
       },
       {
+        name: 'Stat Modifiers',
+        icon: 'mdi:tune-variant',
+        library: 'iconify',
+        action: 'createStatModifiers',
+      },
+      {
         name: 'Playable Passives',
         icon: 'lucide:brain',
         library: 'iconify',
@@ -54,6 +60,12 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
         icon: 'mdi:table',
         library: 'iconify',
         action: 'editStats',
+      },
+      {
+        name: 'Stat Modifiers Table',
+        icon: 'mdi:table-cog',
+        library: 'iconify',
+        action: 'editStatModifiers',
       },
       {
         name: 'Passives Table',

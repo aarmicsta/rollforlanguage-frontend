@@ -84,3 +84,50 @@ export interface PlayableStatEditItem {
   createdAt: string | null
   updatedAt: string | null
 }
+
+/**
+ * ---------------------------------------------------------
+ * Playable Stat Modifier Row
+ * ---------------------------------------------------------
+ *
+ * Unified admin-facing table row shape for the Stat Modifier
+ * management system.
+ *
+ * Responsibilities:
+ * - represent a flattened, display-ready record for all stat
+ *   modifier contexts in a single table view
+ * - normalize backend data from:
+ *   - playable_stat_baselines
+ *   - playable_species_stat_modifiers
+ *   - playable_class_stat_modifiers
+ * - support row-click edit workflows via a consistent shape
+ *
+ * Contexts:
+ * - 'baseline'
+ *   - global stat baseline value
+ *   - no specific species/class target
+ *
+ * - 'species'
+ *   - stat modifier applied to a specific playable species
+ *
+ * - 'class'
+ *   - stat modifier applied to a specific playable class
+ *
+ * Notes:
+ * - This is a UI-layer abstraction, not a direct mapping to any
+ *   single backend table.
+ * - `targetId` is null for baseline rows.
+ * - `targetDisplayName` should be "Global" (or similar) for
+ *   baseline rows to maintain table consistency.
+ * - The table system consumes a single unified row type to
+ *   avoid branching logic across modifier contexts.
+ */
+export interface PlayableStatModifierRow {
+  context: 'baseline' | 'species' | 'class'
+  targetId: string | null
+  targetDisplayName: string
+  statId: string
+  statDisplayName: string
+  value: number
+  updatedAt: string | null
+}

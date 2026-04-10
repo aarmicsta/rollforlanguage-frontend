@@ -55,6 +55,15 @@
     </AdminModal>
 
     <AdminModal
+      title="Edit Stat Modifiers"
+      size="5xl"
+      :visible="isEditStatModifiersModalOpen"
+      @close="isEditStatModifiersModalOpen = false"
+    >
+      <PlayableStatModifierTable @close="isEditStatModifiersModalOpen = false" />
+    </AdminModal>
+
+    <AdminModal
       title="Edit Playable Classes"
       size="5xl"
       :visible="isEditClassesModalOpen"
@@ -97,7 +106,7 @@
  *
  * Notes:
  * - This component is primarily a control surface.
- * - Species/Class create flows are store-driven.
+ * - Species/Class/Stat/Stat Modifier create flows are store-driven.
  * - Some table/passive/stat modal flows remain locally mounted
  *   as transitional behavior until their dedicated systems are built.
  */
@@ -106,6 +115,7 @@ import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
+import PlayableStatModifierTable from '@/features/admin/components/playableDashboard/PlayableStatModifierTable.vue'
 import PlayableStatTable from '@/features/admin/components/playableDashboard/PlayableStatTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
@@ -113,7 +123,6 @@ import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTo
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-
 
 const emit = defineEmits<{
   (e: 'openTagsModal'): void
@@ -170,6 +179,7 @@ function toggleSubmenu(tool: AdminDashboardTool) {
 const isEditClassesModalOpen = ref(false)
 const isEditSpeciesModalOpen = ref(false)
 const isEditStatsModalOpen = ref(false)
+const isEditStatModifiersModalOpen = ref(false)
 const isEditPassivesModalOpen = ref(false)
 
 /**
@@ -178,8 +188,8 @@ const isEditPassivesModalOpen = ref(false)
  * ---------------------------------------------------------
  *
  * Routes sidebar actions to:
- * - store-driven modal flows (create)
- * - local modal state (current edit/stats/passives placeholders)
+ * - store-driven modal flows (create/edit entity modals)
+ * - local modal state (current table/passive transitional flows)
  */
 function handleAction(action?: string) {
   if (!action) return
@@ -197,6 +207,10 @@ function handleAction(action?: string) {
       store.openCreateStatsModal()
       break
 
+    case 'createStatModifiers':
+      store.openCreateStatModifierModal()
+      break
+
     case 'createPassives':
       isEditPassivesModalOpen.value = true
       break
@@ -211,6 +225,10 @@ function handleAction(action?: string) {
 
     case 'editStats':
       isEditStatsModalOpen.value = true
+      break
+
+    case 'editStatModifiers':
+      isEditStatModifiersModalOpen.value = true
       break
 
     case 'editPassives':

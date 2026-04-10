@@ -4,6 +4,7 @@ import type {
   PlayableClassEditItem,
   PlayableSpeciesEditItem,
   PlayableStatEditItem,
+  PlayableStatModifierRow,
 } from '@/features/admin/types/playableTypes'
 
 /**
@@ -16,13 +17,14 @@ import type {
  * Responsibilities:
  * - track refresh triggers for playable dashboard widgets/tables
  * - track currently selected species/class/stat records for edit flows
+ * - track currently selected stat modifier row for modifier edit flows
  * - manage modal visibility for create/edit workflows
- * - track shared stats mode state for stat-related workflows
+ * - track shared stat modifier mode state across baseline/species/class contexts
  * - expose shared submit/error state for modal-based operations
  *
  * Notes:
- * - Species, Classes, and Stats use explicit parallel state
- *   rather than a single generic "selectedPlayable" model.
+ * - Species, Classes, Stats, and Stat Modifiers use explicit
+ *   parallel state rather than a single generic selected entity model.
  * - This keeps modal flows clearer and avoids ambiguous typing
  *   as the Playables dashboard grows in complexity.
  * - Create flows do not rely on selected entity state; they
@@ -58,6 +60,23 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
 
   /**
    * ---------------------------------------------------------
+   * Stat Modifier Selection State
+   * ---------------------------------------------------------
+   *
+   * Unified selected row for Stat Modifier edit workflows.
+   *
+   * Notes:
+   * - This represents a UI-layer row shape, not a direct backend
+   *   table record.
+   * - It may correspond to:
+   *   - a baseline row
+   *   - a species modifier row
+   *   - a class modifier row
+   */
+  const selectedStatModifierRow = ref<PlayableStatModifierRow | null>(null)
+
+  /**
+   * ---------------------------------------------------------
    * Modal Visibility State
    * ---------------------------------------------------------
    *
@@ -70,26 +89,33 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   const showCreateSpeciesModal = ref(false)
   const showCreateClassModal = ref(false)
   const showCreateStatsModal = ref(false)
+  const showCreateStatModifierModal = ref(false)
   const showEditSpeciesModal = ref(false)
   const showEditClassModal = ref(false)
   const showEditStatModal = ref(false)
+  const showEditStatModifierModal = ref(false)
 
   /**
    * ---------------------------------------------------------
-   * Stats Mode State
+   * Stat Modifier Mode State
    * ---------------------------------------------------------
    *
-   * Shared mode state for stat-related workflows that can pivot
-   * between Species and Class contexts.
+   * Shared mode state for the unified Stat Modifier system.
    *
-   * Current usage:
-   * - create stat modal toggle shell
+   * Contexts:
+   * - 'baseline'
+   *   global playable stat baseline values
+   * - 'species'
+   *   species-specific stat modifiers
+   * - 'class'
+   *   class-specific stat modifiers
    *
-   * Future usage:
-   * - stat assignment/configuration workflows
-   * - stat table/edit modal context switching where appropriate
+   * Notes:
+   * - This replaces the narrower statsMode concept that only
+   *   pivoted between species and class.
+   * - Canonical stat definitions remain a separate system.
    */
-  const statsMode = ref<'species' | 'class'>('species')
+  const statModifierMode = ref<'baseline' | 'species' | 'class'>('species')
 
   /**
    * ---------------------------------------------------------
@@ -149,14 +175,34 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     submitError.value = null
   }
 
-  function openCreateStatsModal(mode: 'species' | 'class' = 'species') {
-    statsMode.value = mode
+  function openCreateStatsModal() {
     showCreateStatsModal.value = true
     submitError.value = null
   }
 
   function closeCreateStatsModal() {
     showCreateStatsModal.value = false
+    submitError.value = null
+  }
+
+  /**
+   * ---------------------------------------------------------
+   * Stat Modifier Create Modal Actions
+   * ---------------------------------------------------------
+   *
+   * Opens the unified Stat Modifier create flow in the requested
+   * context.
+   */
+  function openCreateStatModifierModal(
+    mode: 'baseline' | 'species' | 'class' = 'species'
+  ) {
+    statModifierMode.value = mode
+    showCreateStatModifierModal.value = true
+    submitError.value = null
+  }
+
+  function closeCreateStatModifierModal() {
+    showCreateStatModifierModal.value = false
     submitError.value = null
   }
 
@@ -204,6 +250,27 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     submitError.value = null
   }
 
+  /**
+   * ---------------------------------------------------------
+   * Stat Modifier Edit Modal Actions
+   * ---------------------------------------------------------
+   *
+   * Opens the unified Stat Modifier edit flow using the selected
+   * modifier row and synchronizes the mode from that row's context.
+   */
+  function openEditStatModifierModal(row: PlayableStatModifierRow) {
+    selectedStatModifierRow.value = row
+    statModifierMode.value = row.context
+    showEditStatModifierModal.value = true
+    submitError.value = null
+  }
+
+  function closeEditStatModifierModal() {
+    showEditStatModifierModal.value = false
+    selectedStatModifierRow.value = null
+    submitError.value = null
+  }
+
   return {
     /**
      * -------------------------------------------------------
@@ -214,13 +281,16 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     selectedSpecies,
     selectedClass,
     selectedStat,
+    selectedStatModifierRow,
     showCreateSpeciesModal,
     showCreateClassModal,
     showCreateStatsModal,
+    showCreateStatModifierModal,
     showEditSpeciesModal,
     showEditClassModal,
     showEditStatModal,
-    statsMode,
+    showEditStatModifierModal,
+    statModifierMode,
     isSubmitting,
     submitError,
 
@@ -236,11 +306,15 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     closeCreateClassModal,
     openCreateStatsModal,
     closeCreateStatsModal,
+    openCreateStatModifierModal,
+    closeCreateStatModifierModal,
     openEditSpeciesModal,
     closeEditSpeciesModal,
     openEditClassModal,
     closeEditClassModal,
     openEditStatModal,
     closeEditStatModal,
+    openEditStatModifierModal,
+    closeEditStatModifierModal,
   }
 })
