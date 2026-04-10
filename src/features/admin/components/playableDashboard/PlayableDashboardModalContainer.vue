@@ -24,6 +24,7 @@
   -->
   <PlayableSpeciesCreateModal />
   <PlayableClassCreateModal />
+  <PlayableStatCreateModal />
 
   <!--
     ---------------------------------------------------------
@@ -45,4 +46,5 @@ import PlayableClassCreateModal from '@/features/admin/components/playableDashbo
 import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
 import PlayableSpeciesCreateModal from '@/features/admin/components/playableDashboard/PlayableSpeciesCreateModal.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
+import PlayableStatCreateModal from '@/features/admin/components/playableDashboard/PlayableStatCreateModal.vue'
 </script>

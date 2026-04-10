@@ -68,6 +68,8 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   const showCreateClassModal = ref(false)
   const showEditSpeciesModal = ref(false)
   const showEditClassModal = ref(false)
+  const showCreateStatsModal = ref(false)
+  const statsMode = ref<'species' | 'class'>('species')
 
   /**
    * ---------------------------------------------------------
@@ -127,6 +129,17 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     submitError.value = null
   }
 
+  function openCreateStatsModal(mode: 'species' | 'class' = 'species') {
+    statsMode.value = mode
+    showCreateStatsModal.value = true
+    submitError.value = null
+  }
+
+  function closeCreateStatsModal() {
+    showCreateStatsModal.value = false
+    submitError.value = null
+  }
+
   /**
    * ---------------------------------------------------------
    * Edit Modal Actions
@@ -174,6 +187,8 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     showEditClassModal,
     isSubmitting,
     submitError,
+    showCreateStatsModal,
+    statsMode,
 
     /**
      * -------------------------------------------------------
@@ -189,5 +204,7 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     closeEditSpeciesModal,
     openEditClassModal,
     closeEditClassModal,
+    openCreateStatsModal,
+    closeCreateStatsModal,
   }
 })

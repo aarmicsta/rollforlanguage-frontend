@@ -100,7 +100,6 @@
 
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import ManageStatsModal from '@/features/admin/components/playableDashboard/ManageStatsModal.vue'
 import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
@@ -189,7 +188,7 @@ function handleAction(action?: string) {
       break
 
     case 'createStats':
-      isEditStatsModalOpen.value = true
+      store.openCreateStatsModal()
       break
 
     case 'createPassives':

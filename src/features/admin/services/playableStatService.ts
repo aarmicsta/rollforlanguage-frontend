@@ -1,63 +1,97 @@
-// /src/features/admin/services/playableStatService.ts
+/**
+ * Playable Stat Admin Service
+ *
+ * Responsibilities:
+ * - interact with backend playable stat admin endpoints
+ * - provide typed API calls for stat creation, retrieval, and updates
+ *
+ * Notes:
+ * - operates on canonical stat definitions (`ref_playable_stats`)
+ * - does NOT manage baselines or modifiers
+ * - aligned with backend response pattern (`{ message, data }` for mutations)
+ */
 
 import { axiosInstance } from '@/services/axiosInstance'
 
+/**
+ * Canonical playable stat definition.
+ */
 export interface PlayableStat {
   id: string
-  name: string            // e.g., "strength" (machine-safe)
-  displayName: string     // e.g., "Strength" (human-readable)
-  description?: string
+  name: string
+  slug: string
+  displayName: string
+  description?: string | null
   isActive: boolean
   sortOrder: number
   createdAt: string
   updatedAt: string
 }
 
-// 🔍 GET: Fetch all stat definitions
-export async function getPlayableStats(includeInactive = false): Promise<PlayableStat[]> {
-  const response = await axiosInstance.get('/admin/playable/stats', {
-    params: includeInactive ? { includeInactive: true } : {},
-  })
-  return response.data
-}
-
-// ➕ POST: Create a new stat
-export async function createPlayableStat(payload: {
-  name: string
+/**
+ * Payload for creating a new stat.
+ */
+export interface CreatePlayableStatPayload {
   displayName: string
-  description?: string
-}): Promise<PlayableStat> {
-  const response = await axiosInstance.post('/admin/playable/stats', payload)
-  return response.data
+  name: string
+  slug: string
+  description?: string | null
+  isActive?: boolean
 }
 
-// 📝 PATCH: Update stat (partial updates allowed)
-export async function updatePlayableStat(id: string, payload: {
-  name?: string
-  displayName?: string
-  description?: string
+/**
+ * Payload for updating an existing stat.
+ */
+export interface UpdatePlayableStatPayload {
+  displayName: string
+  description?: string | null
+  isActive?: boolean
   sortOrder?: number
-}): Promise<PlayableStat> {
-  const response = await axiosInstance.patch(`/admin/playable/stats/${id}`, payload)
+}
+
+/**
+ * ---------------------------------------------------------
+ * GET: Fetch all playable stats
+ * ---------------------------------------------------------
+ *
+ * Returns:
+ * - list of canonical stat definitions
+ */
+export async function getPlayableStats(): Promise<PlayableStat[]> {
+  const response = await axiosInstance.get('/admin/playable-stats')
   return response.data
 }
 
-// 🧼 DELETE: Soft-delete stat
-export async function deletePlayableStat(id: string): Promise<void> {
-  await axiosInstance.delete(`/admin/playable/stats/${id}`)
+/**
+ * ---------------------------------------------------------
+ * POST: Create a new playable stat
+ * ---------------------------------------------------------
+ *
+ * Returns:
+ * - newly created stat (from `response.data.data`)
+ */
+export async function createPlayableStat(
+  payload: CreatePlayableStatPayload
+): Promise<PlayableStat> {
+  const response = await axiosInstance.post('/admin/playable-stats', payload)
+  return response.data.data
 }
 
-// ♻️ PATCH: Restore stat
-export async function restorePlayableStat(id: string): Promise<void> {
-  await axiosInstance.patch(`/admin/playable/stats/${id}/active`, {
-    isActive: true,
-  })
-}
-
-// ✅ TOGGLE: Unified toggle for soft-delete / restore
-export async function togglePlayableStatActive(id: string, makeActive: boolean): Promise<PlayableStat> {
-  const response = await axiosInstance.patch(`/admin/playable/stats/${id}/active`, {
-    isActive: makeActive,
-  })
-  return response.data
+/**
+ * ---------------------------------------------------------
+ * PATCH: Update a playable stat
+ * ---------------------------------------------------------
+ *
+ * Returns:
+ * - updated stat (from `response.data.data`)
+ */
+export async function updatePlayableStat(
+  id: string,
+  payload: UpdatePlayableStatPayload
+): Promise<PlayableStat> {
+  const response = await axiosInstance.patch(
+    `/admin/playable-stats/${id}`,
+    payload
+  )
+  return response.data.data
 }
