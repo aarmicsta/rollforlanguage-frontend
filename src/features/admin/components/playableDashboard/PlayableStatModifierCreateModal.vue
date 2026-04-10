@@ -226,7 +226,13 @@
 import { computed, reactive, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import {
+  createPlayableStatBaseline,
+  createPlayableSpeciesStatModifier,
+  createPlayableClassStatModifier,
+} from '@/features/admin/services/playableStatModifierService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+
 
 /**
  * ---------------------------------------------------------
@@ -370,22 +376,35 @@ async function handleCreate() {
     store.isSubmitting = true
     store.submitError = null
 
-    /**
-     * Replace this section next with actual service calls based on:
-     * - baseline
-     * - species
-     * - class
-     */
-    console.log('Create stat modifier payload:', {
-      context: store.statModifierMode,
-      targetId: store.statModifierMode === 'baseline' ? null : form.targetId,
-      statId: form.statId,
-      value: form.value,
-    })
+    let created
+
+    if (store.statModifierMode === 'baseline') {
+      created = await createPlayableStatBaseline({
+        statId: form.statId,
+        baseValue: form.value as number,
+      })
+    }
+
+    if (store.statModifierMode === 'species') {
+      created = await createPlayableSpeciesStatModifier({
+        speciesId: form.targetId,
+        statId: form.statId,
+        modifierValue: form.value as number,
+      })
+    }
+
+    if (store.statModifierMode === 'class') {
+      created = await createPlayableClassStatModifier({
+        classId: form.targetId,
+        statId: form.statId,
+        modifierValue: form.value as number,
+      })
+    }
 
     store.refreshPlayableList()
     closeModal()
-    toastStore.showToast('Stat modifier flow structure created successfully.', 'success')
+
+    toastStore.showToast('Stat modifier created successfully.', 'success')
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to create stat modifier.'

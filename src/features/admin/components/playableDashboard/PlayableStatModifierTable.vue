@@ -98,9 +98,11 @@
  * - Current implementation uses mock data for UI validation
  */
 
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { getPlayableStatModifiers } from '@/features/admin/services/playableStatModifierService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableStatModifierRow } from '@/features/admin/types/playableTypes'
+
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -134,38 +136,12 @@ const filterOptions: Array<{
 
 /**
  * ---------------------------------------------------------
- * Mock Data (Temporary)
+ * Table Data
  * ---------------------------------------------------------
+ *
+ * Unified stat modifier rows loaded from the admin service.
  */
-const rows = ref<PlayableStatModifierRow[]>([
-  {
-    context: 'baseline',
-    targetId: null,
-    targetDisplayName: 'Global',
-    statId: 'ref_stat_hp',
-    statDisplayName: 'HP',
-    value: 10,
-    updatedAt: null,
-  },
-  {
-    context: 'species',
-    targetId: 'species_dragonborn',
-    targetDisplayName: 'Dragonborn',
-    statId: 'ref_stat_attack',
-    statDisplayName: 'Attack',
-    value: 1,
-    updatedAt: null,
-  },
-  {
-    context: 'class',
-    targetId: 'class_barbarian',
-    targetDisplayName: 'Barbarian',
-    statId: 'ref_stat_defense',
-    statDisplayName: 'Defense',
-    value: 2,
-    updatedAt: null,
-  },
-])
+const rows = ref<PlayableStatModifierRow[]>([])
 
 /**
  * ---------------------------------------------------------
@@ -184,12 +160,35 @@ const filteredRows = computed(() => {
 
 /**
  * ---------------------------------------------------------
+ * Lifecycle / Refresh Sync
+ * ---------------------------------------------------------
+ *
+ * - fetch once when mounted
+ * - refetch whenever the shared playable refresh key changes
+ */
+onMounted(fetchRows)
+watch(() => store.lastPlayableRefresh, fetchRows)
+
+/**
+ * ---------------------------------------------------------
  * Row Interaction
  * ---------------------------------------------------------
  */
 function handleRowClick(item: PlayableStatModifierRow) {
   emit('close')
   store.openEditStatModifierModal(item)
+}
+
+/**
+ * ---------------------------------------------------------
+ * Data Loading
+ * ---------------------------------------------------------
+ *
+ * Fetches the unified stat modifier list from the admin service.
+ */
+async function fetchRows() {
+  const res = await getPlayableStatModifiers()
+  rows.value = res as PlayableStatModifierRow[]
 }
 
 /**

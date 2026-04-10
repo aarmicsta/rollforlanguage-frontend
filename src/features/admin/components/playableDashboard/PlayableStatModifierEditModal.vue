@@ -228,6 +228,11 @@
 import { computed, reactive, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import {
+  updatePlayableStatBaseline,
+  updatePlayableSpeciesStatModifier,
+  updatePlayableClassStatModifier,
+} from '@/features/admin/services/playableStatModifierService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 
 /**
@@ -399,34 +404,46 @@ function closeModal() {
  * - can be replaced with service-backed submission next
  */
 async function handleUpdate() {
-  if (!isFormValid.value) return
+  if (!isFormValid.value || !store.selectedStatModifierRow) return
 
   try {
     store.isSubmitting = true
     store.submitError = null
 
-    /**
-     * Replace this section next with actual service calls based on:
-     * - baseline
-     * - species
-     * - class
-     *
-     * Also note:
-     * - if backend update semantics require immutable context/target/stat
-     *   identity, the eventual implementation may choose to restrict
-     *   editable fields here
-     */
-    console.log('Update stat modifier payload:', {
-      originalRow: store.selectedStatModifierRow,
-      updatedContext: store.statModifierMode,
-      targetId: store.statModifierMode === 'baseline' ? null : form.targetId,
-      statId: form.statId,
-      value: form.value,
-    })
+    const original = store.selectedStatModifierRow
+
+    let updated
+
+    if (store.statModifierMode === 'baseline') {
+      updated = await updatePlayableStatBaseline(original.statId, {
+        baseValue: form.value as number,
+      })
+    }
+
+    if (store.statModifierMode === 'species') {
+      updated = await updatePlayableSpeciesStatModifier(
+        original.targetId as string,
+        original.statId,
+        {
+          modifierValue: form.value as number,
+        }
+      )
+    }
+
+    if (store.statModifierMode === 'class') {
+      updated = await updatePlayableClassStatModifier(
+        original.targetId as string,
+        original.statId,
+        {
+          modifierValue: form.value as number,
+        }
+      )
+    }
 
     store.refreshPlayableList()
     closeModal()
-    toastStore.showToast('Stat modifier edit flow structure created successfully.', 'success')
+
+    toastStore.showToast('Stat modifier updated successfully.', 'success')
   } catch (error) {
     console.error(error)
     store.submitError = 'Failed to update stat modifier.'
