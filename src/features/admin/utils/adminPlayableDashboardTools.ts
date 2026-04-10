@@ -18,6 +18,18 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
         library: 'iconify',
         action: 'createSpecies',
       },
+      {
+        name: 'Playable Stats',
+        icon: 'mdi:chart-timeline-variant',
+        library: 'iconify',
+        action: 'createStats',
+      },
+      {
+        name: 'Playable Passives',
+        icon: 'lucide:brain',
+        library: 'iconify',
+        action: 'createPassives',
+      },
     ],
   },
   {
@@ -29,33 +41,27 @@ export const adminPlayableDashboardTools: AdminDashboardTool[] = [
         name: 'Class Table',
         icon: 'mdi:table-large',
         library: 'iconify',
-        action: 'browseClasses',
+        action: 'editClasses',
       },
       {
         name: 'Species Table',
         icon: 'mdi:table-large-plus',
         library: 'iconify',
-        action: 'browseSpecies',
+        action: 'editSpecies',
+      },
+      {
+        name: 'Stats Table',
+        icon: 'mdi:table',
+        library: 'iconify',
+        action: 'editStats',
+      },
+      {
+        name: 'Passives Table',
+        icon: 'mdi:table-eye',
+        library: 'iconify',
+        action: 'editPassives',
       },
     ],
-  },
-  // {
-  //   name: 'Manage Tags',
-  //   icon: 'lucide:tag',
-  //   library: 'iconify',
-  //   action: 'manageTags', // ✅ Simplified to a single action
-  // },
-  {
-    name: 'Manage Stats',
-    icon: 'mdi:chart-timeline-variant',
-    library: 'iconify',
-    action: 'manageStats',
-  },
-  {
-    name: 'Manage Passives',
-    icon: 'lucide:brain',
-    library: 'iconify',
-    action: 'managePassives',
   },
   {
     name: 'Refresh Classes',

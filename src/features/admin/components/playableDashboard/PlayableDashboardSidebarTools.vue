@@ -37,40 +37,41 @@
 
     <!--
       =========================================================
-      Sidebar-Scoped Modals (Non-Playables Core)
+      Sidebar-Scoped Modals (Temporary / Non-Store-Driven)
       =========================================================
 
-      These remain here because they are not part of the core
-      Playables CRUD flow (yet).
+      These remain locally mounted for now until the next-stage
+      Stats / Passives system and any broader table-flow refactor
+      are implemented.
     -->
 
     <ManageStatsModal
-      :visible="isManageStatsModalOpen"
-      @close="isManageStatsModalOpen = false"
+      :visible="isEditStatsModalOpen"
+      @close="isEditStatsModalOpen = false"
     />
 
     <AdminModal
-      title="Browse Playable Classes"
+      title="Edit Playable Classes"
       size="5xl"
-      :visible="isBrowseClassesModalOpen"
-      @close="isBrowseClassesModalOpen = false"
+      :visible="isEditClassesModalOpen"
+      @close="isEditClassesModalOpen = false"
     >
-      <PlayableClassTable @close="isBrowseClassesModalOpen = false" />
+      <PlayableClassTable @close="isEditClassesModalOpen = false" />
     </AdminModal>
 
     <AdminModal
-      title="Browse Playable Species"
+      title="Edit Playable Species"
       size="5xl"
-      :visible="isBrowseSpeciesModalOpen"
-      @close="isBrowseSpeciesModalOpen = false"
+      :visible="isEditSpeciesModalOpen"
+      @close="isEditSpeciesModalOpen = false"
     >
-      <PlayableSpeciesTable @close="isBrowseSpeciesModalOpen = false" />
+      <PlayableSpeciesTable @close="isEditSpeciesModalOpen = false" />
     </AdminModal>
 
     <AdminModal
-      title="Manage Passives"
-      :visible="isManagePassivesModalOpen"
-      @close="isManagePassivesModalOpen = false"
+      title="Edit Passives"
+      :visible="isEditPassivesModalOpen"
+      @close="isEditPassivesModalOpen = false"
     >
       <p class="text-gray-700 dark:text-gray-200">
         Placeholder for passive ability glossary.
@@ -91,9 +92,10 @@
  * - dispatch user actions to the store or local modal state
  *
  * Notes:
- * - This component is now strictly a control surface.
- * - It no longer mounts edit/create modals directly.
- * - Modal rendering is handled by the Playables modal container.
+ * - This component is primarily a control surface.
+ * - Species/Class create flows are store-driven.
+ * - Some table/passive/stat modal flows remain locally mounted
+ *   as transitional behavior until their dedicated systems are built.
  */
 
 import { ref, computed, inject } from 'vue'
@@ -157,13 +159,13 @@ function toggleSubmenu(tool: AdminDashboardTool) {
 
 /**
  * ---------------------------------------------------------
- * Local Modal State (Non-CRUD)
+ * Local Modal State (Transitional)
  * ---------------------------------------------------------
  */
-const isBrowseClassesModalOpen = ref(false)
-const isBrowseSpeciesModalOpen = ref(false)
-const isManageStatsModalOpen = ref(false)
-const isManagePassivesModalOpen = ref(false)
+const isEditClassesModalOpen = ref(false)
+const isEditSpeciesModalOpen = ref(false)
+const isEditStatsModalOpen = ref(false)
+const isEditPassivesModalOpen = ref(false)
 
 /**
  * ---------------------------------------------------------
@@ -171,8 +173,8 @@ const isManagePassivesModalOpen = ref(false)
  * ---------------------------------------------------------
  *
  * Routes sidebar actions to:
- * - store-driven modal flows (create/edit)
- * - local modal state (browse/stats/passives)
+ * - store-driven modal flows (create)
+ * - local modal state (current edit/stats/passives placeholders)
  */
 function handleAction(action?: string) {
   if (!action) return
@@ -186,24 +188,32 @@ function handleAction(action?: string) {
       store.openCreateSpeciesModal()
       break
 
-    case 'browseClasses':
-      isBrowseClassesModalOpen.value = true
+    case 'createStats':
+      isEditStatsModalOpen.value = true
       break
 
-    case 'browseSpecies':
-      isBrowseSpeciesModalOpen.value = true
+    case 'createPassives':
+      isEditPassivesModalOpen.value = true
+      break
+
+    case 'editClasses':
+      isEditClassesModalOpen.value = true
+      break
+
+    case 'editSpecies':
+      isEditSpeciesModalOpen.value = true
+      break
+
+    case 'editStats':
+      isEditStatsModalOpen.value = true
+      break
+
+    case 'editPassives':
+      isEditPassivesModalOpen.value = true
       break
 
     case 'refreshClasses':
       store.refreshPlayableList()
-      break
-
-    case 'manageStats':
-      isManageStatsModalOpen.value = true
-      break
-
-    case 'managePassives':
-      isManagePassivesModalOpen.value = true
       break
 
     // case 'manageTags':
