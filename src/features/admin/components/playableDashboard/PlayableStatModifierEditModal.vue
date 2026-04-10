@@ -224,15 +224,18 @@
  *   service-layer submission can be wired after the UI contract
  *   is fully stabilized
  */
-
+import { onMounted, ref } from 'vue'
 import { computed, reactive, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import { getPlayableClasses } from '@/features/admin/services/playableClassService'
+import { getPlayableSpecies } from '@/features/admin/services/playableSpeciesService'
 import {
   updatePlayableStatBaseline,
   updatePlayableSpeciesStatModifier,
   updatePlayableClassStatModifier,
 } from '@/features/admin/services/playableStatModifierService'
+import { getPlayableStats } from '@/features/admin/services/playableStatService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 
 /**
@@ -261,30 +264,38 @@ const form = reactive({
 
 /**
  * ---------------------------------------------------------
- * Temporary Option Sources
+ * Option Sources
  * ---------------------------------------------------------
  *
- * Placeholder option arrays used to establish the UI contract.
- *
- * These should later be replaced with:
- * - service-backed option loading
- * - or shared store-provided option sources
+ * Option arrays used to establish the UI contract.
  */
-const speciesOptions = [
-  { id: 'species_dragonborn', displayName: 'Dragonborn' },
-  { id: 'species_elf', displayName: 'Elf' },
-]
+const speciesOptions = ref<any[]>([])
+const classOptions = ref<any[]>([])
+const statOptions = ref<any[]>([])
 
-const classOptions = [
-  { id: 'class_barbarian', displayName: 'Barbarian' },
-  { id: 'class_wizard', displayName: 'Wizard' },
-]
+/**
+ * ---------------------------------------------------------
+ * Fetch
+ * ---------------------------------------------------------
+ */
+async function fetchOptions() {
+  const [stats, species, classes] = await Promise.all([
+    getPlayableStats(),
+    getPlayableSpecies(),
+    getPlayableClasses(),
+  ])
 
-const statOptions = [
-  { id: 'ref_stat_hp', displayName: 'HP' },
-  { id: 'ref_stat_attack', displayName: 'Attack' },
-  { id: 'ref_stat_defense', displayName: 'Defense' },
-]
+  statOptions.value = stats
+  speciesOptions.value = species
+  classOptions.value = classes
+}
+
+/**
+ * ---------------------------------------------------------
+ * Lifecycle
+ * ---------------------------------------------------------
+ */
+onMounted(fetchOptions)
 
 /**
  * ---------------------------------------------------------
