@@ -208,6 +208,47 @@ export async function updatePlayableClass(
 
 /**
  * ---------------------------------------------------------
+ * createPlayableClass
+ * ---------------------------------------------------------
+ *
+ * Creates a new playable class record.
+ *
+ * Endpoint:
+ * POST /admin/playable-classes
+ *
+ * Payload:
+ * - displayName
+ * - name
+ * - slug
+ * - description (nullable)
+ * - isActive
+ *
+ * Returns:
+ * - success message
+ * - created class record in `data`
+ */
+export async function createPlayableClass(
+  payload: {
+    displayName: string
+    name: string
+    slug: string
+    description: string | null
+    isActive: boolean
+  }
+): Promise<{
+  message: string
+  data: PlayableClass | null
+}> {
+  const response = await axiosInstance.post(
+    `/admin/playable-classes`,
+    payload
+  )
+
+  return response.data
+}
+
+/**
+ * ---------------------------------------------------------
  * getPlayableClassTags
  * ---------------------------------------------------------
  *
@@ -304,6 +345,7 @@ export async function updatePlayableClassTags(
  */
 export const playableClassService = {
   getPlayableClasses,
+  createPlayableClass,
   updatePlayableClass,
   getPlayableClassTags,
   updatePlayableClassTags,
