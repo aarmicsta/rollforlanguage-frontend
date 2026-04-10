@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type {
-  PlayableClassBrowseItem,
-  PlayableSpeciesBrowseItem,
+  PlayableClassEditItem,
+  PlayableSpeciesEditItem,
+  PlayableStatEditItem,
 } from '@/features/admin/types/playableTypes'
 
 /**
@@ -14,13 +15,14 @@ import type {
  *
  * Responsibilities:
  * - track refresh triggers for playable dashboard widgets/tables
- * - track currently selected species/class records for edit flows
+ * - track currently selected species/class/stat records for edit flows
  * - manage modal visibility for create/edit workflows
+ * - track shared stats mode state for stat-related workflows
  * - expose shared submit/error state for modal-based operations
  *
  * Notes:
- * - Species and Classes now use explicit parallel state rather
- *   than a single generic "selectedPlayable" model.
+ * - Species, Classes, and Stats use explicit parallel state
+ *   rather than a single generic "selectedPlayable" model.
  * - This keeps modal flows clearer and avoids ambiguous typing
  *   as the Playables dashboard grows in complexity.
  * - Create flows do not rely on selected entity state; they
@@ -45,13 +47,14 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    * Explicit edit targets for each playable entity type.
    *
    * Why split these?
-   * - avoids one generic selected object pretending to be both
-   *   species and class
+   * - avoids one generic selected object pretending to be all
+   *   playable entity types at once
    * - keeps edit modal flows type-safe and easier to follow
    * - supports a cleaner modal-container architecture
    */
-  const selectedSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
-  const selectedClass = ref<PlayableClassBrowseItem | null>(null)
+  const selectedSpecies = ref<PlayableSpeciesEditItem | null>(null)
+  const selectedClass = ref<PlayableClassEditItem | null>(null)
+  const selectedStat = ref<PlayableStatEditItem | null>(null)
 
   /**
    * ---------------------------------------------------------
@@ -66,9 +69,26 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    */
   const showCreateSpeciesModal = ref(false)
   const showCreateClassModal = ref(false)
+  const showCreateStatsModal = ref(false)
   const showEditSpeciesModal = ref(false)
   const showEditClassModal = ref(false)
-  const showCreateStatsModal = ref(false)
+  const showEditStatModal = ref(false)
+
+  /**
+   * ---------------------------------------------------------
+   * Stats Mode State
+   * ---------------------------------------------------------
+   *
+   * Shared mode state for stat-related workflows that can pivot
+   * between Species and Class contexts.
+   *
+   * Current usage:
+   * - create stat modal toggle shell
+   *
+   * Future usage:
+   * - stat assignment/configuration workflows
+   * - stat table/edit modal context switching where appropriate
+   */
   const statsMode = ref<'species' | 'class'>('species')
 
   /**
@@ -148,7 +168,7 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    * Edit flows set the selected entity first, then open the
    * corresponding modal.
    */
-  function openEditSpeciesModal(species: PlayableSpeciesBrowseItem) {
+  function openEditSpeciesModal(species: PlayableSpeciesEditItem) {
     selectedSpecies.value = species
     showEditSpeciesModal.value = true
     submitError.value = null
@@ -160,7 +180,7 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     submitError.value = null
   }
 
-  function openEditClassModal(classItem: PlayableClassBrowseItem) {
+  function openEditClassModal(classItem: PlayableClassEditItem) {
     selectedClass.value = classItem
     showEditClassModal.value = true
     submitError.value = null
@@ -169,6 +189,18 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   function closeEditClassModal() {
     showEditClassModal.value = false
     selectedClass.value = null
+    submitError.value = null
+  }
+
+  function openEditStatModal(stat: PlayableStatEditItem) {
+    selectedStat.value = stat
+    showEditStatModal.value = true
+    submitError.value = null
+  }
+
+  function closeEditStatModal() {
+    showEditStatModal.value = false
+    selectedStat.value = null
     submitError.value = null
   }
 
@@ -181,14 +213,16 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     lastPlayableRefresh,
     selectedSpecies,
     selectedClass,
+    selectedStat,
     showCreateSpeciesModal,
     showCreateClassModal,
+    showCreateStatsModal,
     showEditSpeciesModal,
     showEditClassModal,
+    showEditStatModal,
+    statsMode,
     isSubmitting,
     submitError,
-    showCreateStatsModal,
-    statsMode,
 
     /**
      * -------------------------------------------------------
@@ -200,11 +234,13 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     closeCreateSpeciesModal,
     openCreateClassModal,
     closeCreateClassModal,
+    openCreateStatsModal,
+    closeCreateStatsModal,
     openEditSpeciesModal,
     closeEditSpeciesModal,
     openEditClassModal,
     closeEditClassModal,
-    openCreateStatsModal,
-    closeCreateStatsModal,
+    openEditStatModal,
+    closeEditStatModal,
   }
 })

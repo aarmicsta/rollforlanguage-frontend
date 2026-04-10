@@ -33,6 +33,7 @@
   -->
   <PlayableSpeciesEditModal />
   <PlayableClassEditModal />
+  <PlayableStatEditModal />
 </template>
 
 <script setup lang="ts">
@@ -47,4 +48,5 @@ import PlayableClassEditModal from '@/features/admin/components/playableDashboar
 import PlayableSpeciesCreateModal from '@/features/admin/components/playableDashboard/PlayableSpeciesCreateModal.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 import PlayableStatCreateModal from '@/features/admin/components/playableDashboard/PlayableStatCreateModal.vue'
+import PlayableStatEditModal from '@/features/admin/components/playableDashboard/PlayableStatEditModal.vue'
 </script>

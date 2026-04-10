@@ -48,31 +48,32 @@
  * Playable Stat Table
  * =========================================================
  *
- * Admin browse table for playable stats.
+ * Admin table for canonical playable stats.
  *
  * Responsibilities:
  * - fetch and display canonical playable stat records
  * - refresh when the shared playable refresh key changes
- * - prepare the row-selection flow for stat editing
+ * - open the stat edit workflow when a row is selected
  *
  * Notes:
- * - This component is intentionally browse-focused.
+ * - This component is intentionally table-focused.
  * - It does not render modals directly.
- * - Stat edit modal wiring will be layered in after the
- *   dedicated stat edit workflow is created.
+ * - Modal orchestration is handled through the shared
+ *   admin playable store and the Playables modal container.
  */
 
 import { onMounted, ref, watch } from 'vue'
-import { getPlayableStats, type PlayableStat } from '@/features/admin/services/playableStatService'
+import { getPlayableStats } from '@/features/admin/services/playableStatService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import type { PlayableStatEditItem } from '@/features/admin/types/playableTypes'
 
 /**
  * ---------------------------------------------------------
  * Emits
  * ---------------------------------------------------------
  *
- * `close` allows the parent browse modal/container to close
- * itself before a future edit flow opens.
+ * `close` allows the parent table modal/container to close
+ * itself before the edit flow opens.
  */
 const emit = defineEmits<{
   (e: 'close'): void
@@ -87,22 +88,22 @@ const emit = defineEmits<{
  * - shared admin playable UI state
  *
  * `stats`
- * - local table data for the current playable stat browse view
+ * - local table data for the current playable stat view
  */
 const store = useAdminPlayableStore()
-const stats = ref<PlayableStat[]>([])
+const stats = ref<PlayableStatEditItem[]>([])
 
 /**
  * ---------------------------------------------------------
  * Data Loading
  * ---------------------------------------------------------
  *
- * Fetches the current playable stat browse list from the
- * admin service.
+ * Fetches the current playable stat list from the admin
+ * service.
  */
 async function fetchStats() {
   const res = await getPlayableStats()
-  stats.value = res
+  stats.value = res as PlayableStatEditItem[]
 }
 
 /**
@@ -110,15 +111,12 @@ async function fetchStats() {
  * Row Interaction
  * ---------------------------------------------------------
  *
- * Current behavior:
- * - closes the surrounding browse view only
- *
- * Future behavior:
- * - will also open the dedicated stat edit modal through
- *   the shared admin playable store
+ * Selecting a row closes the surrounding table view and
+ * opens the dedicated stat edit modal through the store.
  */
-function handleRowClick(_item: PlayableStat) {
+function handleRowClick(item: PlayableStatEditItem) {
   emit('close')
+  store.openEditStatModal(item)
 }
 
 /**
