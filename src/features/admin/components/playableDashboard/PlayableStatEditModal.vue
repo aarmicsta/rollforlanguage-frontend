@@ -17,8 +17,6 @@
       - internal name
       - slug
       - updatedAt
-    - preserve stats mode context for future stat assignment /
-      configuration workflows
   -->
   <AdminModal
     :visible="store.showEditStatModal"
@@ -45,52 +43,6 @@
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
       @submit.prevent="handleSave"
     >
-      <!--
-        ---------------------------------------------------------
-        Mode Toggle
-        ---------------------------------------------------------
-
-        This preserves the broader stats workflow direction,
-        where stat-related admin flows can pivot between
-        Species and Class contexts.
-
-        Current note:
-        - canonical stat editing itself is shared
-        - the selected mode is not yet submitted to backend
-      -->
-      <div>
-        <label class="mb-1 block text-xs text-gray-500">Stat Context</label>
-        <div class="inline-flex rounded border dark:border-neutral-700">
-          <button
-            type="button"
-            :class="[
-              'px-4 py-2 text-sm transition',
-              store.statsMode === 'species'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 dark:bg-neutral-900 dark:text-gray-100'
-            ]"
-            @click="store.statsMode = 'species'"
-          >
-            Species
-          </button>
-          <button
-            type="button"
-            :class="[
-              'px-4 py-2 text-sm transition border-l dark:border-neutral-700',
-              store.statsMode === 'class'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 dark:bg-neutral-900 dark:text-gray-100'
-            ]"
-            @click="store.statsMode = 'class'"
-          >
-            Class
-          </button>
-        </div>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Current mode is stored for future stat assignment/configuration flows.
-        </p>
-      </div>
-
       <!--
         ---------------------------------------------------------
         Display Name
@@ -226,6 +178,7 @@
  * Notes:
  * - works from a local editable copy of the selected stat
  * - does not edit name/slug in this modal
+ * - canonical stat editing is class/species agnostic
  * - baseline/modifier editing is intentionally deferred
  */
 
@@ -315,13 +268,14 @@ async function handleSave() {
     })
 
     store.selectedStat = {
-    ...updated,
-    description: updated.description ?? null,
-    isActive: updated.isActive ?? false,
-    sortOrder: updated.sortOrder ?? 0,
-    createdAt: updated.createdAt ?? null,
-    updatedAt: updated.updatedAt ?? null,
+      ...updated,
+      description: updated.description ?? null,
+      isActive: updated.isActive ?? false,
+      sortOrder: updated.sortOrder ?? 0,
+      createdAt: updated.createdAt ?? null,
+      updatedAt: updated.updatedAt ?? null,
     }
+
     store.refreshPlayableList()
     closeModal()
     toastStore.showToast('Playable stat updated successfully.', 'success')

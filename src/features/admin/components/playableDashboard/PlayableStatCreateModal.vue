@@ -11,7 +11,6 @@
     - collect required stat identity fields
     - auto-generate canonical helper fields from displayName
     - allow manual override of generated name/slug
-    - expose a future-facing mode toggle for Species / Class use
     - submit the create payload to the backend
   -->
   <AdminModal
@@ -24,54 +23,6 @@
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
       @submit.prevent="handleCreate"
     >
-      <!--
-        ---------------------------------------------------------
-        Mode Toggle
-        ---------------------------------------------------------
-
-        This reflects the intended long-term stats workflow
-        direction, where stat-related admin flows can pivot
-        between Species and Class contexts.
-
-        Current note:
-        - canonical stat creation itself is shared
-        - the selected mode is not yet submitted to backend
-        - this state is preserved to support the future expanded
-          stats assignment/configuration workflow
-      -->
-      <div>
-        <label class="mb-1 block text-xs text-gray-500">Stat Context</label>
-        <div class="inline-flex rounded border dark:border-neutral-700">
-          <button
-            type="button"
-            :class="[
-              'px-4 py-2 text-sm transition',
-              store.statsMode === 'species'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 dark:bg-neutral-900 dark:text-gray-100'
-            ]"
-            @click="store.statsMode = 'species'"
-          >
-            Species
-          </button>
-          <button
-            type="button"
-            :class="[
-              'px-4 py-2 text-sm transition border-l dark:border-neutral-700',
-              store.statsMode === 'class'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-800 dark:bg-neutral-900 dark:text-gray-100'
-            ]"
-            @click="store.statsMode = 'class'"
-          >
-            Class
-          </button>
-        </div>
-        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-          Current mode is stored for future stat assignment/configuration flows.
-        </p>
-      </div>
-
       <!--
         ---------------------------------------------------------
         Display Name
@@ -220,9 +171,7 @@
  * - `name` and `slug` are auto-generated from displayName until
  *   manually edited by the admin.
  * - backend is expected to generate the canonical `id`
- * - Species/Class mode toggle is included now to align with the
- *   long-term stats workflow, though it does not yet alter the
- *   backend payload
+ * - canonical stat creation is class/species agnostic
  */
 
 import { computed, reactive, ref, watch } from 'vue'
