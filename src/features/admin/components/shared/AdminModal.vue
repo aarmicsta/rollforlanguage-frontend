@@ -7,7 +7,7 @@
     >
       <div
         :class="[
-          'relative bg-gray-900 text-white rounded-lg shadow-lg w-full p-6',
+          'relative bg-gray-900 text-white rounded-lg shadow-lg w-full p-6 max-h-[90vh] overflow-y-auto',
           sizeClass,
         ]"
         role="dialog"
@@ -53,7 +53,25 @@ function close() {
 
 const sizeClass = computed(() => {
   const size = props.size || 'lg'
-  return `max-w-${size}`
+
+  const sizeMap: Record<
+    NonNullable<typeof props.size>,
+    string
+  > = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl',
+    full: 'max-w-full',
+  }
+
+  return sizeMap[size]
 })
 </script>
 
