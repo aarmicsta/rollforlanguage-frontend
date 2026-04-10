@@ -45,10 +45,14 @@
       are implemented.
     -->
 
-    <ManageStatsModal
+    <AdminModal
+      title="Edit Playable Stats"
+      size="5xl"
       :visible="isEditStatsModalOpen"
       @close="isEditStatsModalOpen = false"
-    />
+    >
+      <PlayableStatTable @close="isEditStatsModalOpen = false" />
+    </AdminModal>
 
     <AdminModal
       title="Edit Playable Classes"
@@ -102,12 +106,14 @@ import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
+import PlayableStatTable from '@/features/admin/components/playableDashboard/PlayableStatTable.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+
 
 const emit = defineEmits<{
   (e: 'openTagsModal'): void
