@@ -112,8 +112,8 @@ import { playableClassService } from '@/features/admin/services/playableClassSer
 import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type {
-  PlayableClassBrowseItem,
-  PlayableSpeciesBrowseItem,
+  PlayableClassEditItem,
+  PlayableSpeciesEditItem,
 } from '@/features/admin/types/playableTypes'
 
 /**
@@ -137,7 +137,7 @@ const activeType = ref<'species' | 'classes'>('species')
  * Species State
  * ---------------------------------------------------------
  */
-const species = ref<PlayableSpeciesBrowseItem[]>([])
+const species = ref<PlayableSpeciesEditItem[]>([])
 const loadingSpecies = ref(false)
 const speciesError = ref<string | null>(null)
 
@@ -146,7 +146,7 @@ const speciesError = ref<string | null>(null)
  * Class State
  * ---------------------------------------------------------
  */
-const classes = ref<PlayableClassBrowseItem[]>([])
+const classes = ref<PlayableClassEditItem[]>([])
 const loadingClasses = ref(false)
 const classesError = ref<string | null>(null)
 
@@ -176,7 +176,7 @@ async function fetchClasses() {
 
   try {
     const res = await playableClassService.getPlayableClasses()
-    classes.value = res as PlayableClassBrowseItem[]
+    classes.value = res as PlayableClassEditItem[]
   } catch (error) {
     console.error(error)
     classesError.value = 'Failed to load class summary.'

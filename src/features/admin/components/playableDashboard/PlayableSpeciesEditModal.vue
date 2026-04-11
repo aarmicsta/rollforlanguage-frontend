@@ -196,7 +196,7 @@ import {
   type PlayableTag,
 } from '@/features/admin/services/playableTagService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
+import type { PlayableSpeciesEditItem } from '@/features/admin/types/playableTypes'
 
 /**
  * ---------------------------------------------------------
@@ -233,7 +233,7 @@ const emit = defineEmits<{
  * - loaded from species-specific assignment endpoints
  */
 const store = useAdminPlayableStore()
-const editableSpecies = ref<PlayableSpeciesBrowseItem | null>(null)
+const editableSpecies = ref<PlayableSpeciesEditItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
 const availableTags = ref<PlayableTag[]>([])

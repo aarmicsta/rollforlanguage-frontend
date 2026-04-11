@@ -131,14 +131,14 @@ import {
   type PlayableTag,
 } from '@/features/admin/services/playableTagService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-import type { PlayableClassBrowseItem } from '@/features/admin/types/playableTypes'
+import type { PlayableClassEditItem } from '@/features/admin/types/playableTypes'
 
 const emit = defineEmits<{
   (e: 'back'): void
 }>()
 
 const store = useAdminPlayableStore()
-const editableClass = ref<PlayableClassBrowseItem | null>(null)
+const editableClass = ref<PlayableClassEditItem | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableClassTag[]>([])
 const availableTags = ref<PlayableTag[]>([])

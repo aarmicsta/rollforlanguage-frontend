@@ -83,12 +83,11 @@
 
     <AdminModal
       title="Edit Passives"
+      size="5xl"
       :visible="isEditPassivesModalOpen"
       @close="isEditPassivesModalOpen = false"
     >
-      <p class="text-gray-700 dark:text-gray-200">
-        Placeholder for passive ability glossary.
-      </p>
+      <PlayablePassiveTable @close="isEditPassivesModalOpen = false" />
     </AdminModal>
   </div>
 </template>
@@ -114,6 +113,7 @@
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
+import PlayablePassiveTable from '@/features/admin/components/playableDashboard/PlayablePassiveTable.vue'
 import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
 import PlayableStatModifierTable from '@/features/admin/components/playableDashboard/PlayableStatModifierTable.vue'
 import PlayableStatTable from '@/features/admin/components/playableDashboard/PlayableStatTable.vue'
@@ -123,6 +123,7 @@ import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTo
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+
 
 const emit = defineEmits<{
   (e: 'openTagsModal'): void
@@ -212,7 +213,7 @@ function handleAction(action?: string) {
       break
 
     case 'createPassives':
-      isEditPassivesModalOpen.value = true
+      store.openCreatePassiveModal()
       break
 
     case 'editClasses':

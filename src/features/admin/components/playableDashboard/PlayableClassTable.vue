@@ -66,7 +66,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { playableClassService } from '@/features/admin/services/playableClassService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-import type { PlayableClassBrowseItem } from '@/features/admin/types/playableTypes'
+import type { PlayableClassEditItem } from '@/features/admin/types/playableTypes'
 
 /**
  * ---------------------------------------------------------
@@ -92,7 +92,7 @@ const emit = defineEmits<{
  * - local table data for the current playable class browse view
  */
 const store = useAdminPlayableStore()
-const classes = ref<PlayableClassBrowseItem[]>([])
+const classes = ref<PlayableClassEditItem[]>([])
 
 /**
  * ---------------------------------------------------------
@@ -104,7 +104,7 @@ const classes = ref<PlayableClassBrowseItem[]>([])
  */
 async function fetchClasses() {
   const res = await playableClassService.getPlayableClasses()
-  classes.value = res as PlayableClassBrowseItem[]
+  classes.value = res as PlayableClassEditItem[]
 }
 
 /**
@@ -115,7 +115,7 @@ async function fetchClasses() {
  * Selecting a row closes the surrounding browse view and
  * opens the dedicated class edit modal through the store.
  */
-function handleRowClick(item: PlayableClassBrowseItem) {
+function handleRowClick(item: PlayableClassEditItem) {
   emit('close')
   store.openEditClassModal(item)
 }

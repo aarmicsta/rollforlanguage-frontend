@@ -65,7 +65,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-import type { PlayableSpeciesBrowseItem } from '@/features/admin/types/playableTypes'
+import type { PlayableSpeciesEditItem } from '@/features/admin/types/playableTypes'
 
 /**
  * ---------------------------------------------------------
@@ -91,7 +91,7 @@ const emit = defineEmits<{
  * - local table data for the species browse view
  */
 const store = useAdminPlayableStore()
-const species = ref<PlayableSpeciesBrowseItem[]>([])
+const species = ref<PlayableSpeciesEditItem[]>([])
 
 /**
  * ---------------------------------------------------------
@@ -113,7 +113,7 @@ async function fetchSpecies() {
  * Selecting a row closes the browse view and opens the
  * species edit modal via the store.
  */
-function handleRowClick(item: PlayableSpeciesBrowseItem) {
+function handleRowClick(item: PlayableSpeciesEditItem) {
   emit('close')
   store.openEditSpeciesModal(item)
 }
