@@ -49,12 +49,12 @@
 
 import PlayableClassCreateModal from '@/features/admin/components/playableDashboard/PlayableClassCreateModal.vue'
 import PlayableClassEditModal from '@/features/admin/components/playableDashboard/PlayableClassEditModal.vue'
+import PlayablePassiveCreateModal from '@/features/admin/components/playableDashboard/PlayablePassiveCreateModal.vue'
+import PlayablePassiveEditModal from '@/features/admin/components/playableDashboard/PlayablePassiveEditModal.vue'
 import PlayableSpeciesCreateModal from '@/features/admin/components/playableDashboard/PlayableSpeciesCreateModal.vue'
 import PlayableSpeciesEditModal from '@/features/admin/components/playableDashboard/PlayableSpeciesEditModal.vue'
 import PlayableStatCreateModal from '@/features/admin/components/playableDashboard/PlayableStatCreateModal.vue'
 import PlayableStatEditModal from '@/features/admin/components/playableDashboard/PlayableStatEditModal.vue'
 import PlayableStatModifierCreateModal from '@/features/admin/components/playableDashboard/PlayableStatModifierCreateModal.vue'
 import PlayableStatModifierEditModal from '@/features/admin/components/playableDashboard/PlayableStatModifierEditModal.vue'
-import PlayablePassiveCreateModal from './PlayablePassiveCreateModal.vue'
-import PlayablePassiveEditModal from './PlayablePassiveEditModal.vue'
 </script>
