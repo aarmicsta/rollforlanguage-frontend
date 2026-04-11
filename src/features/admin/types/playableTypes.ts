@@ -131,3 +131,52 @@ export interface PlayableStatModifierRow {
   value: number
   updatedAt: string | null
 }
+
+/**
+ * ---------------------------------------------------------
+ * Playable Passive Types
+ * ---------------------------------------------------------
+ *
+ * Represents both:
+ * - canonical passive definitions (edit items)
+ * - unified passive assignment rows (species/class context)
+ *
+ * Notes:
+ * - `PlayablePassiveEditItem`
+ *   mirrors the canonical passive entity returned from the backend
+ *   and is used for create/edit modal workflows
+ *
+ * - `PlayablePassiveAssignmentRow`
+ *   is a flattened UI-layer row shape used in the unified
+ *   assignment table (species + class)
+ *
+ * - This mirrors the existing split between:
+ *   - PlayableStatEditItem (canonical)
+ *   - PlayableStatModifierRow (unified assignment system)
+ */
+
+export interface PlayablePassiveEditItem {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description?: string | null
+  effectText?: string | null
+  effectType?: string | null
+  isActive: boolean
+  sortOrder: number
+  createdAt?: string | null
+  updatedAt?: string | null
+}
+
+export interface PlayablePassiveAssignmentRow {
+  context: 'species' | 'class'
+  targetId: string
+  targetDisplayName: string
+  passiveId: string
+  passiveDisplayName: string
+  passiveDescription?: string | null
+  passiveEffectText?: string | null
+  passiveEffectType?: string | null
+  createdAt?: string | null
+}
