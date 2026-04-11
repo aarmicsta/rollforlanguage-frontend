@@ -55,5 +55,6 @@ import PlayableStatCreateModal from '@/features/admin/components/playableDashboa
 import PlayableStatEditModal from '@/features/admin/components/playableDashboard/PlayableStatEditModal.vue'
 import PlayableStatModifierCreateModal from '@/features/admin/components/playableDashboard/PlayableStatModifierCreateModal.vue'
 import PlayableStatModifierEditModal from '@/features/admin/components/playableDashboard/PlayableStatModifierEditModal.vue'
+import PlayablePassiveCreateModal from './PlayablePassiveCreateModal.vue'
 import PlayablePassiveEditModal from './PlayablePassiveEditModal.vue'
 </script>
