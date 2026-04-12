@@ -26,6 +26,62 @@
 
     <!--
       =========================================================
+      Filter Controls
+      =========================================================
+
+      These filters are usage-based, not canonical category-based.
+
+      Meanings:
+      - All
+        show all canonical passive definitions
+      - Class
+        show passives assigned to at least one class
+      - Species
+        show passives assigned to at least one species
+    -->
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="rounded px-3 py-1 text-sm transition"
+        :class="
+          filterMode === 'all'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-200 dark:hover:bg-neutral-700'
+        "
+        @click="filterMode = 'all'"
+      >
+        All
+      </button>
+
+      <button
+        type="button"
+        class="rounded px-3 py-1 text-sm transition"
+        :class="
+          filterMode === 'class'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-200 dark:hover:bg-neutral-700'
+        "
+        @click="filterMode = 'class'"
+      >
+        Class
+      </button>
+
+      <button
+        type="button"
+        class="rounded px-3 py-1 text-sm transition"
+        :class="
+          filterMode === 'species'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-neutral-800 dark:text-gray-200 dark:hover:bg-neutral-700'
+        "
+        @click="filterMode = 'species'"
+      >
+        Species
+      </button>
+    </div>
+
+    <!--
+      =========================================================
       Loading / Error
       =========================================================
     -->
@@ -69,7 +125,7 @@
 
         <tbody class="divide-y divide-gray-200 bg-white dark:divide-neutral-800 dark:bg-black">
           <tr
-            v-for="passive in passives"
+            v-for="passive in filteredPassives"
             :key="passive.id"
             class="cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-900"
             @click="handleRowClick(passive)"
@@ -96,12 +152,12 @@
             </td>
           </tr>
 
-          <tr v-if="passives.length === 0">
+          <tr v-if="filteredPassives.length === 0">
             <td
               colspan="4"
               class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400"
             >
-              No passive records found.
+              No passive records found for this filter.
             </td>
           </tr>
         </tbody>
@@ -122,37 +178,161 @@
  * - fetch and display canonical passive records
  * - allow row selection for edit flow
  * - provide a quick entry point to passive creation
+ * - support usage-based visual filtering
  *
  * Notes:
  * - this table manages canonical passive definitions only
- * - species/class passive assignments are a separate unified system
+ * - the filter toggle is usage-based, not category-based
+ * - "Class" means assigned to at least one class
+ * - "Species" means assigned to at least one species
  */
 
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import {
+  getPlayableClasses,
+  getPlayableClassPassives,
+} from '@/features/admin/services/playableClassService'
 import { getPlayablePassives } from '@/features/admin/services/playablePassiveService'
+import {
+  getPlayableSpecies,
+  getPlayableSpeciesPassives,
+} from '@/features/admin/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayablePassiveEditItem } from '@/features/admin/types/playableTypes'
 
 const store = useAdminPlayableStore()
 
+/**
+ * ---------------------------------------------------------
+ * Local Table State
+ * ---------------------------------------------------------
+ */
 const passives = ref<PlayablePassiveEditItem[]>([])
 const isLoading = ref(false)
 const loadError = ref<string | null>(null)
 
+/**
+ * ---------------------------------------------------------
+ * Usage Filter State
+ * ---------------------------------------------------------
+ *
+ * Controls which passive subset is shown in the table.
+ *
+ * Modes:
+ * - all
+ * - class
+ * - species
+ */
+const filterMode = ref<'all' | 'class' | 'species'>('all')
+
+/**
+ * ---------------------------------------------------------
+ * Assignment Usage Tracking
+ * ---------------------------------------------------------
+ *
+ * These sets record whether a passive is currently assigned to:
+ * - at least one class
+ * - at least one species
+ *
+ * This supports usage-based filtering in the browse table.
+ */
+const classAssignedPassiveIds = ref<Set<string>>(new Set())
+const speciesAssignedPassiveIds = ref<Set<string>>(new Set())
+
+/**
+ * ---------------------------------------------------------
+ * Filtered Rows
+ * ---------------------------------------------------------
+ */
+const filteredPassives = computed(() => {
+  if (filterMode.value === 'class') {
+    return passives.value.filter((passive) =>
+      classAssignedPassiveIds.value.has(passive.id)
+    )
+  }
+
+  if (filterMode.value === 'species') {
+    return passives.value.filter((passive) =>
+      speciesAssignedPassiveIds.value.has(passive.id)
+    )
+  }
+
+  return passives.value
+})
+
+/**
+ * ---------------------------------------------------------
+ * Data Load
+ * ---------------------------------------------------------
+ *
+ * Loads:
+ * - all canonical passives
+ * - all class passive assignments
+ * - all species passive assignments
+ *
+ * Current implementation derives usage-based filtering from
+ * existing per-entity assignment endpoints.
+ *
+ * This is correct for the current architecture, though it may
+ * later be optimized by a dedicated aggregate backend endpoint.
+ */
 async function loadPassives() {
   isLoading.value = true
   loadError.value = null
 
   try {
-    passives.value = await getPlayablePassives()
+    const [allPassives, allClasses, allSpecies] = await Promise.all([
+      getPlayablePassives(),
+      getPlayableClasses(),
+      getPlayableSpecies(),
+    ])
+
+    passives.value = allPassives
+
+    const classPassiveResults = await Promise.all(
+      allClasses.map((classItem) =>
+        getPlayableClassPassives(classItem.id)
+      )
+    )
+
+    const speciesPassiveResults = await Promise.all(
+      allSpecies.map((speciesItem) =>
+        getPlayableSpeciesPassives(speciesItem.id)
+      )
+    )
+
+    const nextClassAssignedIds = new Set<string>()
+    const nextSpeciesAssignedIds = new Set<string>()
+
+    for (const passiveList of classPassiveResults) {
+      for (const passive of passiveList) {
+        nextClassAssignedIds.add(passive.id)
+      }
+    }
+
+    for (const passiveList of speciesPassiveResults) {
+      for (const passive of passiveList) {
+        nextSpeciesAssignedIds.add(passive.id)
+      }
+    }
+
+    classAssignedPassiveIds.value = nextClassAssignedIds
+    speciesAssignedPassiveIds.value = nextSpeciesAssignedIds
   } catch (error) {
     console.error('Failed to load playable passives:', error)
     loadError.value = 'Failed to load playable passives.'
+    classAssignedPassiveIds.value = new Set()
+    speciesAssignedPassiveIds.value = new Set()
   } finally {
     isLoading.value = false
   }
 }
 
+/**
+ * ---------------------------------------------------------
+ * Row Click
+ * ---------------------------------------------------------
+ */
 function handleRowClick(passive: PlayablePassiveEditItem) {
   store.openEditPassiveModal(passive)
 }
