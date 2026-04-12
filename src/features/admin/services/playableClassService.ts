@@ -139,6 +139,109 @@ export interface PlayableClassTag {
 
 /**
  * ---------------------------------------------------------
+ * PlayableClassPassive
+ * ---------------------------------------------------------
+ *
+ * Frontend shape for a passive assigned to a playable class.
+ *
+ * These records come from the class-passive assignment endpoints,
+ * which read from the class/passive junction table and return the
+ * resolved passive objects rather than raw passive IDs.
+ *
+ * This means the frontend receives enough passive metadata to:
+ * - pre-populate selected passive IDs
+ * - support grouped selector UIs
+ * - display passive context without extra per-item lookups
+ *
+ * Notes:
+ * - `effectType` is used by the frontend selector for grouping
+ *   passives into categories such as utility, defense, etc.
+ * - This is relational assignment data, not canonical passive
+ *   reference browse data.
+ */
+export interface PlayableClassPassive {
+  id: string
+  displayName: string
+  effectType: string | null
+}
+
+/**
+ * ---------------------------------------------------------
+ * getPlayableClassPassives
+ * ---------------------------------------------------------
+ *
+ * Fetches the currently assigned passives for a specific class.
+ *
+ * Endpoint:
+ * GET /admin/playable-classes/:id/passives
+ *
+ * Returns:
+ * - an array of resolved passive objects assigned to the class
+ *
+ * Important:
+ * - this endpoint returns assigned passives only
+ * - it does NOT return the full master list of available passives
+ *
+ * That distinction matters:
+ * - use this function to load what the class currently has
+ * - use the shared passive reference service to load all available
+ *   passive options for selection UI
+ */
+export async function getPlayableClassPassives(
+  id: string
+): Promise<PlayableClassPassive[]> {
+  const response = await axiosInstance.get<PlayableClassPassive[]>(
+    `/admin/playable-classes/${id}/passives`
+  )
+  return response.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * updatePlayableClassPassives
+ * ---------------------------------------------------------
+ *
+ * Replaces the full assigned passive set for a specific class.
+ *
+ * Endpoint:
+ * PATCH /admin/playable-classes/:id/passives
+ *
+ * Payload shape:
+ * {
+ *   passiveIds: string[]
+ * }
+ *
+ * Behavior:
+ * - this uses a "replace-all" update pattern
+ * - the provided `passiveIds` become the new full assignment set
+ * - any previously assigned passives not included are removed
+ *
+ * Returns:
+ * - a success message
+ * - the updated assigned passive objects in `data`
+ *
+ * Why replace-all instead of add/remove one at a time?
+ * - simpler backend logic
+ * - easier admin form workflow
+ * - cleaner match for multi-select editing UIs
+ */
+export async function updatePlayableClassPassives(
+  id: string,
+  payload: { passiveIds: string[] }
+): Promise<{
+  message: string
+  data: PlayableClassPassive[]
+}> {
+  const response = await axiosInstance.patch(
+    `/admin/playable-classes/${id}/passives`,
+    payload
+  )
+
+  return response.data
+}
+
+/**
+ * ---------------------------------------------------------
  * getPlayableClasses
  * ---------------------------------------------------------
  *
@@ -349,4 +452,6 @@ export const playableClassService = {
   updatePlayableClass,
   getPlayableClassTags,
   updatePlayableClassTags,
+  getPlayableClassPassives,
+  updatePlayableClassPassives,
 }

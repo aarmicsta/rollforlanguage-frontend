@@ -7,25 +7,11 @@
     This modal is the primary admin editing surface for a
     single playable species record.
 
-    Current responsibilities:
+    Responsibilities:
     - edit core scalar species fields
-      - displayName
-      - description
-      - isActive
-    - show read-only metadata
-      - internal name
-      - slug
-      - updatedAt
-    - prepare local state for future relational editing
-      - assigned tags
-      - selected tag IDs
-
-    Notes:
-    - The modal works from a local editable copy of the selected
-      species so that the table/store object is not mutated
-      directly while the user is editing.
-    - Relational editing (tags, passives, stats) will be layered
-      in incrementally rather than all at once.
+    - manage tag assignment for the species
+    - manage passive assignment for the species
+    - display read-only metadata
   -->
   <AdminModal
     :visible="store.showEditSpeciesModal"
@@ -33,11 +19,6 @@
     size="5xl"
     @close="closeModal"
   >
-    <!--
-      Back button:
-      Returns the user to the species browse table without fully
-      resetting the surrounding browse/edit workflow.
-    -->
     <div class="mb-4">
       <button
         @click="handleBack"
@@ -47,21 +28,11 @@
       </button>
     </div>
 
-    <!--
-      Main edit form:
-      Only renders if a species is currently selected and copied
-      into local editable state.
-    -->
     <form
       v-if="editableSpecies"
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
       @submit.prevent="handleSave"
     >
-      <!--
-        Display Name:
-        Primary editable human-facing label for the species.
-        The slug is shown beneath it as a stable reference value.
-      -->
       <div>
         <label class="mb-1 block text-xs text-gray-500">Display Name</label>
         <input
@@ -75,27 +46,12 @@
         </p>
       </div>
 
-      <!--
-        Metadata / quick-edit grid:
-        Mix of read-only informational fields and lightweight
-        editable controls.
-      -->
       <div class="grid grid-cols-2 gap-4">
-        <!--
-          Internal canonical name:
-          Read-only. Useful for admin reference and debugging,
-          but not intended for casual editing in this modal.
-        -->
         <div>
           <p class="text-xs text-gray-500">Internal Name</p>
           <p>{{ editableSpecies.name }}</p>
         </div>
 
-        <!--
-          Active toggle:
-          Editable boolean controlling whether the species is
-          currently active/available in the system.
-        -->
         <div>
           <label class="mb-1 block text-xs text-gray-500">Active</label>
           <label class="flex items-center gap-2">
@@ -111,20 +67,12 @@
           </label>
         </div>
 
-        <!--
-          Last Updated:
-          Read-only timestamp for quick admin visibility.
-        -->
         <div>
           <p class="text-xs text-gray-500">Last Updated</p>
           <p>{{ formatDate(editableSpecies.updatedAt) }}</p>
         </div>
       </div>
 
-      <!--
-        Description:
-        Multi-line editable narrative/summary field for the species.
-      -->
       <div>
         <label class="mb-1 block text-xs text-gray-500">Description</label>
         <textarea
@@ -136,9 +84,9 @@
       </div>
 
       <!--
-        Tag assignment:
-        Reusable assignment-level selector for applying canonical
-        playable tags to this specific species.
+        ---------------------------------------------------------
+        Tag Assignment
+        ---------------------------------------------------------
       -->
       <PlayableTagAssignmentSelector
         v-model="selectedTagIds"
@@ -147,10 +95,19 @@
       />
 
       <!--
-        Action buttons:
-        - Cancel closes and resets the modal
-        - Save persists current scalar field edits
+        ---------------------------------------------------------
+        Passive Assignment
+        ---------------------------------------------------------
       -->
+      <div class="space-y-2">
+        <label class="text-xs text-gray-500">Passives</label>
+
+        <PlayablePassiveAssignmentSelector
+          :available-passives="availablePassives"
+          v-model:selectedPassiveIds="selectedPassiveIds"
+        />
+      </div>
+
       <div class="flex justify-end gap-2 pt-4">
         <button
           type="button"
@@ -171,11 +128,6 @@
       </div>
     </form>
 
-    <!--
-      Empty state:
-      Defensive fallback in case the modal opens without a
-      selected species.
-    -->
     <div v-else class="text-sm text-gray-500">
       No species selected.
     </div>
@@ -185,12 +137,19 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
+import PlayablePassiveAssignmentSelector from '@/features/admin/components/playableDashboard/PlayablePassiveAssignmentSelector.vue'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
+  getPlayablePassives,
+  type PlayablePassive,
+} from '@/features/admin/services/playablePassiveService'
+import {
   playableSpeciesService,
   type PlayableSpeciesTag,
+  type PlayableSpeciesPassive,
 } from '@/features/admin/services/playableSpeciesService'
+
 import {
   getPlayableTags,
   type PlayableTag,
@@ -198,86 +157,40 @@ import {
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { PlayableSpeciesEditItem } from '@/features/admin/types/playableTypes'
 
-/**
- * ---------------------------------------------------------
- * Emits
- * ---------------------------------------------------------
- *
- * `back` is used to return from the edit modal to the browse
- * table modal without fully collapsing the browse/edit flow.
- */
-const emit = defineEmits<{
-  (e: 'back'): void
-}>()
+const emit = defineEmits<{ (e: 'back'): void }>()
+
+const store = useAdminPlayableStore()
+const toastStore = useToastStore()
 
 /**
  * ---------------------------------------------------------
- * Store / Local State
+ * Local Editable Scalar State
  * ---------------------------------------------------------
- *
- * `store` holds shared modal visibility, selection state,
- * and submit/loading/error flags.
- *
- * `editableSpecies` is a local copy of the selected species.
- * This prevents accidental direct mutation of the selected
- * store object while editing.
- *
- * Tag-related local state is split intentionally:
- *
- * `availableTags`
- * - the full canonical tag list available for assignment
- * - loaded once from the shared playable tag reference service
- *
- * `assignedTags`
- * - the full tag objects currently assigned to the selected species
- * - loaded from species-specific assignment endpoints
  */
-const store = useAdminPlayableStore()
 const editableSpecies = ref<PlayableSpeciesEditItem | null>(null)
+
+/**
+ * ---------------------------------------------------------
+ * Tag Assignment State
+ * ---------------------------------------------------------
+ */
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableSpeciesTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
 
 /**
  * ---------------------------------------------------------
- * Global UI Feedback
+ * Passive Assignment State
  * ---------------------------------------------------------
- *
- * Toast rendering is owned by the persistent admin layout.
- * This modal may trigger toast feedback, but does not render
- * or manage toast lifecycle directly.
  */
-const toastStore = useToastStore()
+const selectedPassiveIds = ref<string[]>([])
+const assignedPassives = ref<PlayableSpeciesPassive[]>([])
+const availablePassives = ref<PlayablePassive[]>([])
 
 /**
  * ---------------------------------------------------------
  * Sync selected species + load relational data
  * ---------------------------------------------------------
- *
- * Whenever the selected species changes:
- * 1. Copy it into local editable state (scalar fields)
- * 2. Fetch assigned relational data (currently: tags)
- * 3. Normalize relational data into local editing models
- *
- * Scalar sync:
- * - Creates a local copy of the selected species to avoid
- *   mutating shared store state during editing.
- *
- * Relational sync (current: tags):
- * - Fetches assigned tags from the backend
- * - Stores full tag objects in `assignedTags` (display/use)
- * - Stores tag IDs in `selectedTagIds` (editing/persistence)
- *
- * Why this split?
- * - Objects are useful for UI display
- * - IDs are required for backend update payloads
- *
- * Reset behavior:
- * - If no species is selected, all local state is cleared
- * - If fetch fails, relational state is safely reset
- *
- * `immediate: true` ensures the modal initializes correctly
- * when opened with a pre-selected species.
  */
 watch(
   () => store.selectedSpecies,
@@ -287,7 +200,10 @@ watch(
     if (!value) {
       assignedTags.value = []
       selectedTagIds.value = []
+      assignedPassives.value = []
+      selectedPassiveIds.value = []
       availableTags.value = []
+      availablePassives.value = []
       return
     }
 
@@ -296,13 +212,24 @@ watch(
         await loadAvailableTags()
       }
 
+      if (!availablePassives.value.length) {
+        await loadAvailablePassives()
+      }
+
       const tags = await playableSpeciesService.getPlayableSpeciesTags(value.id)
       assignedTags.value = tags
       selectedTagIds.value = tags.map((tag) => tag.id)
+
+      const passives =
+        await playableSpeciesService.getPlayableSpeciesPassives(value.id)
+      assignedPassives.value = passives
+      selectedPassiveIds.value = passives.map((p) => p.id)
     } catch (error) {
-      console.error('Failed to load playable species tags:', error)
+      console.error('Failed to load species relational data:', error)
       assignedTags.value = []
       selectedTagIds.value = []
+      assignedPassives.value = []
+      selectedPassiveIds.value = []
     }
   },
   { immediate: true }
@@ -310,20 +237,8 @@ watch(
 
 /**
  * ---------------------------------------------------------
- * loadAvailableTags
+ * Reference Data Loading
  * ---------------------------------------------------------
- *
- * Loads the full canonical playable tag list from the shared
- * tag reference service.
- *
- * Important distinction:
- * - this is the full available option pool
- * - it is NOT the same thing as the tags currently assigned
- *   to the selected species
- *
- * The selector UI needs both:
- * - availableTags   -> all assignable options
- * - selectedTagIds  -> current assignment state
  */
 async function loadAvailableTags() {
   try {
@@ -334,74 +249,34 @@ async function loadAvailableTags() {
   }
 }
 
-/**
- * ---------------------------------------------------------
- * Initial reference-data load
- * ---------------------------------------------------------
- *
- * Load shared canonical tag options once when the modal
- * component is mounted.
- *
- * These options are reused as different species are selected,
- * while the assigned tag set is refreshed per selected species
- * inside the watcher.
- */
+async function loadAvailablePassives() {
+  try {
+    availablePassives.value = await getPlayablePassives()
+  } catch (error) {
+    console.error('Failed to load playable passives:', error)
+    availablePassives.value = []
+  }
+}
+
 onMounted(async () => {
   await loadAvailableTags()
+  await loadAvailablePassives()
 })
 
-/**
- * ---------------------------------------------------------
- * formatDate
- * ---------------------------------------------------------
- *
- * Lightweight UI formatter for nullable date strings returned
- * from the backend.
- */
 function formatDate(dateStr: string | null) {
   return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
 }
 
 /**
  * ---------------------------------------------------------
- * closeModal
+ * Modal Controls
  * ---------------------------------------------------------
- *
- * Fully closes and resets the edit modal state.
- *
- * Used when:
- * - the user clicks Cancel
- * - the modal emits a close event
- * - save completes successfully
- *
- * This clears:
- * - modal visibility
- * - selected species in store
- * - local editable copy
- * - submit error state
- *
- * Note:
- * As relational editing expands, this function should also
- * reset any additional local relation state (tags, passives,
- * stats, etc.) to avoid stale modal data between edits.
  */
 function closeModal() {
   store.closeEditSpeciesModal()
   editableSpecies.value = null
 }
 
-/**
- * ---------------------------------------------------------
- * handleBack
- * ---------------------------------------------------------
- *
- * Returns the user from edit view back to the browse view
- * without treating it as a full cancel/reset of the outer
- * flow.
- *
- * This intentionally emits `back` so the parent can reopen
- * the browse table/modal as needed.
- */
 function handleBack() {
   store.closeEditSpeciesModal()
   editableSpecies.value = null
@@ -410,35 +285,8 @@ function handleBack() {
 
 /**
  * ---------------------------------------------------------
- * handleSave
+ * Save Handler
  * ---------------------------------------------------------
- *
- * Persists the currently editable species data to the backend.
- *
- * Current fields/relations saved:
- * - displayName
- * - description
- * - isActive
- * - tag assignments
- *
- * Behavior:
- * 1. enable submitting/loading state
- * 2. clear prior submit error
- * 3. update scalar species fields
- * 4. update species tag assignments (replace-all model)
- * 5. if backend returns updated species data, apply it to the store
- * 6. trigger list refresh
- * 7. close/reset modal state
- *
- * Why use returned backend data?
- * - keeps frontend aligned with server-confirmed values
- * - avoids trusting only local form state
- * - prepares for future reduction of unnecessary refetching
- *
- * Tag assignment model:
- * - `selectedTagIds` represents the full desired tag set
- * - saving replaces the species's existing tag assignments
- *   with the currently selected IDs
  */
 async function handleSave() {
   if (!editableSpecies.value) return
@@ -460,6 +308,13 @@ async function handleSave() {
       editableSpecies.value.id,
       {
         tagIds: selectedTagIds.value,
+      }
+    )
+
+    await playableSpeciesService.updatePlayableSpeciesPassives(
+      editableSpecies.value.id,
+      {
+        passiveIds: selectedPassiveIds.value,
       }
     )
 

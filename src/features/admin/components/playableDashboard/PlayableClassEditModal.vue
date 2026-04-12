@@ -69,11 +69,30 @@
         />
       </div>
 
+      <!--
+        ---------------------------------------------------------
+        Tag Assignments
+        ---------------------------------------------------------
+      -->
       <PlayableTagAssignmentSelector
         v-model="selectedTagIds"
         :available-tags="availableTags"
         :disabled="store.isSubmitting"
       />
+
+      <!--
+        ---------------------------------------------------------
+        Passive Assignments
+        ---------------------------------------------------------
+      -->
+      <div class="space-y-2">
+        <label class="block text-xs text-gray-500">Passives</label>
+
+        <PlayablePassiveAssignmentSelector
+          :available-passives="availablePassives"
+          v-model:selectedPassiveIds="selectedPassiveIds"
+        />
+      </div>
 
       <div class="flex justify-end gap-2 pt-4">
         <button
@@ -88,7 +107,7 @@
         <button
           type="submit"
           :disabled="store.isSubmitting"
-          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {{ store.isSubmitting ? 'Saving...' : 'Save Changes' }}
         </button>
@@ -110,22 +129,31 @@
  * Responsibilities:
  * - edit scalar fields for a playable class
  * - manage tag assignment for the class
+ * - manage passive assignment for the class
  * - submit updates to backend services
  *
  * Notes:
  * - visibility is controlled by adminPlayableStore
  * - selected entity comes from store.selectedClass
  * - local editable copy is used to prevent direct mutation
+ * - relational data is loaded independently from scalar fields
+ *   and saved through dedicated replace-all endpoints
  */
 
 import { onMounted, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
+import PlayablePassiveAssignmentSelector from '@/features/admin/components/playableDashboard/PlayablePassiveAssignmentSelector.vue'
 import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import {
   playableClassService,
   type PlayableClassTag,
+  type PlayableClassPassive,
 } from '@/features/admin/services/playableClassService'
+import {
+  getPlayablePassives,
+  type PlayablePassive,
+} from '@/features/admin/services/playablePassiveService'
 import {
   getPlayableTags,
   type PlayableTag,
@@ -138,17 +166,57 @@ const emit = defineEmits<{
 }>()
 
 const store = useAdminPlayableStore()
+const toastStore = useToastStore()
+
+/**
+ * ---------------------------------------------------------
+ * Local Editable Scalar State
+ * ---------------------------------------------------------
+ *
+ * Uses a shallow local copy so the modal can edit safely
+ * without directly mutating store-selected records.
+ */
 const editableClass = ref<PlayableClassEditItem | null>(null)
+
+/**
+ * ---------------------------------------------------------
+ * Tag Assignment State
+ * ---------------------------------------------------------
+ *
+ * - `availableTags`
+ *   full master list used by the selector UI
+ * - `assignedTags`
+ *   resolved currently assigned tags from backend
+ * - `selectedTagIds`
+ *   ID-only selection model bound to the selector
+ */
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableClassTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
 
-const toastStore = useToastStore()
+/**
+ * ---------------------------------------------------------
+ * Passive Assignment State
+ * ---------------------------------------------------------
+ *
+ * - `availablePassives`
+ *   full master list used by the selector UI
+ * - `assignedPassives`
+ *   resolved currently assigned passives from backend
+ * - `selectedPassiveIds`
+ *   ID-only selection model bound to the selector
+ */
+const selectedPassiveIds = ref<string[]>([])
+const assignedPassives = ref<PlayableClassPassive[]>([])
+const availablePassives = ref<PlayablePassive[]>([])
 
 /**
  * ---------------------------------------------------------
  * Watch: Selected Class
  * ---------------------------------------------------------
+ *
+ * Synchronizes local scalar state and relational assignment
+ * state whenever the store-selected class changes.
  */
 watch(
   () => store.selectedClass,
@@ -158,7 +226,10 @@ watch(
     if (!value) {
       assignedTags.value = []
       selectedTagIds.value = []
+      assignedPassives.value = []
+      selectedPassiveIds.value = []
       availableTags.value = []
+      availablePassives.value = []
       return
     }
 
@@ -167,13 +238,25 @@ watch(
         await loadAvailableTags()
       }
 
+      if (!availablePassives.value.length) {
+        await loadAvailablePassives()
+      }
+
       const tags = await playableClassService.getPlayableClassTags(value.id)
       assignedTags.value = tags
       selectedTagIds.value = tags.map((tag) => tag.id)
+
+      const passives = await playableClassService.getPlayableClassPassives(
+        value.id
+      )
+      assignedPassives.value = passives
+      selectedPassiveIds.value = passives.map((passive) => passive.id)
     } catch (error) {
-      console.error('Failed to load playable class tags:', error)
+      console.error('Failed to load playable class relational data:', error)
       assignedTags.value = []
       selectedTagIds.value = []
+      assignedPassives.value = []
+      selectedPassiveIds.value = []
     }
   },
   { immediate: true }
@@ -181,8 +264,10 @@ watch(
 
 /**
  * ---------------------------------------------------------
- * Tag Loading
+ * Reference Data Loading
  * ---------------------------------------------------------
+ *
+ * Loads the master option sets used by relational selectors.
  */
 async function loadAvailableTags() {
   try {
@@ -193,8 +278,18 @@ async function loadAvailableTags() {
   }
 }
 
+async function loadAvailablePassives() {
+  try {
+    availablePassives.value = await getPlayablePassives()
+  } catch (error) {
+    console.error('Failed to load playable passives:', error)
+    availablePassives.value = []
+  }
+}
+
 onMounted(async () => {
   await loadAvailableTags()
+  await loadAvailablePassives()
 })
 
 function formatDate(dateStr: string | null) {
@@ -221,6 +316,14 @@ function handleBack() {
  * ---------------------------------------------------------
  * Save Handler
  * ---------------------------------------------------------
+ *
+ * Save order:
+ * 1. scalar class fields
+ * 2. tag assignments
+ * 3. passive assignments
+ *
+ * This mirrors the existing tag-assignment architecture and
+ * keeps relational updates parallel and predictable.
  */
 async function handleSave() {
   if (!editableClass.value) return
@@ -242,6 +345,13 @@ async function handleSave() {
       editableClass.value.id,
       {
         tagIds: selectedTagIds.value,
+      }
+    )
+
+    await playableClassService.updatePlayableClassPassives(
+      editableClass.value.id,
+      {
+        passiveIds: selectedPassiveIds.value,
       }
     )
 
