@@ -4,24 +4,18 @@
       =========================================================
       Header
       =========================================================
-    -->
-    <div class="flex items-center justify-between gap-4">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Playable Passives
-        </h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          Browse and select canonical passive definitions for editing.
-        </p>
-      </div>
 
-      <button
-        type="button"
-        class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-        @click="store.openCreatePassiveModal()"
-      >
-        Create Passive
-      </button>
+      This table is a browse/edit surface for canonical passive
+      definitions. Creation is handled elsewhere in the dashboard,
+      so no create action is exposed here.
+    -->
+    <div>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        Playable Passives
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Browse and select canonical passive definitions for editing.
+      </p>
     </div>
 
     <!--
@@ -177,11 +171,11 @@
  * Responsibilities:
  * - fetch and display canonical passive records
  * - allow row selection for edit flow
- * - provide a quick entry point to passive creation
  * - support usage-based visual filtering
  *
  * Notes:
  * - this table manages canonical passive definitions only
+ * - creation is handled elsewhere in the dashboard flow
  * - the filter toggle is usage-based, not category-based
  * - "Class" means assigned to at least one class
  * - "Species" means assigned to at least one species
