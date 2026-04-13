@@ -29,38 +29,41 @@
 <template>
   <div>
     <label class="mb-1 block text-xs text-gray-500">Tags</label>
-    <p class="text-xs text-red-500">
-        availableTags: {{ availableTags.length }} | selectedTagIds: {{ modelValue.length }}
-    </p>
 
     <div
       class="rounded border px-3 py-3 dark:border-neutral-700"
     >
       <div
         v-if="availableTags && availableTags.length"
-        class="flex flex-wrap gap-2"
+        class="space-y-4"
       >
-        <button
-          v-for="tag in availableTags"
-          :key="tag.id"
-          type="button"
-          :disabled="props.disabled"
-          class="inline-flex items-center rounded-full px-3 py-1 text-sm transition"
-          :class="
-            modelValue.includes(tag.id)
-              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
-              : 'bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-gray-300'
-          "
-          @click="toggleTag(tag.id)"
+        <section
+          v-for="group in groupedTags"
+          :key="group.categoryLabel"
+          class="space-y-2 border-b pb-3 last:border-b-0"
         >
-          {{ tag.displayName }}
-          <span
-            v-if="tag.tagCategory"
-            class="ml-2 text-xs opacity-70"
-          >
-            ({{ tag.tagCategory }})
-          </span>
-        </button>
+          <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            {{ group.categoryLabel }}
+          </h4>
+
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="tag in group.tags"
+              :key="tag.id"
+              type="button"
+              :disabled="props.disabled"
+              class="inline-flex items-center rounded-full px-3 py-1 text-sm transition"
+              :class="
+                modelValue.includes(tag.id)
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100'
+                  : 'bg-gray-100 text-gray-700 dark:bg-neutral-800 dark:text-gray-300'
+              "
+              @click="toggleTag(tag.id)"
+            >
+              {{ tag.displayName }}
+            </button>
+          </div>
+        </section>
       </div>
 
       <p
@@ -74,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 /**
  * ---------------------------------------------------------
  * Props
@@ -106,6 +110,62 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
 }>()
+
+/**
+ * ---------------------------------------------------------
+ * groupedTags
+ * ---------------------------------------------------------
+ *
+ * Groups available tags by their canonical `tagCategory` so the
+ * selector can present them in organized sections rather than
+ * as one flat, unstructured list.
+ *
+ * Normalization rules:
+ * - null/empty categories are grouped under `Uncategorized`
+ *
+ * Sorting rules:
+ * - category groups are sorted alphabetically by label
+ * - tags within each group are sorted alphabetically by displayName
+ *
+ * Architectural note:
+ * - grouping is derived UI state only
+ * - the parent still owns the source data and selected IDs
+ * - Layout note:
+ * - this component does not impose its own max-height or scrolling
+ * - parent containers should control overflow behavior based on context
+ *   (for example: create modal vs edit modal)
+ */
+const groupedTags = computed(() => {
+  const groups = new Map<
+    string,
+    Array<{
+      id: string
+      displayName: string
+      tagCategory: string | null
+      isActive: boolean | null
+    }>
+  >()
+
+  for (const tag of props.availableTags) {
+    const rawCategory = tag.tagCategory?.trim()
+    const categoryLabel = rawCategory ? rawCategory : 'Uncategorized'
+
+    if (!groups.has(categoryLabel)) {
+      groups.set(categoryLabel, [])
+    }
+
+    groups.get(categoryLabel)!.push(tag)
+  }
+
+  return Array.from(groups.entries())
+    .map(([categoryLabel, tags]) => ({
+      categoryLabel,
+      tags: [...tags].sort((a, b) =>
+        a.displayName.localeCompare(b.displayName)
+      ),
+    }))
+    .sort((a, b) => a.categoryLabel.localeCompare(b.categoryLabel))
+})
 
 /**
  * ---------------------------------------------------------
