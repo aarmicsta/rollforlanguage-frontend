@@ -37,13 +37,18 @@
         v-if="availableTags && availableTags.length"
         class="space-y-4"
       >
+
+      <!--
+        Tags are grouped by canonical tagCategory so assignment UI remains
+        organized and scalable as the tag set grows.
+      -->
         <section
           v-for="group in groupedTags"
           :key="group.categoryLabel"
           class="space-y-2 border-b pb-3 last:border-b-0"
         >
           <h4 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-            {{ group.categoryLabel }}
+            {{ formatCategoryLabel(group.categoryLabel) }}
           </h4>
 
           <div class="flex flex-wrap gap-2">
@@ -110,6 +115,29 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string[]): void
 }>()
+
+/**
+ * ---------------------------------------------------------
+ * formatCategoryLabel
+ * ---------------------------------------------------------
+ *
+ * Converts canonical tag category values into human-friendly
+ * UI labels for section headings.
+ *
+ * Example:
+ * - `combat_style` -> `Combat Style`
+ *
+ * Notes:
+ * - fallback labels such as `Uncategorized` pass through cleanly
+ * - this is presentation-only and does not alter canonical data
+ */
+function formatCategoryLabel(categoryLabel: string): string {
+  return categoryLabel
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ')
+}
 
 /**
  * ---------------------------------------------------------
