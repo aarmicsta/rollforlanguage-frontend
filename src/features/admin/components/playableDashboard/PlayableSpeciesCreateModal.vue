@@ -10,6 +10,7 @@
     - collect the minimum required species identity fields
     - auto-generate canonical helper fields from displayName
     - allow manual override of generated name/slug
+    - optionally assign tags and passives during initial creation
     - submit the create payload to the backend
   -->
   <AdminModal
@@ -114,6 +115,137 @@
 
       <!--
         ---------------------------------------------------------
+        Optional Assignments
+        ---------------------------------------------------------
+
+        Assignments are intentionally hidden by default so the
+        modal preserves a clean, low-friction core create flow.
+
+        When expanded, this section allows the admin to assign:
+        - canonical playable tags
+        - canonical playable passives
+
+        Accordion behavior:
+        - only one assignment panel is open at a time
+        - selections persist while the modal remains open
+      -->
+      <div class="rounded border dark:border-neutral-700">
+        <button
+          type="button"
+          :disabled="store.isSubmitting"
+          class="flex w-full items-center justify-between px-4 py-3 text-left"
+          @click="toggleAssignments"
+        >
+          <div>
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              Assignments
+            </h3>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Optionally assign tags and passives during initial species creation.
+            </p>
+          </div>
+
+          <span class="text-xs text-gray-500 dark:text-gray-400">
+            {{ showAssignments ? 'Hide' : 'Show' }}
+          </span>
+        </button>
+
+        <div
+          v-if="showAssignments"
+          class="space-y-3 border-t px-4 py-4 dark:border-neutral-700"
+        >
+          <!--
+            -----------------------------------------------------
+            Tags Assignment Panel
+            -----------------------------------------------------
+          -->
+          <div class="rounded border dark:border-neutral-700">
+            <button
+              type="button"
+              :disabled="store.isSubmitting"
+              class="flex w-full items-center justify-between px-4 py-3 text-left"
+              @click="toggleAssignmentPanel('tags')"
+            >
+              <div>
+                <h4 class="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  Tags
+                </h4>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Select canonical tags to assign to this species.
+                </p>
+              </div>
+
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ openAssignmentPanel === 'tags' ? 'Hide' : 'Show' }}
+              </span>
+            </button>
+
+            <div
+              v-if="openAssignmentPanel === 'tags'"
+              class="border-t px-4 py-4 dark:border-neutral-700"
+            >
+              <!--
+                The parent owns layout constraints for scrolling so the
+                selector component itself remains reusable across contexts.
+              -->
+              <div class="max-h-72 overflow-y-auto pr-1">
+                <PlayableTagAssignmentSelector
+                  v-model="selectedTagIds"
+                  :available-tags="availableTags"
+                  :disabled="store.isSubmitting"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!--
+            -----------------------------------------------------
+            Passives Assignment Panel
+            -----------------------------------------------------
+          -->
+          <div class="rounded border dark:border-neutral-700">
+            <button
+              type="button"
+              :disabled="store.isSubmitting"
+              class="flex w-full items-center justify-between px-4 py-3 text-left"
+              @click="toggleAssignmentPanel('passives')"
+            >
+              <div>
+                <h4 class="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  Passives
+                </h4>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  Select canonical passives to assign to this species.
+                </p>
+              </div>
+
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ openAssignmentPanel === 'passives' ? 'Hide' : 'Show' }}
+              </span>
+            </button>
+
+            <div
+              v-if="openAssignmentPanel === 'passives'"
+              class="border-t px-4 py-4 dark:border-neutral-700"
+            >
+              <!--
+                The parent owns layout constraints for scrolling so the
+                selector component itself remains reusable across contexts.
+              -->
+              <div class="max-h-72 overflow-y-auto pr-1">
+                <PlayablePassiveAssignmentSelector
+                  v-model:selectedPassiveIds="selectedPassiveIds"
+                  :available-passives="availablePassives"
+                  :disabled="store.isSubmitting"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--
+        ---------------------------------------------------------
         Error Feedback
         ---------------------------------------------------------
       -->
@@ -165,21 +297,27 @@
  * - slug
  * - description
  * - isActive
+ * - optional initial tag/passive assignment
  *
  * Notes:
  * - `name` and `slug` are auto-generated from displayName until
  *   manually edited by the admin.
  * - backend is expected to generate the canonical `id`
- * - relational setup (tags, passives, stats) is intentionally
- *   deferred until after core create flow is established
+ * - relational assignment occurs only after the species record has
+ *   been successfully created and returned by the backend
  */
 
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
+import PlayablePassiveAssignmentSelector from '@/features/admin/components/playableDashboard/PlayablePassiveAssignmentSelector.vue'
+import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import type { PlayablePassive } from '@/features/admin/services/playablePassiveService'
+import { getPlayablePassives } from '@/features/admin/services/playablePassiveService'
 import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
+import type { PlayableTag } from '@/features/admin/services/playableTagService'
+import { getPlayableTags } from '@/features/admin/services/playableTagService'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
-
 
 /**
  * ---------------------------------------------------------
@@ -211,6 +349,77 @@ const form = reactive({
  */
 const nameManuallyEdited = ref(false)
 const slugManuallyEdited = ref(false)
+
+/**
+ * ---------------------------------------------------------
+ * Assignment UI State
+ * ---------------------------------------------------------
+ *
+ * These refs support optional tag/passive assignment during the
+ * initial species creation workflow.
+ *
+ * Design notes:
+ * - all assignment UI is collapsed by default
+ * - tag/passive selections persist while the modal remains open
+ * - selectors remain presentational-only; this modal owns loading
+ *   and submission flow
+ */
+const showAssignments = ref(false)
+const openAssignmentPanel = ref<'tags' | 'passives' | null>(null)
+
+const availableTags = ref<PlayableTag[]>([])
+const availablePassives = ref<PlayablePassive[]>([])
+
+const selectedTagIds = ref<string[]>([])
+const selectedPassiveIds = ref<string[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * loadAssignmentOptions
+ * ---------------------------------------------------------
+ *
+ * Loads canonical tag and passive options for optional assignment
+ * during species creation.
+ *
+ * Architectural note:
+ * - this fetches reference data only
+ * - actual species/tag and species/passive relationships are created
+ *   only after the species itself has been successfully created
+ */
+async function loadAssignmentOptions() {
+  availableTags.value = await getPlayableTags(false)
+  availablePassives.value = await getPlayablePassives()
+}
+
+onMounted(() => {
+  loadAssignmentOptions()
+})
+
+/**
+ * ---------------------------------------------------------
+ * Assignment Section Toggles
+ * ---------------------------------------------------------
+ *
+ * Controls progressive disclosure for optional assignment UI.
+ *
+ * Rules:
+ * - closing the main Assignments section also closes any open
+ *   nested panel
+ * - only one nested panel may be open at a time
+ * - closing a panel does not clear current selections
+ */
+function toggleAssignments() {
+  showAssignments.value = !showAssignments.value
+
+  if (!showAssignments.value) {
+    openAssignmentPanel.value = null
+  }
+}
+
+function toggleAssignmentPanel(panel: 'tags' | 'passives') {
+  openAssignmentPanel.value =
+    openAssignmentPanel.value === panel ? null : panel
+}
 
 /**
  * ---------------------------------------------------------
@@ -249,11 +458,11 @@ watch(
   () => form.displayName,
   (value) => {
     if (!nameManuallyEdited.value) {
-    form.name = normalizeToName(value)
+      form.name = normalizeToName(value)
     }
 
     if (!slugManuallyEdited.value) {
-    form.slug = normalizeToSlug(value)
+      form.slug = normalizeToSlug(value)
     }
   }
 )
@@ -275,6 +484,9 @@ const isFormValid = computed(() => {
  * ---------------------------------------------------------
  * Reset / Close
  * ---------------------------------------------------------
+ *
+ * Resets both scalar form fields and optional assignment state
+ * so each modal session starts clean.
  */
 function resetForm() {
   form.displayName = ''
@@ -285,6 +497,12 @@ function resetForm() {
 
   nameManuallyEdited.value = false
   slugManuallyEdited.value = false
+
+  showAssignments.value = false
+  openAssignmentPanel.value = null
+
+  selectedTagIds.value = []
+  selectedPassiveIds.value = []
 }
 
 function closeModal() {
@@ -296,6 +514,16 @@ function closeModal() {
  * ---------------------------------------------------------
  * Submit
  * ---------------------------------------------------------
+ *
+ * Create flow:
+ * 1. create the core playable species record
+ * 2. if selected, assign tags via replace-all endpoint
+ * 3. if selected, assign passives via replace-all endpoint
+ *
+ * Important:
+ * - tag/passive assignment is optional
+ * - assignment calls are only made when there is at least one
+ *   selected ID for that relation type
  */
 async function handleCreate() {
   if (!isFormValid.value) return
@@ -304,13 +532,31 @@ async function handleCreate() {
     store.isSubmitting = true
     store.submitError = null
 
-    await playableSpeciesService.createPlayableSpecies({
+    const response = await playableSpeciesService.createPlayableSpecies({
       displayName: form.displayName.trim(),
       name: form.name.trim(),
       slug: form.slug.trim(),
       description: form.description.trim() || null,
       isActive: form.isActive,
     })
+
+    const createdSpecies = response.data
+
+    if (!createdSpecies?.id) {
+      throw new Error('Playable species creation did not return a valid species ID.')
+    }
+
+    if (selectedTagIds.value.length > 0) {
+      await playableSpeciesService.updatePlayableSpeciesTags(createdSpecies.id, {
+        tagIds: selectedTagIds.value,
+      })
+    }
+
+    if (selectedPassiveIds.value.length > 0) {
+      await playableSpeciesService.updatePlayableSpeciesPassives(createdSpecies.id, {
+        passiveIds: selectedPassiveIds.value,
+      })
+    }
 
     store.refreshPlayableList()
     closeModal()
