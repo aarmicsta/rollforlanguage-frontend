@@ -35,6 +35,12 @@
         Child actions are intentionally thin:
         - they do not own workflow state
         - they dispatch into the Playables store
+
+        Active-state note:
+        - only management-surface actions receive persistent
+          active styling
+        - create actions remain one-off workflow triggers and do
+          not present an active state
       -->
       <div
         v-if="tool.children && openSubmenu === tool.name"
@@ -43,7 +49,20 @@
         <button
           v-for="child in tool.children"
           :key="child.name"
-          class="flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-black hover:bg-gray-200 dark:bg-neutral-700 dark:text-white dark:hover:bg-neutral-600"
+          :class="[
+            'flex items-center gap-2 rounded border-l-4 px-3 py-1 text-sm transition',
+            isManagementSurfaceAction(child.action) && isActionActive(child.action)
+              ? 'bg-gray-200 font-medium dark:bg-neutral-800'
+              : 'bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600',
+            isManagementSurfaceAction(child.action) && isActionActive(child.action)
+              ? 'text-black dark:text-white'
+              : 'text-black dark:text-white',
+          ]"
+          :style="
+            isManagementSurfaceAction(child.action) && isActionActive(child.action)
+              ? { borderLeftColor: accentValue }
+              : { borderLeftColor: 'transparent' }
+          "
           @click="handleAction(child.action)"
         >
           <AppIcon :name="child.icon" :library="child.library" />
@@ -161,6 +180,41 @@ function toggleSubmenu(tool: AdminDashboardTool) {
   }
 
   openSubmenu.value = openSubmenu.value === tool.name ? null : tool.name
+}
+
+/**
+ * ---------------------------------------------------------
+ * Management Surface Active-State Helpers
+ * ---------------------------------------------------------
+ *
+ * Only edit-table actions correspond to persistent dashboard
+ * management surfaces and therefore receive active-state styling.
+ */
+function isManagementSurfaceAction(action?: string): boolean {
+  return [
+    'editClasses',
+    'editSpecies',
+    'editStats',
+    'editStatModifiers',
+    'editPassives',
+  ].includes(action ?? '')
+}
+
+function isActionActive(action?: string): boolean {
+  switch (action) {
+    case 'editClasses':
+      return store.activeManagementSurface === 'classes'
+    case 'editSpecies':
+      return store.activeManagementSurface === 'species'
+    case 'editStats':
+      return store.activeManagementSurface === 'stats'
+    case 'editStatModifiers':
+      return store.activeManagementSurface === 'statModifiers'
+    case 'editPassives':
+      return store.activeManagementSurface === 'passives'
+    default:
+      return false
+  }
 }
 
 /**
