@@ -71,7 +71,7 @@
       scrolling while also ensuring all tables sit on a solid,
       readable dashboard surface.
     -->
-    <div class="max-h-[60vh] overflow-y-auto p-4">
+    <div class="max-h-[50vh] overflow-y-auto p-4">
       <PlayableClassTable v-if="activeSurface === 'classes'" />
 
       <PlayableSpeciesTable v-else-if="activeSurface === 'species'" />
