@@ -86,6 +86,7 @@
  */
 
 import { computed, inject } from 'vue'
+import type { ComputedRef } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
 import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
@@ -101,9 +102,9 @@ const store = useUserDashboardStore()
  * ring consistency with the surrounding admin dashboard.
  */
 const dashboardThemeRef =
-  inject<DashboardTheme | undefined>('dashboardTheme')
+  inject<ComputedRef<DashboardTheme | undefined>>('dashboardTheme')
 
-const accentValue = dashboardThemeRef?.accentValue ?? '#3b82f6'
+const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
 
 /**
  * ---------------------------------------------------------
