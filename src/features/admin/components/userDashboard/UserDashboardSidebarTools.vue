@@ -1,136 +1,101 @@
-<!-- /src/features/admin/components/userDashboard/UserDashboardSidebarTools.vue -->
 <template>
+  <!--
+    =========================================================
+    User Dashboard Sidebar Tools
+    =========================================================
+
+    Command surface for the admin Users dashboard.
+
+    Responsibilities:
+    - render real dashboard actions only
+    - dispatch user intent into store-controlled workflows
+    - avoid owning modal rendering or workflow execution
+
+    Notes:
+    - this component does not render modals
+    - this component does not fetch entity data
+    - this component does not contain placeholder tools
+  -->
   <div class="flex flex-col gap-4">
+    <!--
+      ---------------------------------------------------------
+      Create User
+      ---------------------------------------------------------
+    -->
     <button
-      v-for="tool in filteredTools"
-      :key="tool.name"
-      :class="[
-        'flex items-center gap-2 px-4 py-2 rounded text-left transition group',
-        'bg-white text-black dark:bg-black dark:text-white',
-        'border border-transparent hover:ring-4 hover:ring-offset-2 focus:outline-none'
-      ]"
+      type="button"
+      :class="toolButtonClass"
       :style="{ '--tw-ring-color': accentValue }"
-      @click="handleToolClick(tool.action!)"
+      @click="store.openCreateUserModal()"
     >
-      <AppIcon :name="tool.icon" :library="tool.library" />
-      <span>{{ tool.name }}</span>
+      <AppIcon name="UserPlus" library="lucide" />
+      <span>Create User</span>
     </button>
 
-    <!-- Add User Modal -->
-    <AdminModal
-      :visible="isAddUserModalOpen"
-      @close="isAddUserModalOpen = false"
-      title="Add User"
-    >
-      <AddUserForm @success="handleAddUserSuccess" />
-    </AdminModal>
+    <!--
+      ---------------------------------------------------------
+      User Table
+      ---------------------------------------------------------
 
-    <!-- Manage Roles Modal -->
-    <AdminModal
-      :visible="isManageRolesModalOpen"
-      @close="isManageRolesModalOpen = false"
-      title="Manage Roles"
+      Opens or closes the first-class user management surface.
+    -->
+    <button
+      type="button"
+      :class="toolButtonClass"
+      :style="{ '--tw-ring-color': accentValue }"
+      @click="store.toggleManagementSurface('users')"
     >
-      <p>This is placeholder content for manage roles modal.</p>
-    </AdminModal>
-
-    <!-- Audit Logs Modal -->
-    <AdminModal
-      :visible="isAuditLogsModalOpen"
-      @close="isAuditLogsModalOpen = false"
-      title="Audit Logs"
-    >
-      <p>This is placeholder content for audit logs modal.</p>
-    </AdminModal>
-
-    <!-- Merge Users Modal -->
-    <AdminModal
-      :visible="isMergeUsersModalOpen"
-      @close="isMergeUsersModalOpen = false"
-      title="Merge Users"
-    >
-      <p>This is placeholder content for merge users modal.</p>
-    </AdminModal>
-
-    <!-- Global User Settings Modal -->
-    <AdminModal
-      :visible="isGlobalSettingsModalOpen"
-      @close="isGlobalSettingsModalOpen = false"
-      title="Global User Settings"
-    >
-      <p>This is placeholder content for global user settings modal.</p>
-    </AdminModal>
+      <AppIcon name="Table" library="lucide" />
+      <span>User Table</span>
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject } from 'vue'
+/**
+ * =========================================================
+ * User Dashboard Sidebar Tools
+ * =========================================================
+ *
+ * Command-only sidebar tools for the admin Users dashboard.
+ *
+ * Architectural role:
+ * - mirrors the canonical new-generation sidebar model
+ * - translates user intent into store actions
+ * - does not own modal rendering or workflow state
+ */
+
+import { inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import AddUserForm from '@/features/admin/components/userDashboard/AddUserForm.vue'
 import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
-import { adminUserDashboardTools } from '@/features/admin/utils/adminUserDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
-import { useAuth } from '@/features/auth/hooks/useAuth'
 
+const store = useUserDashboardStore()
 
-// ✅ Dynamically pull accent color value from injected theme
-const dashboardThemeRef = inject<ComputedRef<DashboardTheme | undefined>>('dashboardTheme')
-const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
+/**
+ * ---------------------------------------------------------
+ * Theme Accent
+ * ---------------------------------------------------------
+ *
+ * Uses the injected dashboard theme accent color for hover/focus
+ * ring consistency with the surrounding admin dashboard.
+ */
+const dashboardThemeRef =
+  inject<DashboardTheme | undefined>('dashboardTheme')
 
-const { user } = useAuth()
-const userRole = user.value?.roles?.[0] === 'superadmin' ? 'superadmin' : 'admin'
+const accentValue = dashboardThemeRef?.accentValue ?? '#3b82f6'
 
-const filteredTools = computed(() =>
-  adminUserDashboardTools.filter(tool =>
-    !tool.roles || tool.roles.includes(userRole)
-  )
-)
-
-const isAddUserModalOpen = ref(false)
-const isManageRolesModalOpen = ref(false)
-const isAuditLogsModalOpen = ref(false)
-const isMergeUsersModalOpen = ref(false)
-const isGlobalSettingsModalOpen = ref(false)
-
-const userDashboardStore = useUserDashboardStore()
-
-function handleToolClick(action: string) {
-  switch (action) {
-    case 'addUser':
-      isAddUserModalOpen.value = true
-      break
-    case 'manageRoles':
-      isManageRolesModalOpen.value = true
-      break
-    case 'viewAuditLogs':
-      isAuditLogsModalOpen.value = true
-      break
-    case 'mergeUsers':
-      isMergeUsersModalOpen.value = true
-      break
-    case 'globalUserSettings':
-      isGlobalSettingsModalOpen.value = true
-      break
-    case 'searchUsers':
-      userDashboardStore.searchUsers()
-      break
-    case 'exportUsers':
-      userDashboardStore.exportUsers()
-      break
-    case 'bulkActions':
-      userDashboardStore.openBulkActionsModal()
-      break
-    default:
-      console.log(`Tool clicked: ${action}`)
-  }
-}
-
-function handleAddUserSuccess() {
-  isAddUserModalOpen.value = false
-  userDashboardStore.refreshUserList()
-}
-
-// 🧪 Debug inline ring color value
-console.log('[UserSidebarTools.vue] accentValue for ring:', accentValue)
+/**
+ * ---------------------------------------------------------
+ * Shared Button Classes
+ * ---------------------------------------------------------
+ *
+ * Keeps MVP command buttons visually aligned while avoiding
+ * unnecessary abstraction into a separate utility at this stage.
+ */
+const toolButtonClass = [
+  'flex items-center gap-2 rounded px-4 py-2 text-left transition group',
+  'bg-white text-black dark:bg-black dark:text-white',
+  'border border-transparent hover:ring-4 hover:ring-offset-2 focus:outline-none',
+]
 </script>

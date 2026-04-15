@@ -1,91 +1,122 @@
-// /features/admin/services/userService.ts
+/**
+ * =========================================================
+ * User Service (Admin)
+ * =========================================================
+ *
+ * This service provides frontend API interactions related to
+ * admin user management.
+ *
+ * Responsibilities:
+ * - fetch paginated user browse data
+ * - create new users
+ * - update existing users
+ * - fetch user dashboard metrics
+ *
+ * Architectural note:
+ * - shared user types belong in `UserTypes.ts`
+ * - this file owns API communication only
+ */
 
 import { axiosInstance } from '@/services/axiosInstance'
+import type {
+  CreateUserPayload,
+  PaginatedUserResponse,
+  UpdateUserPayload,
+  UserMetrics,
+  UserQueryParams,
+} from '@/features/admin/types/UserTypes'
 
-/** 📄 Represents a user returned by the backend */
-export interface User {
-  id: string
-  username: string
-  email: string
-  role: 'superadmin' | 'admin' | 'teacher' | 'student'
-  createdAt: string
-}
-
-/** 🔍 Query params for fetching users */
-export interface UserQueryParams {
-  search?: string
-  role?: string
-  roles?: string[]
-  page?: number
-  limit?: number
-  sortBy?: 'username' | 'email' | 'createdAt'
-  sortOrder?: 'asc' | 'desc'
-  createdBefore?: string
-  createdAfter?: string
-  includeSuspended?: boolean
-  includeCountOnly?: boolean
-}
-
-/** ✅ Payload structure for creating a new user */
-export type CreateUserPayload = {
-  email: string
-  username: string
-  password: string
-  role: string
-}
-
-/** 📊 Structure of /admin/users/metrics response */
-export interface UserMetricsResponse {
-  totalUsers: number
-  activeUsers: number
-  suspendedUsers: number
-  roles: {
-    student?: number
-    teacher?: number
-    admin?: number
-    superadmin?: number
-  }
-  newUsersPast7Days: number
-}
-
-/** 🧮 Structure of paginated user response */
-export interface PaginatedUserResponse {
-  data: User[]
-  pagination: {
-    total: number
-    page: number
-    limit: number
-    totalPages: number
-  }
-}
-
-/** 🔗 GET /admin/users — Fetch users with query support */
-export async function getUsers(params: UserQueryParams = {}): Promise<PaginatedUserResponse> {
+/**
+ * ---------------------------------------------------------
+ * getUsers
+ * ---------------------------------------------------------
+ *
+ * Fetches paginated users using the supported browse query
+ * parameters.
+ *
+ * Behavior:
+ * - removes empty/null/undefined query values before sending
+ * - preserves backend-driven pagination structure
+ */
+export async function getUsers(
+  params: UserQueryParams = {}
+): Promise<PaginatedUserResponse> {
   const filteredParams = Object.fromEntries(
-    Object.entries(params).filter(([, value]) => value !== '' && value !== undefined && value !== null)
+    Object.entries(params).filter(
+      ([, value]) => value !== '' && value !== undefined && value !== null
+    )
   )
 
-  const response = await axiosInstance.get<PaginatedUserResponse>('/admin/users', {
-    params: filteredParams,
-  })
+  const response = await axiosInstance.get<PaginatedUserResponse>(
+    '/admin/users',
+    {
+      params: filteredParams,
+    }
+  )
+
   return response.data
 }
 
-/** 🧙 POST /admin/users — Create a new user */
-export async function createUser(payload: CreateUserPayload): Promise<{ message: string }> {
+/**
+ * ---------------------------------------------------------
+ * createUser
+ * ---------------------------------------------------------
+ *
+ * Creates a new user through the admin user-management API.
+ */
+export async function createUser(
+  payload: CreateUserPayload
+): Promise<{ message: string }> {
   const response = await axiosInstance.post('/admin/users', payload)
   return response.data
 }
 
-/** 📊 GET /admin/users/metrics — Fetch dashboard-level user stats */
-export async function getUserMetrics(): Promise<UserMetricsResponse> {
-  const response = await axiosInstance.get<UserMetricsResponse>('/admin/users/metrics')
+/**
+ * ---------------------------------------------------------
+ * updateUser
+ * ---------------------------------------------------------
+ *
+ * Updates an existing user through the admin user-management API.
+ *
+ * MVP scope:
+ * - username
+ * - email
+ * - role
+ *
+ * Note:
+ * - expand the payload only when edit capabilities genuinely grow
+ */
+export async function updateUser(
+  id: string,
+  payload: UpdateUserPayload
+): Promise<{ message: string }> {
+  const response = await axiosInstance.patch(`/admin/users/${id}`, payload)
   return response.data
 }
 
-/** 🧰 Exported service object for consistency & scalability */
+/**
+ * ---------------------------------------------------------
+ * getUserMetrics
+ * ---------------------------------------------------------
+ *
+ * Fetches dashboard-level metrics for the Users system.
+ */
+export async function getUserMetrics(): Promise<UserMetrics> {
+  const response = await axiosInstance.get<UserMetrics>('/admin/users/metrics')
+  return response.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * userService
+ * ---------------------------------------------------------
+ *
+ * Convenience grouped export for components/stores that prefer
+ * object-style access.
+ */
 export const userService = {
   getUsers,
   createUser,
+  updateUser,
   getUserMetrics,
 }
