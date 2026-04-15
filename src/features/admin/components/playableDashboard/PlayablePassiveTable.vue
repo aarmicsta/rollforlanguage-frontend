@@ -2,24 +2,6 @@
   <div class="space-y-4">
     <!--
       =========================================================
-      Header
-      =========================================================
-
-      This table is a browse/edit surface for canonical passive
-      definitions. Creation is handled elsewhere in the dashboard,
-      so no create action is exposed here.
-    -->
-    <div>
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        Playable Passives
-      </h3>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        Browse and select canonical passive definitions for editing.
-      </p>
-    </div>
-
-    <!--
-      =========================================================
       Filter Controls
       =========================================================
 
