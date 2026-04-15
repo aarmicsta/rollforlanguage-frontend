@@ -18,24 +18,35 @@
     - it does not manage workflows
     - it does not control modals
 
-    It simply reflects store state.
+    Presentation Role:
+    - provide a dedicated dashboard-level surface for management
+    - provide a solid, non-transparent visual container
+    - provide an internal scroll region for long tables
+
+    It simply reflects store state and hosts the active table
+    in a consistent dashboard surface.
   -->
 
-  <div v-if="activeSurface" class="mt-6">
+  <section
+    v-if="activeSurface"
+    class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+  >
     <!--
       -------------------------------------------------------
       Surface Header
       -------------------------------------------------------
 
       Provides context for which entity type is currently
-      being managed.
+      being managed and gives the user a simple way to close
+      the current management surface.
     -->
-    <div class="mb-4 flex items-center justify-between">
+    <div
+      class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-neutral-700"
+    >
       <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
         {{ surfaceTitle }}
       </h2>
 
-      <!-- Optional: Close / Clear Surface -->
       <button
         class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
         @click="store.clearActiveManagementSurface()"
@@ -51,24 +62,29 @@
 
       Only one table is mounted at a time.
 
-      Tables:
-      - own their own data fetching
-      - react to refresh signals
-      - open edit modals via store
+      This wrapper intentionally owns:
+      - padding
+      - internal scroll containment
+      - the visible management-region body
+
+      The goal is to prevent long tables from forcing full-page
+      scrolling while also ensuring all tables sit on a solid,
+      readable dashboard surface.
     -->
+    <div class="max-h-[70vh] overflow-y-auto p-4">
+      <PlayableClassTable v-if="activeSurface === 'classes'" />
 
-    <PlayableClassTable v-if="activeSurface === 'classes'" />
+      <PlayableSpeciesTable v-else-if="activeSurface === 'species'" />
 
-    <PlayableSpeciesTable v-else-if="activeSurface === 'species'" />
+      <PlayableStatTable v-else-if="activeSurface === 'stats'" />
 
-    <PlayableStatTable v-else-if="activeSurface === 'stats'" />
+      <PlayableStatModifierTable
+        v-else-if="activeSurface === 'statModifiers'"
+      />
 
-    <PlayableStatModifierTable
-      v-else-if="activeSurface === 'statModifiers'"
-    />
-
-    <PlayablePassiveTable v-else-if="activeSurface === 'passives'" />
-  </div>
+      <PlayablePassiveTable v-else-if="activeSurface === 'passives'" />
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
