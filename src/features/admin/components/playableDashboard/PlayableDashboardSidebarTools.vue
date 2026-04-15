@@ -1,7 +1,15 @@
 <template>
   <div class="flex flex-col gap-4">
     <div v-for="tool in tools" :key="tool.name">
-      <!-- Top-level tool button -->
+      <!--
+        ---------------------------------------------------------
+        Top-Level Tool Button
+        ---------------------------------------------------------
+
+        Behavior:
+        - if the tool has children, clicking toggles the submenu
+        - if the tool has no children, clicking dispatches its action
+      -->
       <button
         :class="[
           'flex w-full items-center justify-between gap-2 rounded px-4 py-2 text-left transition group',
@@ -15,10 +23,19 @@
           <AppIcon :name="tool.icon" :library="tool.library" />
           <span>{{ tool.name }}</span>
         </div>
+
         <span v-if="tool.children">▸</span>
       </button>
 
-      <!-- Submenu -->
+      <!--
+        ---------------------------------------------------------
+        Submenu
+        ---------------------------------------------------------
+
+        Child actions are intentionally thin:
+        - they do not own workflow state
+        - they dispatch into the Playables store
+      -->
       <div
         v-if="tool.children && openSubmenu === tool.name"
         class="ml-6 mt-2 flex flex-col gap-2"
@@ -34,61 +51,6 @@
         </button>
       </div>
     </div>
-
-    <!--
-      =========================================================
-      Sidebar-Scoped Modals (Temporary / Non-Store-Driven)
-      =========================================================
-
-      These remain locally mounted for now until the next-stage
-      Stats / Passives system and any broader table-flow refactor
-      are implemented.
-    -->
-
-    <AdminModal
-      title="Edit Playable Stats"
-      size="5xl"
-      :visible="isEditStatsModalOpen"
-      @close="isEditStatsModalOpen = false"
-    >
-      <PlayableStatTable @close="isEditStatsModalOpen = false" />
-    </AdminModal>
-
-    <AdminModal
-      title="Edit Stat Modifiers"
-      size="5xl"
-      :visible="isEditStatModifiersModalOpen"
-      @close="isEditStatModifiersModalOpen = false"
-    >
-      <PlayableStatModifierTable @close="isEditStatModifiersModalOpen = false" />
-    </AdminModal>
-
-    <AdminModal
-      title="Edit Playable Classes"
-      size="5xl"
-      :visible="isEditClassesModalOpen"
-      @close="isEditClassesModalOpen = false"
-    >
-      <PlayableClassTable @close="isEditClassesModalOpen = false" />
-    </AdminModal>
-
-    <AdminModal
-      title="Edit Playable Species"
-      size="5xl"
-      :visible="isEditSpeciesModalOpen"
-      @close="isEditSpeciesModalOpen = false"
-    >
-      <PlayableSpeciesTable @close="isEditSpeciesModalOpen = false" />
-    </AdminModal>
-
-    <AdminModal
-      title="Edit Passives"
-      size="5xl"
-      :visible="isEditPassivesModalOpen"
-      @close="isEditPassivesModalOpen = false"
-    >
-      <PlayablePassiveTable @close="isEditPassivesModalOpen = false" />
-    </AdminModal>
   </div>
 </template>
 
@@ -101,101 +63,136 @@
  * Responsibilities:
  * - render Playables-specific sidebar tools
  * - handle submenu expansion/collapse
- * - dispatch user actions to the store or local modal state
+ * - dispatch user actions into the Playables store
  *
- * Notes:
- * - This component is primarily a control surface.
- * - Species/Class/Stat/Stat Modifier create flows are store-driven.
- * - Some table/passive/stat modal flows remain locally mounted
- *   as transitional behavior until their dedicated systems are built.
+ * Canonical Architecture Notes:
+ * - This component is a control surface only.
+ * - It does not mount browse tables or workflow modals locally.
+ * - Create actions open store-driven modals.
+ * - Edit actions toggle the dashboard-level management surface.
+ *
+ * This means:
+ * - create flows remain modal-based
+ * - edit-table access becomes a first-class dashboard surface
+ * - modal ownership no longer lives in the sidebar
  */
 
-import { ref, computed, inject } from 'vue'
+import { computed, inject, ref } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
-import PlayablePassiveTable from '@/features/admin/components/playableDashboard/PlayablePassiveTable.vue'
-import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
-import PlayableStatModifierTable from '@/features/admin/components/playableDashboard/PlayableStatModifierTable.vue'
-import PlayableStatTable from '@/features/admin/components/playableDashboard/PlayableStatTable.vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
-
-const emit = defineEmits<{
-  (e: 'openTagsModal'): void
-}>()
-
 /**
  * ---------------------------------------------------------
  * Theme Injection
  * ---------------------------------------------------------
+ *
+ * The sidebar consumes the shared dashboard theme so hover/focus
+ * accents remain visually consistent with the surrounding admin
+ * dashboard shell.
  */
-const dashboardThemeRef = inject<import('vue').ComputedRef<DashboardTheme | undefined>>('dashboardTheme')
+const dashboardThemeRef =
+  inject<import('vue').ComputedRef<DashboardTheme | undefined>>(
+    'dashboardTheme'
+  )
+
 const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
 
 /**
  * ---------------------------------------------------------
  * Store / Auth
  * ---------------------------------------------------------
+ *
+ * `store`
+ * - shared Playables dashboard orchestration state
+ *
+ * `userRole`
+ * - used to filter sidebar tools by role
  */
 const store = useAdminPlayableStore()
 const { user } = useAuth()
-const userRole = user.value?.roles?.[0] === 'superadmin' ? 'superadmin' : 'admin'
+const userRole =
+  user.value?.roles?.[0] === 'superadmin' ? 'superadmin' : 'admin'
 
 /**
  * ---------------------------------------------------------
  * Tool Filtering
  * ---------------------------------------------------------
+ *
+ * Sidebar tools are config-driven and filtered by the current
+ * user's role.
+ *
+ * This keeps the sidebar itself focused on rendering rather than
+ * hardcoding role checks throughout the template.
  */
 const tools = computed(() =>
-  adminPlayableDashboardTools.filter(tool =>
-    !tool.roles || tool.roles.includes(userRole)
-  )
+  adminPlayableDashboardTools.filter((tool) => {
+    return !tool.roles || tool.roles.includes(userRole)
+  })
 )
 
 /**
  * ---------------------------------------------------------
  * Submenu State
  * ---------------------------------------------------------
+ *
+ * Tracks which top-level tool group is currently expanded.
+ *
+ * This is purely local UI state because it affects only the
+ * sidebar's presentational behavior and has no cross-component
+ * implications.
  */
 const openSubmenu = ref<string | null>(null)
 
+/**
+ * Handles clicks on top-level tools.
+ *
+ * Rules:
+ * - tools with children toggle their submenu
+ * - tools without children dispatch immediately
+ */
 function toggleSubmenu(tool: AdminDashboardTool) {
   if (!tool.children) {
     handleAction(tool.action)
     return
   }
+
   openSubmenu.value = openSubmenu.value === tool.name ? null : tool.name
 }
-
-/**
- * ---------------------------------------------------------
- * Local Modal State (Transitional)
- * ---------------------------------------------------------
- */
-const isEditClassesModalOpen = ref(false)
-const isEditSpeciesModalOpen = ref(false)
-const isEditStatsModalOpen = ref(false)
-const isEditStatModifiersModalOpen = ref(false)
-const isEditPassivesModalOpen = ref(false)
 
 /**
  * ---------------------------------------------------------
  * Action Dispatcher
  * ---------------------------------------------------------
  *
- * Routes sidebar actions to:
- * - store-driven modal flows (create/edit entity modals)
- * - local modal state (current table/passive transitional flows)
+ * Routes sidebar actions into the Playables store.
+ *
+ * Architectural split:
+ * - Create actions:
+ *   open centralized, store-driven modals
+ *
+ * - Edit actions:
+ *   toggle the active dashboard-level management surface
+ *
+ * - Refresh actions:
+ *   trigger the shared refresh signal so widgets/tables refetch
+ *
+ * Important:
+ * - The sidebar no longer owns local modal state
+ * - The sidebar no longer mounts browse tables inside AdminModal
  */
 function handleAction(action?: string) {
   if (!action) return
 
   switch (action) {
+    /**
+     * -------------------------------------------------------
+     * Create Actions
+     * -------------------------------------------------------
+     */
     case 'createClass':
       store.openCreateClassModal()
       break
@@ -216,33 +213,48 @@ function handleAction(action?: string) {
       store.openCreatePassiveModal()
       break
 
+    /**
+     * -------------------------------------------------------
+     * Edit Surface Actions
+     * -------------------------------------------------------
+     *
+     * These no longer open local browse modals.
+     *
+     * Instead, they toggle which first-class management table is
+     * shown inside the Playables dashboard.
+     *
+     * Toggle behavior:
+     * - clicking a different edit tool switches tables
+     * - clicking the currently active tool hides the table
+     */
     case 'editClasses':
-      isEditClassesModalOpen.value = true
+      store.toggleManagementSurface('classes')
       break
 
     case 'editSpecies':
-      isEditSpeciesModalOpen.value = true
+      store.toggleManagementSurface('species')
       break
 
     case 'editStats':
-      isEditStatsModalOpen.value = true
+      store.toggleManagementSurface('stats')
       break
 
     case 'editStatModifiers':
-      isEditStatModifiersModalOpen.value = true
+      store.toggleManagementSurface('statModifiers')
       break
 
     case 'editPassives':
-      isEditPassivesModalOpen.value = true
+      store.toggleManagementSurface('passives')
       break
 
+    /**
+     * -------------------------------------------------------
+     * Utility Actions
+     * -------------------------------------------------------
+     */
     case 'refreshClasses':
       store.refreshPlayableList()
       break
-
-    // case 'manageTags':
-    //   emit('openTagsModal')
-    //   break
 
     default:
       console.log(`Unhandled action: ${action}`)

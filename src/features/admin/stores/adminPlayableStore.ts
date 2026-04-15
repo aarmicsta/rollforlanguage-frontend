@@ -14,10 +14,16 @@ import type {
  * Admin Playable Store
  * =========================================================
  *
- * Shared UI state for the Playables admin dashboard.
+ * Shared UI orchestration state for the Playables admin dashboard.
  *
  * Responsibilities:
  * - track refresh triggers for playable dashboard widgets/tables
+ * - track which primary management surface is currently active
+ *   - classes
+ *   - species
+ *   - stats
+ *   - stat modifiers
+ *   - passives
  * - track selected canonical entities for edit flows
  *   - species
  *   - classes
@@ -35,12 +41,14 @@ import type {
  * Notes:
  * - This store uses explicit parallel state rather than a generic
  *   selected-entity model.
- * - That keeps modal flows easier to reason about as the Playables
- *   dashboard grows in complexity.
+ * - That keeps dashboard flows easier to reason about as the
+ *   Playables system grows in complexity.
  * - Create flows do not rely on selected entity state; they begin
  *   from fresh local form state inside their modals.
  * - Unified row types represent UI-layer records, not direct raw
  *   backend table rows.
+ * - This store is intentionally an orchestration layer, not a
+ *   general-purpose entity cache.
  */
 export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
   /**
@@ -50,8 +58,39 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    *
    * Timestamp-style refresh key used to trigger refetches in
    * widgets/tables that watch for playable-data changes.
+   *
+   * Typical flow:
+   * - create/edit/delete operation succeeds
+   * - refreshPlayableList() updates this key
+   * - interested widgets/tables reactively refetch
    */
   const lastPlayableRefresh = ref(Date.now())
+
+  /**
+   * ---------------------------------------------------------
+   * Management Surface State
+   * ---------------------------------------------------------
+   *
+   * Tracks which primary management table is currently active
+   * in the Playables dashboard.
+   *
+   * This supports the "first-class management surface" model:
+   * - the sidebar does not open local browse modals
+   * - instead, it activates a dashboard-level table surface
+   * - clicking the same tool again toggles that surface off
+   *
+   * `null` means:
+   * - no management table is currently shown
+   * - the dashboard remains in summary-only mode
+   */
+  const activeManagementSurface = ref<
+    'classes'
+    | 'species'
+    | 'stats'
+    | 'statModifiers'
+    | 'passives'
+    | null
+  >(null)
 
   /**
    * ---------------------------------------------------------
@@ -143,6 +182,8 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    * Notes:
    * - Canonical stat definitions remain a separate system.
    * - Canonical passive definitions remain a separate system.
+   * - These mode refs help unified create/edit modals understand
+   *   which context they should operate in.
    */
   const statModifierMode = ref<'baseline' | 'species' | 'class'>('species')
   const passiveAssignmentMode = ref<'species' | 'class'>('species')
@@ -175,6 +216,44 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
    */
   function refreshPlayableList() {
     lastPlayableRefresh.value = Date.now()
+  }
+
+  /**
+   * ---------------------------------------------------------
+   * Management Surface Actions
+   * ---------------------------------------------------------
+   *
+   * Controls which primary dashboard-level management table is
+   * currently visible.
+   *
+   * Behavior:
+   * - clicking a tool for a different surface switches to it
+   * - clicking a tool for the currently active surface hides it
+   *
+   * Example:
+   * - active = 'classes'
+   * - toggleManagementSurface('species')
+   *   => active becomes 'species'
+   *
+   * - active = 'classes'
+   * - toggleManagementSurface('classes')
+   *   => active becomes null
+   */
+  function toggleManagementSurface(
+    surface: 'classes' | 'species' | 'stats' | 'statModifiers' | 'passives'
+  ) {
+    activeManagementSurface.value =
+      activeManagementSurface.value === surface ? null : surface
+  }
+
+  /**
+   * Clears the currently active management surface entirely.
+   *
+   * Useful if some future flow needs to explicitly return the
+   * dashboard to summary-only mode.
+   */
+  function clearActiveManagementSurface() {
+    activeManagementSurface.value = null
   }
 
   /**
@@ -360,6 +439,9 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
      */
     lastPlayableRefresh,
 
+    // Management surface state
+    activeManagementSurface,
+
     // Canonical entity selection
     selectedSpecies,
     selectedClass,
@@ -400,6 +482,10 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
      * -------------------------------------------------------
      */
     refreshPlayableList,
+
+    // Management surface actions
+    toggleManagementSurface,
+    clearActiveManagementSurface,
 
     // Canonical create modal actions
     openCreateSpeciesModal,
