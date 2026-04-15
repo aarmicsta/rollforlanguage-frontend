@@ -50,7 +50,7 @@
           v-for="child in tool.children"
           :key="child.name"
           :class="[
-            'flex items-center gap-2 rounded border-l-4 px-3 py-1 text-sm transition',
+            'flex items-center gap-2 rounded px-3 py-1 text-sm transition',
             isManagementSurfaceAction(child.action) && isActionActive(child.action)
               ? 'bg-gray-200 font-medium dark:bg-neutral-800'
               : 'bg-gray-100 hover:bg-gray-200 dark:bg-neutral-700 dark:hover:bg-neutral-600',
@@ -60,8 +60,8 @@
           ]"
           :style="
             isManagementSurfaceAction(child.action) && isActionActive(child.action)
-              ? { borderLeftColor: accentValue }
-              : { borderLeftColor: 'transparent' }
+              ? { borderLeft: `4px solid ${accentValue}` }
+              : { borderLeft: '4px solid transparent' }
           "
           @click="handleAction(child.action)"
         >
