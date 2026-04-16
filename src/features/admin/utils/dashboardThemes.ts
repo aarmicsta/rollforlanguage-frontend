@@ -79,5 +79,16 @@ export const dashboardThemes: DashboardTheme[] = [
     accentBorder: getBorderClass('purple-500'),
     accentValue: getColorValue('purple-500'),
   },
+  {
+    routeName: AppRouteNames.AdminContent,
+    widgetColor: 'bg-white dark:bg-neutral-900',
+    widgetTextColor: 'text-black dark:text-white',
+    sidebarColor: 'bg-white dark:bg-neutral-900',
+    sidebarTextColor: 'text-black dark:text-white',
+    accentColor: 'emerald-500',
+    accentBar: getAccentBarClass('emerald-500'),
+    accentBorder: getBorderClass('emerald-500'),
+    accentValue: getColorValue('emerald-500'),
+  },
   // 📌 Future: Add Content, Campaigns, System...
 ]
