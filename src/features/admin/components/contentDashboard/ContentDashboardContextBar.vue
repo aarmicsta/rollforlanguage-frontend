@@ -14,6 +14,9 @@
       <button
         type="button"
         :class="getPillClasses('creatures')"
+        :style="props.activeDomain === 'creatures'
+          ? { backgroundColor: accentValue, borderColor: accentValue }
+          : {}"
         disabled
       >
         Creatures
@@ -21,7 +24,10 @@
 
       <button
         type="button"
-        :class="getPillClasses('items')"
+        :class="getPillClasses('creatures')"
+        :style="props.activeDomain === 'creatures'
+          ? { backgroundColor: accentValue, borderColor: accentValue }
+          : {}"
         disabled
       >
         Items
@@ -48,7 +54,9 @@
  * =========================================================
  */
 
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
+import type { ComputedRef } from 'vue'
+import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 
 type ContentDomain = 'creatures' | 'items'
 
@@ -60,14 +68,20 @@ const activeDomainLabel = computed(() => {
   return props.activeDomain === 'creatures' ? 'Creatures' : 'Items'
 })
 
+const dashboardThemeRef =
+  inject<ComputedRef<DashboardTheme | undefined>>('dashboardTheme')
+
+const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
+
 function getPillClasses(domain: ContentDomain): string[] {
   const isActive = props.activeDomain === domain
 
   return [
-    'rounded-full px-4 py-2 text-sm font-medium transition',
+    'rounded-full px-4 py-2 text-sm font-medium transition border',
+    'flex items-center justify-center',
     isActive
-      ? 'ring-2 ring-white text-white bg-white/10'
-      : 'border border-white/10 bg-white/5 text-gray-300',
+      ? 'text-white'
+      : 'text-gray-700 dark:text-gray-300 border-gray-300 dark:border-neutral-600 bg-transparent hover:bg-gray-100 dark:hover:bg-neutral-800',
   ]
 }
 </script>
