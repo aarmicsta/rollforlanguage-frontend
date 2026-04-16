@@ -15,7 +15,7 @@
         type="button"
         :class="getPillClasses('creatures')"
         :style="props.activeDomain === 'creatures'
-          ? { backgroundColor: accentValue, borderColor: accentValue }
+          ? { '--tw-ring-color': accentValue }
           : {}"
         disabled
       >
@@ -24,9 +24,9 @@
 
       <button
         type="button"
-        :class="getPillClasses('creatures')"
-        :style="props.activeDomain === 'creatures'
-          ? { backgroundColor: accentValue, borderColor: accentValue }
+        :class="getPillClasses('items')"
+        :style="props.activeDomain === 'items'
+          ? { '--tw-ring-color': accentValue }
           : {}"
         disabled
       >
@@ -78,10 +78,10 @@ function getPillClasses(domain: ContentDomain): string[] {
 
   return [
     'rounded-full px-4 py-2 text-sm font-medium transition border',
-    'flex items-center justify-center',
+    'bg-gray-200 text-gray-800 dark:bg-neutral-700 dark:text-gray-200',
     isActive
-      ? 'text-white'
-      : 'text-gray-700 dark:text-gray-300 border-gray-300 dark:border-neutral-600 bg-transparent hover:bg-gray-100 dark:hover:bg-neutral-800',
+      ? 'ring-2 border-transparent'
+      : 'border-gray-300 dark:border-neutral-600',
   ]
 }
 </script>
