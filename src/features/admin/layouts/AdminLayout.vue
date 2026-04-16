@@ -37,6 +37,10 @@
             v-else-if="currentRouteName === 'AdminPlayables'"
             @openTagsModal="showTagsModal = true"
           />
+
+          <ContentDashboardSidebarTools
+            v-else-if="currentRouteName === 'AdminContent'"
+          />
         </template>
       </Sidebar>
 
@@ -57,6 +61,7 @@ import { useRoute } from 'vue-router'
 
 import { useToastStore } from '@/stores/ui/useToastStore'
 import Toast from '@/components/molecules/Toast.vue'
+import ContentDashboardSidebarTools from '@/features/admin/components/contentDashboard/ContentDashboardSidebarTools.vue'
 import DashboardSidebarTools from '@/features/admin/components/dashboard/DashboardSidebarTools.vue'
 import PlayableDashboardSidebarTools from '@/features/admin/components/playableDashboard/PlayableDashboardSidebarTools.vue'
 import UserDashboardSidebarTools from '@/features/admin/components/userDashboard/UserDashboardSidebarTools.vue'
