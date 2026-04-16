@@ -1,25 +1,11 @@
 <template>
-  <div class="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-    <h2 class="text-lg font-semibold text-white">Content Metrics Widget</h2>
-    <p class="mt-2 text-sm text-gray-300">
-      Placeholder widget for future Content dashboard metrics.
+  <WidgetWrapper title="Content Metrics" icon="Activity">
+    <p class="text-sm text-gray-700 dark:text-gray-300">
+      Placeholder widget for Content dashboard metrics.
     </p>
-  </div>
+  </WidgetWrapper>
 </template>
 
 <script setup lang="ts">
-/**
- * =========================================================
- * Content Metrics Widget
- * =========================================================
- *
- * Responsibilities
- * - Placeholder return point for a future informational
- *   Content dashboard metrics widget
- *
- * Notes
- * - Presentational stub only
- * - No metrics logic yet
- * =========================================================
- */
+import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
 </script>
