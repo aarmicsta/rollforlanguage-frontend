@@ -1,50 +1,67 @@
 <template>
+  <!--
+    =========================================================
+    Content Management View
+    =========================================================
+
+    Route-level composition shell for the Content admin
+    dashboard.
+
+    This view remains intentionally thin. It is responsible only
+    for composing the major dashboard layers:
+
+    - content context layer
+    - summary widget layer
+    - management surface layer
+    - centralized modal rendering layer
+
+    Business logic, workflow state, and data loading continue to
+    live elsewhere.
+  -->
+
   <div class="space-y-6">
-    <!-- Context Bar -->
+    <!--
+      ---------------------------------------------------------
+      Content Context Layer
+      ---------------------------------------------------------
+
+      Displays the current Content dashboard context and the
+      available domain pills.
+    -->
     <ContentDashboardContextBar activeDomain="creatures" />
 
-    <!-- Widgets Row -->
-    <section class="grid grid-cols-1 gap-4 xl:grid-cols-3">
-      <div class="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-        <h2 class="text-lg font-semibold text-white">Content Widget 1</h2>
-        <p class="mt-2 text-sm text-gray-300">
-          Placeholder widget area for future content metrics.
-        </p>
-      </div>
+    <!--
+      ---------------------------------------------------------
+      Summary Widget Layer
+      ---------------------------------------------------------
 
-      <div class="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-        <h2 class="text-lg font-semibold text-white">Content Widget 2</h2>
-        <p class="mt-2 text-sm text-gray-300">
-          Placeholder widget area for future content metrics.
-        </p>
-      </div>
+      DashboardWidgetGrid contains the high-level summary and
+      overview widgets for the Content dashboard.
+    -->
+    <DashboardWidgetGrid>
+      <ContentTableWidget />
+      <ContentMetricsWidget />
+    </DashboardWidgetGrid>
 
-      <div class="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-        <h2 class="text-lg font-semibold text-white">Content Widget 3</h2>
-        <p class="mt-2 text-sm text-gray-300">
-          Placeholder widget area for future content metrics.
-        </p>
-      </div>
-    </section>
+    <!--
+      ---------------------------------------------------------
+      Management Surface Layer
+      ---------------------------------------------------------
 
-    <!-- Main Dashboard Row -->
-    <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
-      <!-- Sidebar Placeholder -->
-      <aside class="xl:col-span-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-        <h2 class="text-lg font-semibold text-white">Content Sidebar Tools</h2>
-        <p class="mt-2 text-sm text-gray-300">
-          Placeholder area for domain-aware sidebar actions.
-        </p>
-      </aside>
+      Renders the currently active first-class management table
+      for the Content dashboard.
+    -->
+    <ContentManagementSurface />
 
-      <!-- Management Surface Placeholder -->
-      <div class="xl:col-span-9 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm min-h-[24rem]">
-        <h2 class="text-lg font-semibold text-white">Content Management Surface</h2>
-        <p class="mt-2 text-sm text-gray-300">
-          Placeholder area for the active content management table and workflows.
-        </p>
-      </div>
-    </section>
+    <!--
+      ---------------------------------------------------------
+      Centralized Content Modal Rendering
+      ---------------------------------------------------------
+
+      All major create/edit workflows will remain mounted
+      centrally through the Content modal container.
+    -->
+    <ContentDashboardModalContainer />
   </div>
 </template>
 
@@ -54,18 +71,28 @@
  * Content Management View
  * =========================================================
  *
- * Responsibilities
- * - Compose the Content dashboard layout
- * - Render the context bar above widgets
- * - Provide placeholder regions for widgets, sidebar tools,
- *   and management surface during first-pass implementation
+ * Route-level composition view for the Content admin dashboard.
  *
- * Notes
- * - This file should remain a thin composition layer
- * - Real widget, sidebar, and surface components will be
- *   introduced in later steps
- * =========================================================
+ * Responsibilities:
+ * - compose the Content dashboard context bar
+ * - compose the primary Content dashboard widgets
+ * - compose the dashboard-level management surface
+ * - mount the centralized Content modal container
+ *
+ * Notes:
+ * - This view is intentionally thin.
+ * - Business logic and modal state orchestration live elsewhere:
+ *   - context bar reflects active domain
+ *   - sidebar tools dispatch actions
+ *   - contentDashboardStore will own state
+ *   - ContentManagementSurface will reflect active table state
+ *   - ContentDashboardModalContainer will render workflow modals
  */
 
 import ContentDashboardContextBar from '@/features/admin/components/contentDashboard/ContentDashboardContextBar.vue'
+import ContentDashboardModalContainer from '@/features/admin/components/contentDashboard/ContentDashboardModalContainer.vue'
+import ContentManagementSurface from '@/features/admin/components/contentDashboard/ContentManagementSurface.vue'
+import ContentMetricsWidget from '@/features/admin/components/contentDashboard/ContentMetricsWidget.vue'
+import ContentTableWidget from '@/features/admin/components/contentDashboard/ContentTableWidget.vue'
+import DashboardWidgetGrid from '@/features/admin/components/dashboard/DashboardWidgetGrid.vue'
 </script>
