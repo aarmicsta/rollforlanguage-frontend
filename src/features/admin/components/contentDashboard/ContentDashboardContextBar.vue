@@ -1,14 +1,16 @@
 <template>
-  <section class="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 shadow-sm">
+  <section
+    class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+  >
     <!-- Header -->
-    <div class="mb-3">
-      <h1 class="text-xl font-semibold text-white">
+    <div class="px-4 py-3 border-b border-gray-200 dark:border-neutral-700">
+      <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
         Content / {{ activeDomainLabel }}
       </h1>
     </div>
 
     <!-- Domain Pills -->
-    <div class="flex flex-wrap items-center gap-3">
+    <div class="px-4 py-3 flex flex-wrap items-center gap-3">
       <button
         type="button"
         :class="getPillClasses('creatures')"
