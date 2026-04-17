@@ -40,6 +40,15 @@ export const useContentStore = defineStore('content', () => {
    */
   function setActiveContentDomain(domain: ContentDomain) {
     activeContentDomain.value = domain
+
+    switch (domain) {
+      case 'creatures':
+        activeManagementSurface.value = 'creatures'
+        break
+      case 'items':
+        activeManagementSurface.value = 'items'
+        break
+    }
   }
 
   /**
