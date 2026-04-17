@@ -186,8 +186,8 @@ import { ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import { updatePlayableStat } from '@/features/admin/playable/services/playableStatService'
 import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
+import type { PlayableStatEditItem } from '@/features/admin/playable/types/playableTypes'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
-import type { PlayableStatEditItem } from '@/features/admin/types/playableTypes'
 
 /**
  * ---------------------------------------------------------

@@ -24,7 +24,7 @@ import type {
   UpdateUserPayload,
   UserMetrics,
   UserQueryParams,
-} from '@/features/admin/types/UserTypes'
+} from '@/features/admin/user/types/userTypes'
 
 /**
  * ---------------------------------------------------------

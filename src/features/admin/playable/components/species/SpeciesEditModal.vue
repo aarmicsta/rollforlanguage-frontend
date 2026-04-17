@@ -154,8 +154,8 @@ import {
   type PlayableTag,
 } from '@/features/admin/playable/services/playableTagService'
 import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
+import type { PlayableSpeciesEditItem } from '@/features/admin/playable/types/playableTypes'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
-import type { PlayableSpeciesEditItem } from '@/features/admin/types/playableTypes'
 
 const emit = defineEmits<{ (e: 'back'): void }>()
 

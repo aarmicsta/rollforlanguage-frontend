@@ -65,7 +65,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { playableSpeciesService } from '@/features/admin/playable/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
-import type { PlayableSpeciesEditItem } from '@/features/admin/types/playableTypes'
+import type { PlayableSpeciesEditItem } from '@/features/admin/playable/types/playableTypes'
 
 /**
  * ---------------------------------------------------------

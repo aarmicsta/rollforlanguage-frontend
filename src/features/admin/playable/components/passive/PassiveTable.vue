@@ -174,7 +174,7 @@ import {
   getPlayableSpeciesPassives,
 } from '@/features/admin/playable/services/playableSpeciesService'
 import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
-import type { PlayablePassiveEditItem } from '@/features/admin/types/playableTypes'
+import type { PlayablePassiveEditItem } from '@/features/admin/playable/types/playableTypes'
 
 const store = useAdminPlayableStore()
 

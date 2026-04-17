@@ -15,7 +15,7 @@
  */
 
 import { axiosInstance } from '@/services/apiClient'
-import type { PlayableStatModifierRow } from '@/features/admin/types/playableTypes'
+import type { PlayableStatModifierRow } from '@/features/admin/playable/types/playableTypes'
 
 /**
  * Payload for creating a baseline value.

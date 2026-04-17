@@ -114,7 +114,7 @@ import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPla
 import type {
   PlayableClassEditItem,
   PlayableSpeciesEditItem,
-} from '@/features/admin/types/playableTypes'
+} from '@/features/admin/playable/types/playableTypes'
 
 /**
  * ---------------------------------------------------------

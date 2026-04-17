@@ -7,7 +7,7 @@ import type {
   PlayableStatModifierRow,
   PlayablePassiveEditItem,
   PlayablePassiveAssignmentRow,
-} from '@/features/admin/types/playableTypes'
+} from '@/features/admin/playable/types/playableTypes'
 
 /**
  * =========================================================

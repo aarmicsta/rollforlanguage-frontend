@@ -158,12 +158,12 @@
  */
 
 import { ref, watch } from 'vue'
+import { userService } from '@/features/admin/user/services/userService'
+import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
 import type {
   UserBrowseItem,
   PaginatedUserResponse,
-} from '@/features/admin/types/UserTypes'
-import { userService } from '@/features/admin/user/services/userService'
-import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
+} from '@/features/admin/user/types/userTypes'
 
 const store = useUserDashboardStore()
 
