@@ -33,7 +33,7 @@ export const authService = {
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>
       authStore.setError(axiosError.response?.data?.message || 'Login failed')
-      throw error
+      return undefined
     } finally {
       authStore.setLoading(false)
     }

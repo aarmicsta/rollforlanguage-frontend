@@ -18,15 +18,15 @@ const submit = async () => {
   loading.value = true
   errorMessage.value = ''
 
-  try {
-    await authStore.login({ email: email.value, password: password.value })
+  const user = await authStore.login({ email: email.value, password: password.value })
+
+  if (user) {
     showToast.value = true
-    // Optional: you could add a short delay before redirecting here
-  } catch (error) {
-    errorMessage.value = 'Invalid email or password.'
-  } finally {
-    loading.value = false
+  } else {
+    errorMessage.value = authStore.authError || 'Invalid email or password.'
   }
+
+  loading.value = false
 }
 
 const dismissError = () => {
