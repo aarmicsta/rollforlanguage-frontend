@@ -13,7 +13,7 @@
  * - aligned with backend response pattern (`{ message, data }` for mutations)
  */
 
-import { axiosInstance } from '@/services/axiosInstance'
+import { axiosInstance } from '@/services/apiClient'
 
 /**
  * Canonical playable passive definition.

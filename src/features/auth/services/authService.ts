@@ -1,6 +1,6 @@
 import type { AxiosError } from 'axios'
 import router from '@/router'
-import { axiosInstance } from '@/services/axiosInstance'
+import { axiosInstance } from '@/services/apiClient'
 import type { AuthStore } from '../stores/authStore'
 import type { User } from '../types/authTypes'
 

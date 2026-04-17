@@ -17,7 +17,7 @@
  * - this file owns API communication only
  */
 
-import { axiosInstance } from '@/services/axiosInstance'
+import { axiosInstance } from '@/services/apiClient'
 import type {
   CreateUserPayload,
   PaginatedUserResponse,

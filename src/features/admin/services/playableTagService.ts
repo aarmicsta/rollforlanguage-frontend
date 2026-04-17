@@ -1,6 +1,6 @@
 // /src/features/admin/services/playableTagService.ts
 
-import { axiosInstance } from '@/services/axiosInstance'
+import { axiosInstance } from '@/services/apiClient'
 
 /**
  * ---------------------------------------------------------

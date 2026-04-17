@@ -67,7 +67,7 @@
  * =========================================================
  */
 
-import { axiosInstance } from '@/services/axiosInstance'
+import { axiosInstance } from '@/services/apiClient'
 
 /**
  * ---------------------------------------------------------
