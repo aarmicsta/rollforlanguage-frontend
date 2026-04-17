@@ -21,6 +21,4 @@ const sidebarClasses = computed(() => [
   dashboardTheme?.value?.sidebarTextColor || 'text-black',
 ])
 
-// 🔍 Optional debug log
-console.log('[Sidebar] dashboardTheme:', dashboardTheme?.value)
 </script>

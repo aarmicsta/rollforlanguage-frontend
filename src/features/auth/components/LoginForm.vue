@@ -24,7 +24,6 @@ const submit = async () => {
     // Optional: you could add a short delay before redirecting here
   } catch (error) {
     errorMessage.value = 'Invalid email or password.'
-    console.error(error)
   } finally {
     loading.value = false
   }
