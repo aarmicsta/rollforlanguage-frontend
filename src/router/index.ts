@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
 
-import AdminLayout from '@/features/admin/layouts/AdminLayout.vue'
+import AdminLayout from '@/features/admin/layout/AdminLayout.vue'
 import AdminDashboardView from '@/features/admin/views/AdminDashboardView.vue'
 import AdminPlayableView from '@/features/admin/views/AdminPlayableView.vue'
 import CampaignManagementView from '@/features/admin/views/CampaignManagementView.vue'
@@ -15,7 +15,7 @@ import LoginView from '@/features/auth/views/LoginView.vue'
 import RegisterView from '@/features/auth/views/RegisterView.vue'
 
 
-import { adminGuard } from './guards/adminGuard'
+import { adminGuard } from '../features/admin/router/adminGuard'
 import { AppRouteNames, AppRoutePaths } from './routes'
 
 const routes: Array<RouteRecordRaw> = [
