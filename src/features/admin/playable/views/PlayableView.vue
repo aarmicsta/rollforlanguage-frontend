@@ -82,9 +82,9 @@
  *   - PlayableDashboardModalContainer renders workflow modals
  */
 
-import DashboardWidgetGrid from '@/features/admin/components/dashboard/DashboardWidgetGrid.vue'
-import PlayableDashboardModalContainer from '@/features/admin/components/playableDashboard/PlayableDashboardModalContainer.vue'
-import PlayableManagementSurface from '@/features/admin/components/playableDashboard/PlayableManagementSurface.vue'
-import PlayableMetricsWidget from '@/features/admin/components/playableDashboard/PlayableMetricsWidget.vue'
-import PlayableTableWidget from '@/features/admin/components/playableDashboard/PlayableTableWidget.vue'
+import DashboardWidgetGrid from '@/features/admin/dashboard/components/DashboardWidgetGrid.vue'
+import PlayableMetricsWidget from '@/features/admin/playable/components/PlayableMetricsWidget.vue'
+import PlayableTableWidget from '@/features/admin/playable/components/PlayableTableWidget.vue'
+import PlayableManagementSurface from '@/features/admin/playable/components/system/PlayableManagementSurface.vue'
+import PlayableDashboardModalContainer from '@/features/admin/playable/components/system/PlayableModalContainer.vue'
 </script>

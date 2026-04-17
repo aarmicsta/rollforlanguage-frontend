@@ -62,11 +62,11 @@
  * - delegates workflows to the store, surface, tables, and modals
  */
 
-import DashboardWidgetGrid from '@/features/admin/components/dashboard/DashboardWidgetGrid.vue'
-import FlaggedUsersWidget from '@/features/admin/components/userDashboard/FlaggedUsersWidget.vue'
-import UserDashboardModalContainer from '@/features/admin/components/userDashboard/UserDashboardModalContainer.vue'
-import UserDashboardSidebarTools from '@/features/admin/components/userDashboard/UserDashboardSidebarTools.vue'
-import UserManagementSurface from '@/features/admin/components/userDashboard/UserManagementSurface.vue'
-import UserMetricsWidget from '@/features/admin/components/userDashboard/UserMetricsWidget.vue'
-import UserTableWidget from '@/features/admin/components/userDashboard/UserTableWidget.vue'
+import DashboardWidgetGrid from '@/features/admin/dashboard/components/DashboardWidgetGrid.vue'
+import FlaggedUsersWidget from '@/features/admin/user/components/FlaggedUsersWidget.vue'
+import UserManagementSurface from '@/features/admin/user/components/system/UserManagementSurface.vue'
+import UserDashboardModalContainer from '@/features/admin/user/components/system/UserModalContainer.vue'
+import UserDashboardSidebarTools from '@/features/admin/user/components/system/UserSidebarTools.vue'
+import UserMetricsWidget from '@/features/admin/user/components/UserMetricsWidget.vue'
+import UserTableWidget from '@/features/admin/user/components/UserTableWidget.vue'
 </script>

@@ -89,10 +89,10 @@
  *   - ContentDashboardModalContainer will render workflow modals
  */
 
-import ContentDashboardContextBar from '@/features/admin/components/contentDashboard/ContentDashboardContextBar.vue'
-import ContentDashboardModalContainer from '@/features/admin/components/contentDashboard/ContentDashboardModalContainer.vue'
-import ContentManagementSurface from '@/features/admin/components/contentDashboard/ContentManagementSurface.vue'
-import ContentMetricsWidget from '@/features/admin/components/contentDashboard/ContentMetricsWidget.vue'
-import ContentTableWidget from '@/features/admin/components/contentDashboard/ContentTableWidget.vue'
-import DashboardWidgetGrid from '@/features/admin/components/dashboard/DashboardWidgetGrid.vue'
+import ContentDashboardContextBar from '@/features/admin/content/components/ContentContextBar.vue'
+import ContentManagementSurface from '@/features/admin/content/components/ContentManagementSurface.vue'
+import ContentMetricsWidget from '@/features/admin/content/components/ContentMetricsWidget.vue'
+import ContentDashboardModalContainer from '@/features/admin/content/components/ContentModalContainer.vue'
+import ContentTableWidget from '@/features/admin/content/components/ContentTableWidget.vue'
+import DashboardWidgetGrid from '@/features/admin/dashboard/components/DashboardWidgetGrid.vue'
 </script>
