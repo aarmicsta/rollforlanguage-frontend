@@ -61,7 +61,7 @@ import { useRoute } from 'vue-router'
 
 import { useToastStore } from '@/stores/ui/useToastStore'
 import Toast from '@/components/molecules/Toast.vue'
-import ContentDashboardSidebarTools from '@/features/admin/content/components/ContentSidebarTools.vue'
+import ContentDashboardSidebarTools from '@/features/admin/content/components/system/ContentSidebarTools.vue'
 import DashboardSidebarTools from '@/features/admin/dashboard/components/DashboardSidebarTools.vue'
 import { dashboardThemes } from '@/features/admin/dashboard/config/dashboardThemes'
 import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
