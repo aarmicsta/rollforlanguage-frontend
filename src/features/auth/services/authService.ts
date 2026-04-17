@@ -18,19 +18,7 @@ export const authService = {
       const { accessToken, refreshToken } = response.data
       authStore.setAuth(accessToken, refreshToken)
 
-      const user = authStore.user
-
-      if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-        await router.push('/admin/dashboard')
-      } else if (user?.roles?.includes('teacher')) {
-        await router.push('/teacher-dashboard')
-      } else if (user?.roles?.includes('student')) {
-        await router.push('/dashboard')
-      } else {
-        await router.push('/')
-      }
-
-      return user || undefined
+      return authStore.user || undefined
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>
       authStore.setError(axiosError.response?.data?.message || 'Login failed')
@@ -57,7 +45,7 @@ export const authService = {
       authStore.setAuth(accessToken, refreshToken)
 
       const user = authStore.user
-      
+
       if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
         await router.push('/admin/dashboard')
       } else if (user?.roles?.includes('teacher')) {
