@@ -73,6 +73,7 @@ const goToSettings = () => {
 
 const logout = async () => {
   await authStore.logout()
+  await router.replace('/login')
   closeDropdown()
 }
 </script>

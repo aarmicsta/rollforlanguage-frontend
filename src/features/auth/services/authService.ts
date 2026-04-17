@@ -88,7 +88,6 @@ export const authService = {
     } finally {
       authStore.clearAuth()
       authStore.setLoading(false)
-      router.push('/login')
     }
   },
 
