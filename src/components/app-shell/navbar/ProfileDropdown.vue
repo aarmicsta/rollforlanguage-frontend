@@ -45,8 +45,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // Reactive state for dropdown visibility
 const isOpen = ref(false)
@@ -69,8 +71,8 @@ const goToSettings = () => {
   closeDropdown()
 }
 
-const logout = () => {
-  // TODO: Add actual logout logic (e.g., auth store logout + redirect)
+const logout = async () => {
+  await authStore.logout()
   router.push('/')
   closeDropdown()
 }
