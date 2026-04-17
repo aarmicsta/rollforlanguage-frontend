@@ -1,4 +1,5 @@
 import type { AxiosError } from 'axios'
+import axios from 'axios'
 import router from '@/router'
 import { axiosInstance } from '@/services/apiClient'
 import type { AuthStore } from '../stores/authStore'
@@ -79,7 +80,15 @@ export const authService = {
     authStore.setLoading(true)
 
     try {
-      await axiosInstance.post('/auth/logout')
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/auth/logout`,
+        {},
+        {
+          headers: authStore.token
+            ? { Authorization: `Bearer ${authStore.token}` }
+            : undefined,
+        }
+      )
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>
       authStore.setError(
