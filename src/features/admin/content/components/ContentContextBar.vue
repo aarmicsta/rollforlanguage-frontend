@@ -14,10 +14,10 @@
       <button
         type="button"
         :class="getPillClasses('creatures')"
-        :style="props.activeDomain === 'creatures'
+        :style="store.activeContentDomain === 'creatures'
           ? { '--tw-ring-color': accentValue }
           : {}"
-        disabled
+        @click="store.setActiveContentDomain('creatures')"
       >
         Creatures
       </button>
@@ -25,10 +25,10 @@
       <button
         type="button"
         :class="getPillClasses('items')"
-        :style="props.activeDomain === 'items'
+        :style="store.activeContentDomain === 'items'
           ? { '--tw-ring-color': accentValue }
           : {}"
-        disabled
+        @click="store.setActiveContentDomain('items')"
       >
         Items
       </button>
@@ -56,16 +56,14 @@
 
 import { computed, inject } from 'vue'
 import type { ComputedRef } from 'vue'
+import { useContentStore } from '@/features/admin/content/stores/contentStore'
 import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
+
 
 type ContentDomain = 'creatures' | 'items'
 
-const props = defineProps<{
-  activeDomain: ContentDomain
-}>()
-
 const activeDomainLabel = computed(() => {
-  return props.activeDomain === 'creatures' ? 'Creatures' : 'Items'
+  return store.activeContentDomain === 'creatures' ? 'Creatures' : 'Items'
 })
 
 const dashboardThemeRef =
@@ -73,8 +71,10 @@ const dashboardThemeRef =
 
 const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
 
+const store = useContentStore()
+
 function getPillClasses(domain: ContentDomain): string[] {
-  const isActive = props.activeDomain === domain
+  const isActive = store.activeContentDomain === domain
 
   return [
     'rounded-full px-4 py-2 text-sm font-medium transition border',
