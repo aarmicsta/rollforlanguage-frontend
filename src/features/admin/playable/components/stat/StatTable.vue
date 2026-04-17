@@ -63,8 +63,8 @@
  */
 
 import { onMounted, ref, watch } from 'vue'
-import { getPlayableStats } from '@/features/admin/services/playableStatService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { getPlayableStats } from '@/features/admin/playable/services/playableStatService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 import type { PlayableStatEditItem } from '@/features/admin/types/playableTypes'
 
 /**

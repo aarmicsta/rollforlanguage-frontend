@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Toast from '@/components/molecules/Toast.vue'
-import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
+import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 const { user } = useAuth()

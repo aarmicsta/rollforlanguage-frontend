@@ -167,13 +167,13 @@ import { computed, onMounted, ref, watch } from 'vue'
 import {
   getPlayableClasses,
   getPlayableClassPassives,
-} from '@/features/admin/services/playableClassService'
-import { getPlayablePassives } from '@/features/admin/services/playablePassiveService'
+} from '@/features/admin/playable/services/playableClassService'
+import { getPlayablePassives } from '@/features/admin/playable/services/playablePassiveService'
 import {
   getPlayableSpecies,
   getPlayableSpeciesPassives,
-} from '@/features/admin/services/playableSpeciesService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+} from '@/features/admin/playable/services/playableSpeciesService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 import type { PlayablePassiveEditItem } from '@/features/admin/types/playableTypes'
 
 const store = useAdminPlayableStore()

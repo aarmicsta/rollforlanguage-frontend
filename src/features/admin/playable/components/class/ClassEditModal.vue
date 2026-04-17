@@ -144,23 +144,23 @@ import { onMounted, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 
 
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
 import PlayablePassiveAssignmentSelector from '@/features/admin/playable/components/passive/PassiveAssignmentSelector.vue'
 import PlayableTagAssignmentSelector from '@/features/admin/playable/components/tag/TagAssignmentSelector.vue'
 import {
   playableClassService,
   type PlayableClassTag,
   type PlayableClassPassive,
-} from '@/features/admin/services/playableClassService'
+} from '@/features/admin/playable/services/playableClassService'
 import {
   getPlayablePassives,
   type PlayablePassive,
-} from '@/features/admin/services/playablePassiveService'
+} from '@/features/admin/playable/services/playablePassiveService'
 import {
   getPlayableTags,
   type PlayableTag,
-} from '@/features/admin/services/playableTagService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+} from '@/features/admin/playable/services/playableTagService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 import type { PlayableClassEditItem } from '@/features/admin/types/playableTypes'
 
 const emit = defineEmits<{

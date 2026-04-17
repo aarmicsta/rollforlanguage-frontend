@@ -99,8 +99,8 @@
  */
 
 import { ref, computed, onMounted, watch } from 'vue'
-import { getPlayableStatModifiers } from '@/features/admin/services/playableStatModifierService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { getPlayableStatModifiers } from '@/features/admin/playable/services/playableStatModifierService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 import type { PlayableStatModifierRow } from '@/features/admin/types/playableTypes'
 
 

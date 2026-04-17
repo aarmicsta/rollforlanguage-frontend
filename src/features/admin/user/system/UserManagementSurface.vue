@@ -73,8 +73,8 @@
  */
 
 import { computed } from 'vue'
-import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
 import UserTable from '@/features/admin/user/components/UserTable.vue'
+import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
 
 
 const store = useUserDashboardStore()

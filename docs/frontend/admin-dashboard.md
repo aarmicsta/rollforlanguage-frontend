@@ -115,7 +115,7 @@
 
 ## Location
 
-> `/src/components/shared/AdminModal.vue`
+> `/src/shared/components/AdminModal.vue`
 
 ## Features
 
@@ -166,7 +166,7 @@
 ## Dependencies
 
 * `@/components/shared/AdminCard.vue`
-* `@/components/shared/AdminModal.vue`
+* `@/shared/components/AdminModal.vue`
 * `@/components/atoms/AppIcon.vue`
 
 ## Usage

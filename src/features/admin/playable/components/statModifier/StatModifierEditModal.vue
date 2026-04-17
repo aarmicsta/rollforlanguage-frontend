@@ -227,16 +227,16 @@
 import { onMounted, ref } from 'vue'
 import { computed, reactive, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import { getPlayableClasses } from '@/features/admin/services/playableClassService'
-import { getPlayableSpecies } from '@/features/admin/services/playableSpeciesService'
+import { getPlayableClasses } from '@/features/admin/playable/services/playableClassService'
+import { getPlayableSpecies } from '@/features/admin/playable/services/playableSpeciesService'
 import {
   updatePlayableStatBaseline,
   updatePlayableSpeciesStatModifier,
   updatePlayableClassStatModifier,
-} from '@/features/admin/services/playableStatModifierService'
-import { getPlayableStats } from '@/features/admin/services/playableStatService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+} from '@/features/admin/playable/services/playableStatModifierService'
+import { getPlayableStats } from '@/features/admin/playable/services/playableStatService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
 /**
  * ---------------------------------------------------------

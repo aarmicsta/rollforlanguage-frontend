@@ -30,8 +30,8 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import { useDashboardStore } from '@/features/admin/stores/dashboardStore'
+import { useDashboardStore } from '@/features/admin/dashboard/stores/dashboardStore'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 import { adminDashboardTools } from '@/features/admin/utils/adminDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 

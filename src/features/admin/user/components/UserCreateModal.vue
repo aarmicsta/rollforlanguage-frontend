@@ -145,8 +145,8 @@
 
 import { computed, reactive } from 'vue'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
-import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
 import type { UserRole } from '@/features/admin/types/UserTypes'
+import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
 
 const store = useUserDashboardStore()
 

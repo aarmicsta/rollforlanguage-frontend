@@ -198,9 +198,9 @@
  */
 
 import { computed, reactive, ref, watch } from 'vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
-import { createPlayablePassive } from '@/features/admin/services/playablePassiveService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { createPlayablePassive } from '@/features/admin/playable/services/playablePassiveService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
 /**
  * ---------------------------------------------------------

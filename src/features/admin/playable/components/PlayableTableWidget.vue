@@ -108,9 +108,9 @@
 
 import { computed, onMounted, ref, watch } from 'vue'
 import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
-import { playableClassService } from '@/features/admin/services/playableClassService'
-import { playableSpeciesService } from '@/features/admin/services/playableSpeciesService'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { playableClassService } from '@/features/admin/playable/services/playableClassService'
+import { playableSpeciesService } from '@/features/admin/playable/services/playableSpeciesService'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 import type {
   PlayableClassEditItem,
   PlayableSpeciesEditItem,

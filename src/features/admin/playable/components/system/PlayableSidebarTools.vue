@@ -98,7 +98,7 @@
 
 import { computed, inject, ref } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'
 import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'

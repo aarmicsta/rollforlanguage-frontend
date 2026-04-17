@@ -65,8 +65,8 @@
 
 import { onMounted, ref, watch } from 'vue'
 import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
-import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
 import type { UserMetrics } from '@/features/admin/types/UserTypes'
+import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
 
 const userDashboardStore = useUserDashboardStore()
 

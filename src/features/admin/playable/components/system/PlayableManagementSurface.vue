@@ -100,7 +100,7 @@ import PlayablePassiveTable from '@/features/admin/playable/components/passive/P
 import PlayableSpeciesTable from '@/features/admin/playable/components/species/SpeciesTable.vue'
 import PlayableStatTable from '@/features/admin/playable/components/stat/StatTable.vue'
 import PlayableStatModifierTable from '@/features/admin/playable/components/statModifier/StatModifierTable.vue'
-import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
+import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
 
 /**
  * =========================================================
