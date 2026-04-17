@@ -26,7 +26,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import WidgetWrapper from '@/components/molecules/WidgetWrapper.vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
 const isModalOpen = ref(false)
 </script>

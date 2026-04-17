@@ -1,27 +1,28 @@
 <template>
   <!--
     =========================================================
-    User Create Modal
+    User Edit Modal
     =========================================================
 
-    Canonical create workflow modal for the Users dashboard.
+    Canonical edit workflow modal for the Users dashboard.
 
     Responsibilities:
-    - collect required user creation fields
-    - validate local form input
-    - submit creation request through the store/service layer
+    - clone the store-selected user into local editable state
+    - validate editable fields
+    - submit updates through the service layer
     - trigger dashboard refresh on success
-    - reset local form state on close
+    - never mutate store-selected entity directly
   -->
   <AdminModal
-    :visible="store.showCreateUserModal"
-    title="Create User"
+    :visible="store.showEditUserModal"
+    title="Edit User"
     size="5xl"
     @close="closeModal"
   >
     <form
+      v-if="selectedUser"
       class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
-      @submit.prevent="handleCreate"
+      @submit.prevent="handleUpdate"
     >
       <!--
         ---------------------------------------------------------
@@ -36,7 +37,6 @@
             type="text"
             :disabled="store.isSubmitting"
             class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
-            placeholder="e.g. aaronsmith"
             autocomplete="username"
           />
         </div>
@@ -48,7 +48,6 @@
             type="email"
             :disabled="store.isSubmitting"
             class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
-            placeholder="e.g. aaron@example.com"
             autocomplete="email"
           />
         </div>
@@ -56,38 +55,21 @@
 
       <!--
         ---------------------------------------------------------
-        Credential / Role Fields
+        Role Field
         ---------------------------------------------------------
       -->
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div>
-          <label class="mb-1 block text-xs text-gray-500">Password</label>
-          <input
-            v-model="form.password"
-            type="password"
-            :disabled="store.isSubmitting"
-            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
-            placeholder="Enter a temporary password"
-            autocomplete="new-password"
-          />
-          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            MVP uses an admin-provided password during account creation.
-          </p>
-        </div>
-
-        <div>
-          <label class="mb-1 block text-xs text-gray-500">Role</label>
-          <select
-            v-model="form.role"
-            :disabled="store.isSubmitting"
-            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
-          >
-            <option value="student">Student</option>
-            <option value="teacher">Teacher</option>
-            <option value="admin">Admin</option>
-            <option value="superadmin">Superadmin</option>
-          </select>
-        </div>
+      <div>
+        <label class="mb-1 block text-xs text-gray-500">Role</label>
+        <select
+          v-model="form.role"
+          :disabled="store.isSubmitting"
+          class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+        >
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+          <option value="superadmin">Superadmin</option>
+        </select>
       </div>
 
       <!--
@@ -122,7 +104,7 @@
           :disabled="store.isSubmitting || !isFormValid"
           class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {{ store.isSubmitting ? 'Creating...' : 'Create User' }}
+          {{ store.isSubmitting ? 'Saving...' : 'Save Changes' }}
         </button>
       </div>
     </form>
@@ -132,19 +114,21 @@
 <script setup lang="ts">
 /**
  * =========================================================
- * User Create Modal
+ * User Edit Modal
  * =========================================================
  *
- * Canonical create workflow modal for the admin Users dashboard.
+ * Canonical edit workflow modal for the admin Users dashboard.
  *
  * Notes:
- * - form state is fully local to the modal
- * - visibility is store-controlled
- * - successful creation triggers dashboard-wide refresh
+ * - store owns selected user and modal visibility
+ * - this modal owns local editable form state
+ * - local state is cloned from the selected user to prevent
+ *   direct mutation of store-owned selection state
  */
 
-import { computed, reactive } from 'vue'
-import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import { computed, reactive, watch } from 'vue'
+import { updateUser } from '@/features/admin/services/userService'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 import { useUserDashboardStore } from '@/features/admin/stores/userDashboardStore'
 import type { UserRole } from '@/features/admin/types/UserTypes'
 
@@ -152,34 +136,55 @@ const store = useUserDashboardStore()
 
 /**
  * ---------------------------------------------------------
+ * Selected User
+ * ---------------------------------------------------------
+ *
+ * Store-owned source of truth for the current edit target.
+ */
+const selectedUser = computed(() => store.selectedUser)
+
+/**
+ * ---------------------------------------------------------
  * Local Form State
  * ---------------------------------------------------------
  *
- * Fresh local state used for each create workflow instance.
+ * Editable clone of the selected user.
  */
 const form = reactive({
   username: '',
   email: '',
-  password: '',
   role: 'student' as UserRole,
 })
 
 /**
  * ---------------------------------------------------------
- * Validation
+ * Sync from Store Selection
  * ---------------------------------------------------------
  *
- * Keeps MVP validation intentionally simple:
- * - username required
- * - email required
- * - password required
- * - role required
+ * Copies the selected user into local editable state whenever
+ * the edit workflow target changes.
+ */
+watch(
+  selectedUser,
+  (user) => {
+    if (!user) return
+
+    form.username = user.username ?? ''
+    form.email = user.email ?? ''
+    form.role = user.role ?? 'student'
+  },
+  { immediate: true }
+)
+
+/**
+ * ---------------------------------------------------------
+ * Validation
+ * ---------------------------------------------------------
  */
 const isFormValid = computed(() => {
   return (
     form.username.trim().length > 0 &&
     form.email.trim().length > 0 &&
-    form.password.trim().length > 0 &&
     form.role.trim().length > 0
   )
 })
@@ -188,21 +193,17 @@ const isFormValid = computed(() => {
  * ---------------------------------------------------------
  * Reset / Close
  * ---------------------------------------------------------
- *
- * Resets local form state so each create workflow begins with
- * a clean slate.
  */
 function resetForm() {
   form.username = ''
   form.email = ''
-  form.password = ''
   form.role = 'student'
 }
 
 function closeModal() {
   if (store.isSubmitting) return
 
-  store.closeCreateUserModal()
+  store.closeEditUserModal()
   resetForm()
 }
 
@@ -211,26 +212,27 @@ function closeModal() {
  * Submit
  * ---------------------------------------------------------
  *
- * Creates a new user and triggers the shared refresh signal on
- * success through the dashboard store.
+ * Updates the selected user and triggers shared dashboard
+ * refresh on success.
  */
-async function handleCreate() {
-  if (!isFormValid.value) return
+async function handleUpdate() {
+  if (!selectedUser.value || !isFormValid.value) return
 
   try {
     store.isSubmitting = true
     store.submitError = null
 
-    await store.createUser({
+    await updateUser(selectedUser.value.id, {
       username: form.username.trim(),
       email: form.email.trim(),
-      password: form.password,
       role: form.role,
     })
 
+    store.refreshUserList()
     closeModal()
   } catch (error) {
     console.error(error)
+    store.submitError = 'Failed to update user.'
   } finally {
     store.isSubmitting = false
   }

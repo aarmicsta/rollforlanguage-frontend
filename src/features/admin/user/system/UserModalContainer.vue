@@ -37,6 +37,6 @@
  * - keeps modal mounting centralized and predictable
  */
 
-import UserCreateModal from '@/features/admin/components/userDashboard/UserCreateModal.vue'
-import UserEditModal from '@/features/admin/components/userDashboard/UserEditModal.vue'
+import UserCreateModal from '@/features/admin/user/components/UserCreateModal.vue'
+import UserEditModal from '@/features/admin/user/components/UserEditModal.vue'
 </script>
