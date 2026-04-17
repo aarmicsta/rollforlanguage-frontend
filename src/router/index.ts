@@ -1,13 +1,10 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LandingPage from '@/views/LandingPage.vue'
-
+import ContentManagementView from '@/features/admin/content/views/ContentView.vue'
+import AdminDashboardView from '@/features/admin/dashboard/views/AdminDashboardView.vue'
 import AdminLayout from '@/features/admin/layout/AdminLayout.vue'
-import AdminDashboardView from '@/features/admin/views/AdminDashboardView.vue'
-import AdminPlayableView from '@/features/admin/views/AdminPlayableView.vue'
-import CampaignManagementView from '@/features/admin/views/CampaignManagementView.vue'
-import ContentManagementView from '@/features/admin/views/ContentManagementView.vue'
-import SystemMonitorView from '@/features/admin/views/SystemMonitorView.vue'
-import UserManagementView from '@/features/admin/views/UserManagementView.vue'
+import AdminPlayableView from '@/features/admin/playable/views/PlayableView.vue'
+import UserManagementView from '@/features/admin/user/views/UserView.vue'
 
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import ForgotPasswordView from '@/features/auth/views/ForgotPasswordView.vue'
@@ -71,9 +68,7 @@ const routes: Array<RouteRecordRaw> = [
       { path: '', redirect: { name: AppRouteNames.AdminDashboard } },
       { path: 'dashboard', name: AppRouteNames.AdminDashboard, component: AdminDashboardView },
       { path: 'users', name: AppRouteNames.AdminUsers, component: UserManagementView },
-      { path: 'campaigns', name: AppRouteNames.AdminCampaigns, component: CampaignManagementView },
       { path: 'content', name: AppRouteNames.AdminContent, component: ContentManagementView },
-      { path: 'system', name: AppRouteNames.AdminSystem, component: SystemMonitorView },
       { path: 'playables', name: AppRouteNames.AdminPlayables, component: AdminPlayableView }, // ✅ NEW
     ],
   },
