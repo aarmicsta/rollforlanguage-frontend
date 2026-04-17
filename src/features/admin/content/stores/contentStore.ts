@@ -42,8 +42,30 @@ export const useContentStore = defineStore('content', () => {
     activeContentDomain.value = domain
   }
 
+  /**
+   * ---------------------------------------------------------
+   * Active Management Surface
+   * ---------------------------------------------------------
+   *
+   * Determines which table (if any) is currently visible
+   * in the Content dashboard surface.
+   */
+  const activeManagementSurface = ref<string | null>(null)
+
+  function setActiveManagementSurface(surface: string) {
+    activeManagementSurface.value = surface
+  }
+
+  function clearActiveManagementSurface() {
+    activeManagementSurface.value = null
+  }
+
   return {
     activeContentDomain,
     setActiveContentDomain,
+
+    activeManagementSurface,
+    setActiveManagementSurface,
+    clearActiveManagementSurface,
   }
 })

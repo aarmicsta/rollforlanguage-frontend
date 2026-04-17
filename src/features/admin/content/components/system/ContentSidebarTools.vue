@@ -51,8 +51,24 @@ const tools = computed(() => {
   return contentTools[store.activeContentDomain]
 })
 
-// Stub action handler (next step will wire real behavior)
+// Action handler
 function handleAction(action: string) {
-  console.log(`[ContentSidebarTools] action: ${action}`)
+  switch (action) {
+    case 'editCreatures':
+      store.setActiveManagementSurface('creatures')
+      break
+
+    case 'editItems':
+      store.setActiveManagementSurface('items')
+      break
+
+    case 'createCreature':
+    case 'createItem':
+      console.log(`[ContentSidebarTools] create action: ${action}`)
+      break
+
+    default:
+      console.log(`[ContentSidebarTools] unhandled action: ${action}`)
+  }
 }
 </script>
