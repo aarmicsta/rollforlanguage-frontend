@@ -67,8 +67,9 @@ import PlayableDashboardSidebarTools from '@/features/admin/components/playableD
 import UserDashboardSidebarTools from '@/features/admin/components/userDashboard/UserDashboardSidebarTools.vue'
 import { dashboardThemes } from '@/features/admin/utils/dashboardThemes'
 import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
-import Sidebar from '../components/Sidebar.vue'
-import Topbar from '../components/Topbar.vue'
+import Topbar from '../layout/components/AdminHeaderBar.vue'
+import Sidebar from '../layout/components/AdminSidebarShell.vue'
+
 
 /**
  * ---------------------------------------------------------
