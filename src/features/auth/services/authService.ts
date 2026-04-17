@@ -19,14 +19,15 @@ export const authService = {
       authStore.setAuth(accessToken, refreshToken)
 
       const user = authStore.user
+
       if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-        router.push('/admin')
+        await router.push('/admin/dashboard')
       } else if (user?.roles?.includes('teacher')) {
-        router.push('/teacher-dashboard')
+        await router.push('/teacher-dashboard')
       } else if (user?.roles?.includes('student')) {
-        router.push('/dashboard')
+        await router.push('/dashboard')
       } else {
-        router.push('/') // fallback route
+        await router.push('/')
       }
 
       return user || undefined
@@ -56,14 +57,15 @@ export const authService = {
       authStore.setAuth(accessToken, refreshToken)
 
       const user = authStore.user
+      
       if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-        router.push('/admin-dashboard')
+        await router.push('/admin/dashboard')
       } else if (user?.roles?.includes('teacher')) {
-        router.push('/teacher-dashboard')
+        await router.push('/teacher-dashboard')
       } else if (user?.roles?.includes('student')) {
-        router.push('/dashboard')
+        await router.push('/dashboard')
       } else {
-        router.push('/')
+        await router.push('/')
       }
 
       return user || undefined
