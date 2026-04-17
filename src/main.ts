@@ -1,7 +1,7 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
+import { setupAuthListeners } from '@/features/auth/bootstrap/setupAuthListeners'
 import { useAuthStore } from '@/features/auth/stores/authStore'
-import { setupAuthListeners } from '@/features/auth/utils/setupAuthListeners'
 import App from './App.vue'
 import router from './router'
 

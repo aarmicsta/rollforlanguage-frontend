@@ -2,7 +2,7 @@ import type { AxiosError } from 'axios'
 import router from '@/router'
 import { axiosInstance } from '@/services/axiosInstance'
 import type { AuthStore } from '../stores/authStore'
-import type { User } from '../types/types'
+import type { User } from '../types/authTypes'
 
 interface AuthResponse {
   accessToken: string

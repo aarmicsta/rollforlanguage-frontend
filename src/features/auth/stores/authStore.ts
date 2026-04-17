@@ -1,7 +1,7 @@
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import { authService } from '@/features/auth/services/authService'
-import type { User } from '../types/types'
+import type { User } from '../types/authTypes'
 
 export interface AuthState {
   user: User | null
