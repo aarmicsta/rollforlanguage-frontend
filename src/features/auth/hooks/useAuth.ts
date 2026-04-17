@@ -10,7 +10,7 @@ export function useAuth() {
     token,
     isAuthenticated,
     setAuth: authStore.setAuth.bind(authStore),
-    logout: authStore.clearAuth.bind(authStore),
+    logout: authStore.logout.bind(authStore),
     login: authStore.login.bind(authStore),
   }
 }
