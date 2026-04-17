@@ -77,16 +77,18 @@ export const authService = {
 
   async logout(authStore: AuthStore): Promise<void> {
     authStore.setLoading(true)
+
     try {
       await axiosInstance.post('/auth/logout')
-      authStore.clearAuth()
-      router.push('/login') // redirect to login after logout
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>
-      authStore.setError(axiosError.response?.data?.message || 'Logout failed')
-      throw error
+      authStore.setError(
+        axiosError.response?.data?.message || 'Logout request failed, but local session was cleared.'
+      )
     } finally {
+      authStore.clearAuth()
       authStore.setLoading(false)
+      router.push('/login')
     }
   },
 
