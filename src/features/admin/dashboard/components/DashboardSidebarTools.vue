@@ -30,10 +30,10 @@
 <script setup lang="ts">
 import { ref, computed, inject } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
+import { adminDashboardTools } from '@/features/admin/dashboard/config/dashboardTools'
 import { useDashboardStore } from '@/features/admin/dashboard/stores/dashboardStore'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
-import { adminDashboardTools } from '@/features/admin/utils/adminDashboardTools'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 
 const props = defineProps<{
   userRole: 'admin' | 'superadmin'

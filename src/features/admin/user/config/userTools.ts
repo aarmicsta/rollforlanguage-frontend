@@ -1,6 +1,6 @@
 // /features/admin/utils/adminUserDashboardTools.ts
 
-import type { AdminDashboardTool } from './adminDashboardTools'
+import type { AdminDashboardTool } from '../../dashboard/config/dashboardTools'
 
 export const adminUserDashboardTools: AdminDashboardTool[] = [
   // General tools (admin + superadmin)

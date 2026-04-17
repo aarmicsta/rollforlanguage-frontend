@@ -2,7 +2,7 @@
 
 import resolveConfig from 'tailwindcss/resolveConfig'
 import { AppRouteNames } from '@/router/routes'
-import tailwindConfig from '../../../../tailwind.config'
+import tailwindConfig from '../../../../../tailwind.config'
 
 export interface DashboardTheme {
   routeName: AppRouteNames

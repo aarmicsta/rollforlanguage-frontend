@@ -29,7 +29,7 @@
 
 import { inject } from 'vue'
 import type { ComputedRef } from 'vue'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
 
 const dashboardThemeRef =
   inject<ComputedRef<DashboardTheme | undefined>>('dashboardTheme')

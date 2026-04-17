@@ -25,7 +25,7 @@
 import { computed, inject } from 'vue'
 import type { ComputedRef } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
 
 const props = defineProps<{
   title: string

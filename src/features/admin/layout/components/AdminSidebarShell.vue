@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { inject, computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
 
 // Inject current dashboard theme
 const dashboardTheme = inject<ComputedRef<DashboardTheme | undefined>>('dashboardTheme')

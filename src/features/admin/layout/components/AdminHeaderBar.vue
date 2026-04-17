@@ -30,7 +30,7 @@
   
   <script setup lang="ts">
   import AppIcon from '@/components/atoms/AppIcon.vue'
-  import { adminNavLinks } from '@/features/admin/utils/adminNavLinks'
+  import { adminNavLinks } from '@/features/admin/layout/config/adminNavLinks'
   import { useAuth } from '@/features/auth/hooks/useAuth'
   
   const { logout } = useAuth()

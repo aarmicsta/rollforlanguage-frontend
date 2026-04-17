@@ -98,10 +98,10 @@
 
 import { computed, inject, ref } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
+import type { AdminDashboardTool } from '@/features/admin/dashboard/config/dashboardTools'
+import { adminPlayableDashboardTools } from '@/features/admin/playable/config/playableTools'
 import { useAdminPlayableStore } from '@/features/admin/playable/stores/adminPlayableStore'
-import type { AdminDashboardTool } from '@/features/admin/utils/adminDashboardTools'
-import { adminPlayableDashboardTools } from '@/features/admin/utils/adminPlayableDashboardTools'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 
 /**

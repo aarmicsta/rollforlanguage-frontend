@@ -88,8 +88,8 @@
 import { computed, inject } from 'vue'
 import type { ComputedRef } from 'vue'
 import AppIcon from '@/components/atoms/AppIcon.vue'
+import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
 import { useUserDashboardStore } from '@/features/admin/user/stores/userStore'
-import type { DashboardTheme } from '@/features/admin/utils/dashboardThemes'
 
 const store = useUserDashboardStore()
 
