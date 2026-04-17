@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layouts/MainLayout.vue'
-import LoginForm from '@/components/organisms/login-form/LoginForm.vue'
+import LoginForm from '@/features/auth/components/LoginForm.vue'
 </script>
 
 <template>

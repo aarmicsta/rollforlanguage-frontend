@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainLayout from '@/components/layouts/MainLayout.vue'
-import ForgotPasswordForm from '@/components/organisms/forgot-password/ForgotPasswordForm.vue'
+import ForgotPasswordForm from '@/features/auth/components/ForgotPasswordForm.vue'
 </script>
 
 <template>
