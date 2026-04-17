@@ -95,11 +95,11 @@
  */
 
 import { computed } from 'vue'
-import PlayableClassTable from '@/features/admin/components/playableDashboard/PlayableClassTable.vue'
-import PlayablePassiveTable from '@/features/admin/components/playableDashboard/PlayablePassiveTable.vue'
-import PlayableSpeciesTable from '@/features/admin/components/playableDashboard/PlayableSpeciesTable.vue'
-import PlayableStatModifierTable from '@/features/admin/components/playableDashboard/PlayableStatModifierTable.vue'
-import PlayableStatTable from '@/features/admin/components/playableDashboard/PlayableStatTable.vue'
+import PlayableClassTable from '@/features/admin/playable/components/class/ClassTable.vue'
+import PlayablePassiveTable from '@/features/admin/playable/components/passive/PassiveTable.vue'
+import PlayableSpeciesTable from '@/features/admin/playable/components/species/SpeciesTable.vue'
+import PlayableStatTable from '@/features/admin/playable/components/stat/StatTable.vue'
+import PlayableStatModifierTable from '@/features/admin/playable/components/statModifier/StatModifierTable.vue'
 import { useAdminPlayableStore } from '@/features/admin/stores/adminPlayableStore'
 
 /**

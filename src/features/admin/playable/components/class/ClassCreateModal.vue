@@ -303,9 +303,11 @@
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
-import PlayablePassiveAssignmentSelector from '@/features/admin/components/playableDashboard/PlayablePassiveAssignmentSelector.vue'
-import PlayableTagAssignmentSelector from '@/features/admin/components/playableDashboard/PlayableTagAssignmentSelector.vue'
+
+
 import AdminModal from '@/features/admin/components/shared/AdminModal.vue'
+import PlayablePassiveAssignmentSelector from '@/features/admin/playable/components/passive/PassiveAssignmentSelector.vue'
+import PlayableTagAssignmentSelector from '@/features/admin/playable/components/tag/TagAssignmentSelector.vue'
 import {
   createPlayableClass,
   updatePlayableClassTags,
