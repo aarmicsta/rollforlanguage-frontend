@@ -97,6 +97,7 @@ export const authService = {
     } finally {
       authStore.clearAuth()
       authStore.setLoading(false)
+      window.location.assign('/login')
     }
   },
 
