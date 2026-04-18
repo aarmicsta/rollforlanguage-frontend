@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { isNavigationFailure, NavigationFailureType, useRouter } from 'vue-router'
 import InputField from '@/components/atoms/InputField.vue'
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import ErrorBanner from '@/components/molecules/ErrorBanner.vue'
@@ -22,23 +22,29 @@ const submit = async () => {
 
   const user = await authStore.login({ email: email.value, password: password.value })
 
-  if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-    showToast.value = true
-    await router.replace('/admin/dashboard')
-  } else if (user?.roles?.includes('teacher')) {
-    showToast.value = true
-    await router.replace('/teacher-dashboard')
-  } else if (user?.roles?.includes('student')) {
-    showToast.value = true
-    await router.replace('/dashboard')
-  } else if (user) {
-    showToast.value = true
-    await router.replace('/')
-  } else {
-    errorMessage.value = authStore.authError || 'Invalid email or password.'
+  try {
+    if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
+      showToast.value = true
+      await router.replace('/admin/dashboard')
+    } else if (user?.roles?.includes('teacher')) {
+      showToast.value = true
+      await router.replace('/teacher-dashboard')
+    } else if (user?.roles?.includes('student')) {
+      showToast.value = true
+      await router.replace('/dashboard')
+    } else if (user) {
+      showToast.value = true
+      await router.replace('/')
+    } else {
+      errorMessage.value = authStore.authError || 'Invalid email or password.'
+    }
+  } catch (error) {
+    if (!isNavigationFailure(error, NavigationFailureType.duplicated)) {
+      throw error
+    }
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 }
 
 const dismissError = () => {
