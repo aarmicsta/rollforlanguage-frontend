@@ -1,6 +1,5 @@
 import type { AxiosError } from 'axios'
 import axios from 'axios'
-import router from '@/router'
 import { axiosInstance } from '@/services/apiClient'
 import type { AuthStore } from '../stores/authStore'
 import type { User } from '../types/authTypes'
@@ -44,23 +43,11 @@ export const authService = {
       const { accessToken, refreshToken } = response.data
       authStore.setAuth(accessToken, refreshToken)
 
-      const user = authStore.user
-
-      if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-        await router.push('/admin/dashboard')
-      } else if (user?.roles?.includes('teacher')) {
-        await router.push('/teacher-dashboard')
-      } else if (user?.roles?.includes('student')) {
-        await router.push('/dashboard')
-      } else {
-        await router.push('/')
-      }
-
-      return user || undefined
+      return authStore.user || undefined
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>
       authStore.setError(axiosError.response?.data?.message || 'Registration failed')
-      throw error
+      return undefined
     } finally {
       authStore.setLoading(false)
     }

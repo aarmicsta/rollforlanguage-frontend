@@ -1,6 +1,5 @@
 <template>
   <form @submit.prevent="handleRegister" class="space-y-6">
-    <!-- Username Field -->
     <InputField
       v-model="username"
       label="Username"
@@ -9,7 +8,6 @@
       @input="clearError"
     />
 
-    <!-- Email Field -->
     <InputField
       v-model="email"
       label="Email"
@@ -18,7 +16,6 @@
       @input="clearError"
     />
 
-    <!-- Password Field -->
     <InputField
       v-model="password"
       label="Password"
@@ -27,7 +24,6 @@
       @input="clearError"
     />
 
-    <!-- Confirm Password Field -->
     <InputField
       v-model="confirmPassword"
       label="Confirm Password"
@@ -36,7 +32,6 @@
       @input="clearError"
     />
 
-    <!-- Gender Identity (Optional) -->
     <InputField
       v-model="genderIdentity"
       label="Gender Identity (optional)"
@@ -45,7 +40,6 @@
       @input="clearError"
     />
 
-    <!-- Pronouns (Optional) -->
     <InputField
       v-model="pronouns"
       label="Pronouns (optional)"
@@ -54,14 +48,12 @@
       @input="clearError"
     />
 
-    <!-- Error Banner -->
     <ErrorBanner
       v-if="authStore.authError"
       :message="authStore.authError"
       @dismiss="authStore.clearError"
     />
 
-    <!-- Submit Button -->
     <button
       type="submit"
       class="w-full flex items-center justify-center py-2 px-4 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
@@ -76,7 +68,6 @@
       </span>
     </button>
 
-    <!-- Login Link -->
     <p class="text-center text-sm text-gray-600 dark:text-gray-400">
       Already have an account?
       <RouterLink :to="AppRoutePaths.Login" class="text-indigo-500 hover:underline">
@@ -118,18 +109,22 @@ async function handleRegister() {
     return
   }
 
-  try {
-    await authStore.register({
-      username: username.value,
-      email: email.value,
-      password: password.value,
-      genderIdentity: genderIdentity.value || null,
-      pronouns: pronouns.value || null,
-    })
-    router.push(AppRoutePaths.Dashboard)
-  } catch (error) {
-    console.error('Registration failed:', error)
-    // Error already handled and stored in authStore.authError
+  const user = await authStore.register({
+    username: username.value,
+    email: email.value,
+    password: password.value,
+    genderIdentity: genderIdentity.value || null,
+    pronouns: pronouns.value || null,
+  })
+
+  if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
+    await router.replace('/admin/dashboard')
+  } else if (user?.roles?.includes('teacher')) {
+    await router.replace('/teacher-dashboard')
+  } else if (user?.roles?.includes('student')) {
+    await router.replace('/dashboard')
+  } else if (user) {
+    await router.replace('/')
   }
 }
 </script>
