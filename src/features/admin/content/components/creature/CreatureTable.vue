@@ -48,7 +48,13 @@
           <tr
             v-for="creature in creatures"
             :key="creature.id"
-            class="border-b cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800"
+            :class="[
+              'border-b cursor-pointer',
+              'hover:bg-gray-50 dark:hover:bg-neutral-800',
+              selectedCreature?.id === creature.id
+                ? 'bg-blue-50 dark:bg-neutral-800'
+                : ''
+            ]"
             @click="handleRowClick(creature)"
           >
             <td class="px-3 py-2">
@@ -102,11 +108,15 @@
  * =========================================================
  */
 import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import {
   getCreatures,
   type CreatureListItem,
 } from '@/features/admin/content/services/creatureService'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
+
+
+const selectedCreature = computed(() => store.selectedCreature)
 
 /**
  * =========================================================
