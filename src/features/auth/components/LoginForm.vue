@@ -4,7 +4,6 @@ import { isNavigationFailure, NavigationFailureType, useRouter } from 'vue-route
 import InputField from '@/components/atoms/InputField.vue'
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import ErrorBanner from '@/components/molecules/ErrorBanner.vue'
-import Toast from '@/components/molecules/Toast.vue'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 
 const router = useRouter()
@@ -14,7 +13,6 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const errorMessage = ref('')
-const showToast = ref(false)
 
 const submit = async () => {
   loading.value = true
@@ -24,16 +22,12 @@ const submit = async () => {
 
   try {
     if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-      showToast.value = true
       await router.replace('/admin/dashboard')
     } else if (user?.roles?.includes('teacher')) {
-      showToast.value = true
       await router.replace('/teacher-dashboard')
     } else if (user?.roles?.includes('student')) {
-      showToast.value = true
       await router.replace('/dashboard')
     } else if (user) {
-      showToast.value = true
       await router.replace('/')
     } else {
       errorMessage.value = authStore.authError || 'Invalid email or password.'
@@ -50,21 +44,10 @@ const submit = async () => {
 const dismissError = () => {
   errorMessage.value = ''
 }
-
-const dismissToast = () => {
-  showToast.value = false
-}
 </script>
 
 <template>
   <form @submit.prevent="submit" class="space-y-4">
-    <Toast
-      v-if="showToast"
-      message="✅ Welcome back, Adventurer!"
-      type="success"
-      @dismiss="dismissToast"
-    />
-
     <ErrorBanner v-if="errorMessage" :message="errorMessage" @dismiss="dismissError" />
 
     <InputField
