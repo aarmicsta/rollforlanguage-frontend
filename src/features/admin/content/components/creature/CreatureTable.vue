@@ -149,14 +149,22 @@ const fetchCreatures = async () => {
 }
 
 /**
- * ---------------------------------------------------------
+ * =========================================================
  * Row Interaction
- * ---------------------------------------------------------
+ * =========================================================
  *
- * Selecting a row closes the browse view and opens the
- * species edit modal via the store.
+ * Responsibilities:
+ * - handle user interaction with creature table rows
+ * - forward selected creature records into shared store state
+ *
+ * Notes:
+ * - This is the first step in aligning the Content creature
+ *   table with the canonical Playables management pattern
+ * - Modal triggering will be added after store-driven
+ *   selection is confirmed working
  */
 const handleRowClick = (creature: CreatureListItem) => {
+  store.setSelectedCreature(creature)
   console.log('Selected creature:', creature)
 }
 
