@@ -9,13 +9,13 @@
 
     Behavior:
     - if no surface is active, nothing is rendered
-    - if a surface is active, the corresponding placeholder
-      table region is shown
+    - if a surface is active, the corresponding table
+      component is shown
     - only one surface is shown at a time
 
     Architectural Role:
     - this is a render layer only
-    - it does not fetch data
+    - it does not fetch data directly
     - it does not manage workflows
     - it does not control modals
 
@@ -44,14 +44,10 @@
     </div>
 
     <!-- Surface Body -->
-    <div class="max-h-[50vh] overflow-y-auto p-4">
-      <div v-if="activeSurface === 'creatures'">
-        <p class="text-sm text-gray-700 dark:text-gray-300">
-          Placeholder surface for future creature management tables.
-        </p>
-      </div>
+    <div class="max-h-[50vh] overflow-y-auto">
+      <CreatureTable v-if="activeSurface === 'creatures'" />
 
-      <div v-else-if="activeSurface === 'items'">
+      <div v-else-if="activeSurface === 'items'" class="p-4">
         <p class="text-sm text-gray-700 dark:text-gray-300">
           Placeholder surface for future item management tables.
         </p>
@@ -73,11 +69,12 @@
  * Notes
  * - Presentational/store-reflective only
  * - Mirrors canonical Playables surface shell
- * - Real domain tables will be introduced later
+ * - Real domain tables are introduced incrementally
  * =========================================================
  */
 
 import { computed } from 'vue'
+import CreatureTable from '@/features/admin/content/components/creature/CreatureTable.vue'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
 
 /**
