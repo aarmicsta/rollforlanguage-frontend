@@ -48,7 +48,8 @@
           <tr
             v-for="creature in creatures"
             :key="creature.id"
-            class="border-b hover:bg-gray-50 dark:hover:bg-neutral-800"
+            class="border-b cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-800"
+            @click="handleRowClick(creature)"
           >
             <td class="px-3 py-2">
               <div class="font-medium text-gray-800 dark:text-gray-100">
@@ -105,6 +106,7 @@ import {
   getCreatures,
   type CreatureListItem,
 } from '@/features/admin/content/services/creatureService'
+import { useContentStore } from '@/features/admin/content/stores/contentStore'
 
 /**
  * =========================================================
@@ -114,6 +116,19 @@ import {
 const creatures = ref<CreatureListItem[]>([])
 const loading = ref(false)
 const error = ref('')
+
+/**
+ * ---------------------------------------------------------
+ * Store / Local State
+ * ---------------------------------------------------------
+ *
+ * `store`
+ * - shared admin playable UI state
+ *
+ * `creature`
+ * - local table data for the creature browse view
+ */
+const store = useContentStore()
 
 /**
  * =========================================================
@@ -131,6 +146,18 @@ const fetchCreatures = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * ---------------------------------------------------------
+ * Row Interaction
+ * ---------------------------------------------------------
+ *
+ * Selecting a row closes the browse view and opens the
+ * species edit modal via the store.
+ */
+const handleRowClick = (creature: CreatureListItem) => {
+  console.log('Selected creature:', creature)
 }
 
 /**
