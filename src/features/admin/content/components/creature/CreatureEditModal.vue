@@ -276,6 +276,7 @@ async function handleSave() {
     if (updated) {
       store.setSelectedCreature(updated)
       editableCreature.value = { ...updated }
+      store.refreshContentList()
     }
 
     closeModal()

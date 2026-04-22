@@ -144,6 +144,22 @@ export const useContentStore = defineStore('content', () => {
     selectedCreature.value = null
   }
 
+    /**
+   * ---------------------------------------------------------
+   * Refresh Sync
+   * ---------------------------------------------------------
+   *
+   * Shared refresh signal for Content-domain browse surfaces.
+   *
+   * Components can watch this value and re-fetch their data
+   * whenever a Content-domain mutation completes.
+   */
+  const lastContentRefresh = ref(0)
+
+  function refreshContentList() {
+    lastContentRefresh.value++
+  }
+
   return {
     activeContentDomain,
     setActiveContentDomain,
@@ -155,5 +171,7 @@ export const useContentStore = defineStore('content', () => {
     selectedCreature,
     setSelectedCreature,
     clearSelectedCreature,
+    lastContentRefresh,
+    refreshContentList,
   }
 })

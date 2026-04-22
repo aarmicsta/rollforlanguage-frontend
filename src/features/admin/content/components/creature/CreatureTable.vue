@@ -107,8 +107,7 @@
  * Imports
  * =========================================================
  */
-import { onMounted, ref } from 'vue'
-import { computed } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import {
   getCreatures,
   type CreatureListItem,
@@ -186,4 +185,6 @@ const handleRowClick = (creature: CreatureListItem) => {
 onMounted(() => {
   fetchCreatures()
 })
+
+watch(() => store.lastContentRefresh, fetchCreatures)
 </script>
