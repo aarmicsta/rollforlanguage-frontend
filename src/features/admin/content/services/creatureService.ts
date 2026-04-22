@@ -69,3 +69,29 @@ export async function updateCreature(
 
   return response.data.data
 }
+
+/**
+ * Fetch assigned tags for a creature (admin).
+ */
+export async function getCreatureTags(creatureId: string) {
+  const response = await axiosInstance.get(`/admin/creatures/${creatureId}/tags`)
+
+  return response.data.data
+}
+
+/**
+ * Replace assigned tags for a creature (admin).
+ */
+export async function updateCreatureTags(
+  creatureId: string,
+  data: {
+    tagIds: string[]
+  }
+) {
+  const response = await axiosInstance.patch(
+    `/admin/creatures/${creatureId}/tags`,
+    data
+  )
+
+  return response.data.data
+}

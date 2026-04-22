@@ -122,7 +122,18 @@
       <div v-if="submitError" class="text-sm text-red-500">
         {{ submitError }}
       </div>
-
+      
+      <!--
+        ---------------------------------------------------------
+        Tag Assignment
+        ---------------------------------------------------------
+      -->
+      <CreatureTagAssignmentSelector
+        v-model="selectedTagIds"
+        :available-tags="availableTags"
+        :disabled="isSubmitting"
+      />
+      
       <!--
         ---------------------------------------------------------
         Modal Actions
@@ -160,15 +171,20 @@
  * Imports
  * =========================================================
  */
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import CreatureTagAssignmentSelector from '@/features/admin/content/components/tag/CreatureTagAssignmentSelector.vue'
 import {
+  getCreatureTags,
   updateCreature,
+  updateCreatureTags,
 } from '@/features/admin/content/services/creatureService'
 import {
   useContentStore,
   type ContentCreatureRecord,
 } from '@/features/admin/content/stores/contentStore'
+import { getPlayableTags } from '@/features/admin/playable/services/playableTagService'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
+
 
 /**
  * =========================================================
@@ -198,6 +214,24 @@ const store = useContentStore()
  */
 const editableCreature = ref<ContentCreatureRecord | null>(null)
 
+  /**
+ * ---------------------------------------------------------
+ * Tag Assignment State
+ * ---------------------------------------------------------
+ *
+ * Mirrors the canonical Playables relational-edit pattern.
+ *
+ * - `availableTags`
+ *   full canonical tag list used by the selector UI
+ * - `assignedTags`
+ *   resolved currently assigned tags from backend
+ * - `selectedTagIds`
+ *   ID-only selection model bound to the selector
+ */
+const selectedTagIds = ref<string[]>([])
+const assignedTags = ref<any[]>([])
+const availableTags = ref<any[]>([])
+
 /**
  * =========================================================
  * Submission State
@@ -218,12 +252,35 @@ const submitError = ref('')
  */
 watch(
   () => store.selectedCreature,
-  (value) => {
+  async (value) => {
     editableCreature.value = value ? { ...value } : null
     submitError.value = ''
+
+    if (!value) {
+      assignedTags.value = []
+      selectedTagIds.value = []
+      availableTags.value = []
+      return
+    }
+
+    try {
+      if (!availableTags.value.length) {
+        await loadAvailableTags()
+      }
+
+      await loadAssignedTags(value.id)
+    } catch (error) {
+      console.error('Failed to synchronize creature tag state:', error)
+      assignedTags.value = []
+      selectedTagIds.value = []
+    }
   },
   { immediate: true }
 )
+
+onMounted(async () => {
+  await loadAvailableTags()
+})
 
 /**
  * =========================================================
@@ -232,6 +289,40 @@ watch(
  */
 function formatDate(dateStr: string | null) {
   return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
+}
+
+/**
+ * =========================================================
+ * Tag Data Loading
+ * =========================================================
+ *
+ * Loads:
+ * - the full available canonical tag set
+ * - the assigned tags for the selected creature
+ *
+ * Notes:
+ * - mirrors the Playables relational-edit pattern
+ * - modal owns data loading; selector remains presentational
+ */
+async function loadAvailableTags() {
+  try {
+    availableTags.value = await getPlayableTags(false)
+  } catch (error) {
+    console.error('Failed to load creature tag options:', error)
+    availableTags.value = []
+  }
+}
+
+async function loadAssignedTags(creatureId: string) {
+  try {
+    const tags = await getCreatureTags(creatureId)
+    assignedTags.value = tags
+    selectedTagIds.value = tags.map((tag: any) => tag.id)
+  } catch (error) {
+    console.error('Failed to load assigned creature tags:', error)
+    assignedTags.value = []
+    selectedTagIds.value = []
+  }
 }
 
 /**
