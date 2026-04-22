@@ -4,80 +4,154 @@
     Creature Edit Modal
     =========================================================
 
-    First-pass edit modal for creatures.
+    Primary Content admin editing surface for a single
+    creature record.
 
     Responsibilities:
-    - display selected creature data
-    - provide structured foundation for future editing workflow
+    - display and edit core scalar creature fields
+    - present read-only creature metadata and classifications
+    - persist scalar creature edits to the backend
+    - provide canonical modal controls for Content workflows
 
     Notes:
-    - currently read-only (no form submission yet)
-    - mirrors early-stage Playables modal structure
-    - will expand to include editing, validation, and persistence
+    - This first-pass modal focuses on scalar-edit parity with
+      the Playables system
+    - Relational editing (tags, stats, etc.) will be added
+      in later iterations
   -->
-
-  <div
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  <AdminModal
+    :visible="!!store.selectedCreature"
+    title="Edit Creature"
+    size="4xl"
+    @close="closeModal"
   >
-    <div
-      class="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-900"
-    >
-      <!-- Header -->
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Edit Creature
-        </h2>
-
-        <button
-          class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
-          @click="handleClose"
-        >
-          ✕
-        </button>
-      </div>
-
-      <!-- Body -->
-      <div v-if="creature" class="mt-4 space-y-3">
-        <div>
-          <p class="text-xs text-gray-500">Name</p>
-          <p class="text-sm text-gray-800 dark:text-gray-100">
-            {{ creature.displayName }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-xs text-gray-500">Type</p>
-          <p class="text-sm text-gray-800 dark:text-gray-100">
-            {{ creature.creatureType }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-xs text-gray-500">Size</p>
-          <p class="text-sm text-gray-800 dark:text-gray-100">
-            {{ creature.sizeCategory }}
-          </p>
-        </div>
-
-        <div>
-          <p class="text-xs text-gray-500">Threat</p>
-          <p class="text-sm text-gray-800 dark:text-gray-100">
-            {{ creature.threatLevel ?? '—' }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="mt-6 flex justify-end">
-        <button
-          class="rounded bg-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-300 dark:bg-neutral-700 dark:text-gray-200 dark:hover:bg-neutral-600"
-          @click="handleClose"
-        >
-          Close
-        </button>
-      </div>
+    <div class="mb-4">
+      <button
+        @click="handleBack"
+        class="text-sm text-blue-600 hover:underline"
+      >
+        ← Back to Creature Table
+      </button>
     </div>
-  </div>
+
+    <form
+      v-if="editableCreature"
+      class="space-y-4 text-sm text-gray-800 dark:text-gray-100"
+      @submit.prevent="handleSave"
+    >
+      <!--
+        ---------------------------------------------------------
+        Core Editable Fields
+        ---------------------------------------------------------
+      -->
+      <div>
+        <label class="mb-1 block text-xs text-gray-500">Display Name</label>
+        <input
+          v-model="editableCreature.displayName"
+          type="text"
+          :disabled="isSubmitting"
+          class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+        />
+        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          {{ editableCreature.slug }}
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-xs text-gray-500">Internal Name</p>
+          <p>{{ editableCreature.name }}</p>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-xs text-gray-500">Active</label>
+          <label class="flex items-center gap-2">
+            <input
+              v-model="editableCreature.isActive"
+              type="checkbox"
+              :disabled="isSubmitting"
+              class="h-4 w-4"
+              :true-value="true"
+              :false-value="false"
+            />
+            <span>{{ editableCreature.isActive ? 'Yes' : 'No' }}</span>
+          </label>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Creature Type</p>
+          <p>{{ editableCreature.creatureType }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Size Category</p>
+          <p>{{ editableCreature.sizeCategory }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Intelligence</p>
+          <p>{{ editableCreature.intelligenceCategory ?? '—' }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Threat Level</p>
+          <p>{{ editableCreature.threatLevel ?? '—' }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">Last Updated</p>
+          <p>{{ formatDate(editableCreature.updatedAt) }}</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs text-gray-500">Description</label>
+        <textarea
+          v-model="editableCreature.description"
+          rows="5"
+          :disabled="isSubmitting"
+          class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+        />
+      </div>
+
+      <!--
+        ---------------------------------------------------------
+        Submission Error
+        ---------------------------------------------------------
+      -->
+      <div v-if="submitError" class="text-sm text-red-500">
+        {{ submitError }}
+      </div>
+
+      <!--
+        ---------------------------------------------------------
+        Modal Actions
+        ---------------------------------------------------------
+      -->
+      <div class="flex justify-end gap-2 pt-4">
+        <button
+          type="button"
+          @click="closeModal"
+          :disabled="isSubmitting"
+          class="rounded bg-gray-300 px-4 py-2 text-sm text-gray-800 hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-neutral-700 dark:text-gray-100 dark:hover:bg-neutral-600"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          :disabled="isSubmitting"
+          class="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+
+    <div v-else class="text-sm text-gray-500">
+      No creature selected.
+    </div>
+  </AdminModal>
 </template>
 
 <script setup lang="ts">
@@ -86,8 +160,25 @@
  * Imports
  * =========================================================
  */
-import { computed } from 'vue'
-import { useContentStore } from '@/features/admin/content/stores/contentStore'
+import { ref, watch } from 'vue'
+import {
+  updateCreature,
+} from '@/features/admin/content/services/creatureService'
+import {
+  useContentStore,
+  type ContentCreatureRecord,
+} from '@/features/admin/content/stores/contentStore'
+import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
+
+/**
+ * =========================================================
+ * Emits
+ * =========================================================
+ *
+ * Mirrors the canonical Playables edit-modal pattern,
+ * allowing the modal to request return to the table view.
+ */
+const emit = defineEmits<{ (e: 'back'): void }>()
 
 /**
  * =========================================================
@@ -98,17 +189,101 @@ const store = useContentStore()
 
 /**
  * =========================================================
- * Selected Creature
+ * Local Editable Scalar State
  * =========================================================
+ *
+ * Maintains a local editable copy of the selected creature
+ * so modal edits do not mutate shared selected-record state
+ * directly.
  */
-const creature = computed(() => store.selectedCreature)
+const editableCreature = ref<ContentCreatureRecord | null>(null)
 
 /**
  * =========================================================
- * Actions
+ * Submission State
+ * =========================================================
+ *
+ * Local modal submission state for save workflow feedback.
+ */
+const isSubmitting = ref(false)
+const submitError = ref('')
+
+/**
+ * =========================================================
+ * Sync Selected Creature
+ * =========================================================
+ *
+ * Keeps the local editable copy aligned with the selected
+ * creature in shared store state.
+ */
+watch(
+  () => store.selectedCreature,
+  (value) => {
+    editableCreature.value = value ? { ...value } : null
+    submitError.value = ''
+  },
+  { immediate: true }
+)
+
+/**
+ * =========================================================
+ * Helpers
  * =========================================================
  */
-const handleClose = () => {
+function formatDate(dateStr: string | null) {
+  return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
+}
+
+/**
+ * =========================================================
+ * Modal Controls
+ * =========================================================
+ */
+function closeModal() {
   store.clearSelectedCreature()
+  editableCreature.value = null
+  submitError.value = ''
+}
+
+function handleBack() {
+  closeModal()
+  emit('back')
+}
+
+/**
+ * =========================================================
+ * Save Handler
+ * =========================================================
+ *
+ * Persists scalar creature changes to the backend, then
+ * updates the shared selected-creature state with the
+ * refreshed response record so the modal reflects the
+ * saved canonical data shape.
+ */
+async function handleSave() {
+  if (!editableCreature.value) return
+
+  try {
+    isSubmitting.value = true
+    submitError.value = ''
+
+    const updated = await updateCreature(editableCreature.value.id, {
+      displayName: editableCreature.value.displayName,
+      description: editableCreature.value.description ?? null,
+      isActive: editableCreature.value.isActive ?? false,
+    })
+
+    if (updated) {
+      store.setSelectedCreature(updated)
+      editableCreature.value = { ...updated }
+    }
+
+    closeModal()
+  } catch (error) {
+    console.error(error)
+    submitError.value = 'Failed to save creature changes.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>

@@ -53,3 +53,19 @@ export async function getCreatures(): Promise<CreatureListItem[]> {
 
   return response.data.data
 }
+
+/**
+ * Update a creature (admin).
+ */
+export async function updateCreature(
+  id: string,
+  data: {
+    displayName: string
+    description: string | null
+    isActive: boolean
+  }
+): Promise<CreatureListItem | null> {
+  const response = await axiosInstance.patch(`/admin/creatures/${id}`, data)
+
+  return response.data.data
+}
