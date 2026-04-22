@@ -346,10 +346,15 @@ function handleBack() {
  * Save Handler
  * =========================================================
  *
- * Persists scalar creature changes to the backend, then
- * updates the shared selected-creature state with the
- * refreshed response record so the modal reflects the
- * saved canonical data shape.
+ * Save order:
+ * 1. scalar creature fields
+ * 2. creature tag assignments
+ *
+ * Notes:
+ * - This mirrors the canonical Playables save pattern:
+ *   scalar update first, then relational replace-all updates
+ * - Successful save triggers shared Content table refresh
+ * - The modal closes after persistence completes
  */
 async function handleSave() {
   if (!editableCreature.value) return
@@ -362,6 +367,10 @@ async function handleSave() {
       displayName: editableCreature.value.displayName,
       description: editableCreature.value.description ?? null,
       isActive: editableCreature.value.isActive ?? false,
+    })
+
+    await updateCreatureTags(editableCreature.value.id, {
+      tagIds: selectedTagIds.value,
     })
 
     if (updated) {
