@@ -5,9 +5,13 @@
  *
  * Responsibilities:
  * - fetch creature data from backend admin endpoints
+ * - create new creature records
+ * - update existing creature records
+ * - manage creature tag assignment
+ * - load canonical creature reference options for admin forms
  *
  * Notes:
- * - mirrors existing admin service patterns (e.g. playableSpeciesService)
+ * - mirrors existing admin service patterns
  * - keeps logic thin: no transformation beyond basic typing
  * - assumes backend returns hydrated display fields
  */
@@ -16,7 +20,7 @@ import { axiosInstance } from '@/services/apiClient'
 
 /**
  * ---------------------------------------------------------
- * Types
+ * Creature Browse Types
  * ---------------------------------------------------------
  */
 
@@ -41,7 +45,62 @@ export interface CreatureListItem {
 
 /**
  * ---------------------------------------------------------
- * API Calls
+ * Creature Create / Update Payloads
+ * ---------------------------------------------------------
+ */
+
+export interface CreateCreaturePayload {
+  displayName: string
+  name: string
+  slug: string
+  description: string | null
+  creatureTypeId: string
+  sizeCategoryId: string
+  isActive: boolean
+}
+
+export interface UpdateCreaturePayload {
+  displayName: string
+  description: string | null
+  isActive: boolean
+}
+
+export interface UpdateCreatureTagsPayload {
+  tagIds: string[]
+}
+
+/**
+ * ---------------------------------------------------------
+ * Reference Lookup Types
+ * ---------------------------------------------------------
+ *
+ * Canonical option shapes used by creature create/edit forms.
+ */
+
+export interface CreatureTypeOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface SizeCategoryOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  sizeRank: number | null
+  isActive: boolean
+  sortOrder: number
+}
+
+/**
+ * ---------------------------------------------------------
+ * Creature Browse
  * ---------------------------------------------------------
  */
 
@@ -55,20 +114,39 @@ export async function getCreatures(): Promise<CreatureListItem[]> {
 }
 
 /**
+ * ---------------------------------------------------------
+ * Creature Create / Update
+ * ---------------------------------------------------------
+ */
+
+/**
+ * Create a creature (admin).
+ */
+export async function createCreature(
+  data: CreateCreaturePayload
+): Promise<CreatureListItem | null> {
+  const response = await axiosInstance.post('/admin/creatures', data)
+
+  return response.data.data
+}
+
+/**
  * Update a creature (admin).
  */
 export async function updateCreature(
   id: string,
-  data: {
-    displayName: string
-    description: string | null
-    isActive: boolean
-  }
+  data: UpdateCreaturePayload
 ): Promise<CreatureListItem | null> {
   const response = await axiosInstance.patch(`/admin/creatures/${id}`, data)
 
   return response.data.data
 }
+
+/**
+ * ---------------------------------------------------------
+ * Creature Tags
+ * ---------------------------------------------------------
+ */
 
 /**
  * Fetch assigned tags for a creature (admin).
@@ -84,14 +162,36 @@ export async function getCreatureTags(creatureId: string) {
  */
 export async function updateCreatureTags(
   creatureId: string,
-  data: {
-    tagIds: string[]
-  }
+  data: UpdateCreatureTagsPayload
 ) {
   const response = await axiosInstance.patch(
     `/admin/creatures/${creatureId}/tags`,
     data
   )
+
+  return response.data.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * Reference Lookups
+ * ---------------------------------------------------------
+ */
+
+/**
+ * Fetch canonical creature type options for admin forms.
+ */
+export async function getCreatureTypes(): Promise<CreatureTypeOption[]> {
+  const response = await axiosInstance.get('/admin/creature-types')
+
+  return response.data.data
+}
+
+/**
+ * Fetch canonical size category options for admin forms.
+ */
+export async function getSizeCategories(): Promise<SizeCategoryOption[]> {
+  const response = await axiosInstance.get('/admin/size-categories')
 
   return response.data.data
 }

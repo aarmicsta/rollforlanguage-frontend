@@ -10,17 +10,20 @@ import { ref } from 'vue'
  * - own shared dashboard state for the Content admin domain
  * - coordinate active domain / active management surface
  * - hold selected records for management workflows
+ * - control Content-domain modal visibility
  *
  * Current Scope
  * - active content domain
  * - active management surface
  * - selected creature
+ * - creature create modal visibility
  *
  * Notes
  * - This store is being expanded incrementally using the
  *   Playables dashboard as the canonical reference model
- * - Modal visibility and additional selected record types
- *   will be added as the Content domain grows
+ * - Edit visibility for creatures is currently driven by
+ *   selectedCreature presence
+ * - Create visibility is explicitly store-controlled
  * =========================================================
  */
 
@@ -95,6 +98,31 @@ export const useContentStore = defineStore('content', () => {
 
   /**
    * ---------------------------------------------------------
+   * Modal Visibility
+   * ---------------------------------------------------------
+   *
+   * Explicit visibility state for Content-domain create
+   * workflows.
+   *
+   * Current scope:
+   * - creature create modal
+   */
+  const showCreateCreatureModal = ref(false)
+
+  /**
+   * ---------------------------------------------------------
+   * Refresh Sync
+   * ---------------------------------------------------------
+   *
+   * Shared refresh signal for Content-domain browse surfaces.
+   *
+   * Components can watch this value and re-fetch their data
+   * whenever a Content-domain mutation completes.
+   */
+  const lastContentRefresh = ref(0)
+
+  /**
+   * ---------------------------------------------------------
    * Actions
    * ---------------------------------------------------------
    */
@@ -144,18 +172,23 @@ export const useContentStore = defineStore('content', () => {
     selectedCreature.value = null
   }
 
-    /**
-   * ---------------------------------------------------------
-   * Refresh Sync
-   * ---------------------------------------------------------
-   *
-   * Shared refresh signal for Content-domain browse surfaces.
-   *
-   * Components can watch this value and re-fetch their data
-   * whenever a Content-domain mutation completes.
+  /**
+   * Open the creature create modal.
    */
-  const lastContentRefresh = ref(0)
+  function openCreateCreatureModal() {
+    showCreateCreatureModal.value = true
+  }
 
+  /**
+   * Close the creature create modal.
+   */
+  function closeCreateCreatureModal() {
+    showCreateCreatureModal.value = false
+  }
+
+  /**
+   * Trigger a Content-domain refresh signal for browse views.
+   */
   function refreshContentList() {
     lastContentRefresh.value++
   }
@@ -171,6 +204,11 @@ export const useContentStore = defineStore('content', () => {
     selectedCreature,
     setSelectedCreature,
     clearSelectedCreature,
+
+    showCreateCreatureModal,
+    openCreateCreatureModal,
+    closeCreateCreatureModal,
+
     lastContentRefresh,
     refreshContentList,
   }

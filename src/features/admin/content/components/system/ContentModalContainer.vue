@@ -19,6 +19,13 @@
 
   <!--
     ---------------------------------------------------------
+    Create Modals
+    ---------------------------------------------------------
+  -->
+  <CreatureCreateModal />
+
+  <!--
+    ---------------------------------------------------------
     Edit Modals
     ---------------------------------------------------------
   -->
@@ -32,5 +39,6 @@
  * =========================================================
  */
 
+import CreatureCreateModal from '@/features/admin/content/components/creature/CreatureCreateModal.vue'
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
 </script>
