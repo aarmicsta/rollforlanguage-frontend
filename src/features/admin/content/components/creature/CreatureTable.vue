@@ -4,12 +4,18 @@
     Creature Table
     =========================================================
 
-    First real Content domain surface.
+    First real Content-domain management table.
 
     Responsibilities:
-    - fetch creature data from backend
-    - render a simple, stable admin table
-    - establish baseline pattern for future content domains
+    - fetch and display creature browse records
+    - refresh when the shared Content refresh signal changes
+    - open the creature edit workflow when a row is selected
+
+    Notes:
+    - This component is browse-only.
+    - It does not render modals directly.
+    - Modal orchestration is handled via the Content store
+      and the Content modal container.
   -->
   <div class="p-4">
     <!-- Loading State -->
@@ -23,10 +29,7 @@
     </div>
 
     <!-- Empty State -->
-    <div
-      v-else-if="!creatures.length"
-      class="text-sm text-gray-500"
-    >
+    <div v-else-if="!creatures.length" class="text-sm text-gray-500">
       No creatures found.
     </div>
 
@@ -85,7 +88,7 @@
             <td class="px-3 py-2">
               <span
                 :class="[
-                  'text-xs px-2 py-1 rounded',
+                  'rounded px-2 py-1 text-xs',
                   creature.isActive
                     ? 'bg-green-100 text-green-700'
                     : 'bg-gray-200 text-gray-600'
@@ -108,23 +111,12 @@
  * =========================================================
  */
 import { computed, onMounted, ref, watch } from 'vue'
+
 import {
   getCreatures,
   type CreatureListItem,
 } from '@/features/admin/content/services/creatureService'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
-
-
-const selectedCreature = computed(() => store.selectedCreature)
-
-/**
- * =========================================================
- * State
- * =========================================================
- */
-const creatures = ref<CreatureListItem[]>([])
-const loading = ref(false)
-const error = ref('')
 
 /**
  * ---------------------------------------------------------
@@ -132,19 +124,42 @@ const error = ref('')
  * ---------------------------------------------------------
  *
  * `store`
- * - shared admin playable UI state
+ * - shared admin Content UI state
  *
- * `creature`
+ * `creatures`
  * - local table data for the creature browse view
  */
 const store = useContentStore()
+const creatures = ref<CreatureListItem[]>([])
 
 /**
- * =========================================================
- * Data Fetch
- * =========================================================
+ * ---------------------------------------------------------
+ * Derived State
+ * ---------------------------------------------------------
+ *
+ * Used to visually reflect the currently selected creature
+ * row while the edit workflow is active.
  */
-const fetchCreatures = async () => {
+const selectedCreature = computed(() => store.selectedCreature)
+
+/**
+ * ---------------------------------------------------------
+ * Request State
+ * ---------------------------------------------------------
+ *
+ * Local loading and error state for creature browse loading.
+ */
+const loading = ref(false)
+const error = ref('')
+
+/**
+ * ---------------------------------------------------------
+ * Data Loading
+ * ---------------------------------------------------------
+ *
+ * Fetches creature browse records from the admin service.
+ */
+async function fetchCreatures() {
   loading.value = true
   error.value = ''
 
@@ -158,33 +173,25 @@ const fetchCreatures = async () => {
 }
 
 /**
- * =========================================================
+ * ---------------------------------------------------------
  * Row Interaction
- * =========================================================
+ * ---------------------------------------------------------
  *
- * Responsibilities:
- * - handle user interaction with creature table rows
- * - forward selected creature records into shared store state
- *
- * Notes:
- * - This is the first step in aligning the Content creature
- *   table with the canonical Playables management pattern
- * - Modal triggering will be added after store-driven
- *   selection is confirmed working
+ * Selecting a row opens the creature edit workflow via
+ * shared Content-store selection state.
  */
-const handleRowClick = (creature: CreatureListItem) => {
+function handleRowClick(creature: CreatureListItem) {
   store.setSelectedCreature(creature)
-  console.log('Selected creature:', creature)
 }
 
 /**
- * =========================================================
- * Lifecycle
- * =========================================================
+ * ---------------------------------------------------------
+ * Lifecycle / Refresh Sync
+ * ---------------------------------------------------------
+ *
+ * - fetch on mount
+ * - refetch whenever the shared Content refresh signal changes
  */
-onMounted(() => {
-  fetchCreatures()
-})
-
+onMounted(fetchCreatures)
 watch(() => store.lastContentRefresh, fetchCreatures)
 </script>

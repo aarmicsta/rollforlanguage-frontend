@@ -8,16 +8,16 @@
     creature record.
 
     Responsibilities:
-    - display and edit core scalar creature fields
-    - present read-only creature metadata and classifications
-    - persist scalar creature edits to the backend
-    - provide canonical modal controls for Content workflows
+    - edit core scalar creature fields
+    - manage tag assignment for the creature
+    - display read-only creature metadata and classifications
+    - persist creature edits through Content-domain services
 
     Notes:
-    - This first-pass modal focuses on scalar-edit parity with
-      the Playables system
-    - Relational editing (tags, stats, etc.) will be added
-      in later iterations
+    - visibility is controlled by selectedCreature store state
+    - local editable copy is used to prevent direct mutation
+    - relational data is loaded by the modal and passed into
+      presentational selector components
   -->
   <AdminModal
     :visible="!!store.selectedCreature"
@@ -116,15 +116,6 @@
 
       <!--
         ---------------------------------------------------------
-        Submission Error
-        ---------------------------------------------------------
-      -->
-      <div v-if="submitError" class="text-sm text-red-500">
-        {{ submitError }}
-      </div>
-      
-      <!--
-        ---------------------------------------------------------
         Tag Assignment
         ---------------------------------------------------------
       -->
@@ -133,7 +124,16 @@
         :available-tags="availableTags"
         :disabled="isSubmitting"
       />
-      
+
+      <!--
+        ---------------------------------------------------------
+        Submission Error
+        ---------------------------------------------------------
+      -->
+      <div v-if="submitError" class="text-sm text-red-500">
+        {{ submitError }}
+      </div>
+
       <!--
         ---------------------------------------------------------
         Modal Actions
@@ -172,6 +172,7 @@
  * =========================================================
  */
 import { onMounted, ref, watch } from 'vue'
+import { useToastStore } from '@/stores/ui/useToastStore'
 import CreatureTagAssignmentSelector from '@/features/admin/content/components/tag/CreatureTagAssignmentSelector.vue'
 import {
   getCreatureTags,
@@ -182,7 +183,10 @@ import {
   useContentStore,
   type ContentCreatureRecord,
 } from '@/features/admin/content/stores/contentStore'
-import { getPlayableTags } from '@/features/admin/playable/services/playableTagService'
+import {
+  getPlayableTags,
+  type PlayableTag,
+} from '@/features/admin/playable/services/playableTagService'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
 
@@ -202,24 +206,22 @@ const emit = defineEmits<{ (e: 'back'): void }>()
  * =========================================================
  */
 const store = useContentStore()
+const toastStore = useToastStore()
 
 /**
- * =========================================================
+ * ---------------------------------------------------------
  * Local Editable Scalar State
- * =========================================================
+ * ---------------------------------------------------------
  *
- * Maintains a local editable copy of the selected creature
- * so modal edits do not mutate shared selected-record state
- * directly.
+ * Uses a shallow local copy so the modal can edit safely
+ * without directly mutating store-selected records.
  */
 const editableCreature = ref<ContentCreatureRecord | null>(null)
 
-  /**
+/**
  * ---------------------------------------------------------
  * Tag Assignment State
  * ---------------------------------------------------------
- *
- * Mirrors the canonical Playables relational-edit pattern.
  *
  * - `availableTags`
  *   full canonical tag list used by the selector UI
@@ -229,26 +231,27 @@ const editableCreature = ref<ContentCreatureRecord | null>(null)
  *   ID-only selection model bound to the selector
  */
 const selectedTagIds = ref<string[]>([])
-const assignedTags = ref<any[]>([])
-const availableTags = ref<any[]>([])
+const assignedTags = ref<PlayableTag[]>([])
+const availableTags = ref<PlayableTag[]>([])
 
 /**
- * =========================================================
+ * ---------------------------------------------------------
  * Submission State
- * =========================================================
+ * ---------------------------------------------------------
  *
- * Local modal submission state for save workflow feedback.
+ * Local submission and error state for the creature edit
+ * workflow.
  */
 const isSubmitting = ref(false)
 const submitError = ref('')
 
 /**
- * =========================================================
- * Sync Selected Creature
- * =========================================================
+ * ---------------------------------------------------------
+ * Watch: Selected Creature
+ * ---------------------------------------------------------
  *
- * Keeps the local editable copy aligned with the selected
- * creature in shared store state.
+ * Synchronizes local scalar state and relational assignment
+ * state whenever the store-selected creature changes.
  */
 watch(
   () => store.selectedCreature,
@@ -278,31 +281,12 @@ watch(
   { immediate: true }
 )
 
-onMounted(async () => {
-  await loadAvailableTags()
-})
-
 /**
- * =========================================================
- * Helpers
- * =========================================================
- */
-function formatDate(dateStr: string | null) {
-  return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
-}
-
-/**
- * =========================================================
- * Tag Data Loading
- * =========================================================
+ * ---------------------------------------------------------
+ * Reference Data Loading
+ * ---------------------------------------------------------
  *
- * Loads:
- * - the full available canonical tag set
- * - the assigned tags for the selected creature
- *
- * Notes:
- * - mirrors the Playables relational-edit pattern
- * - modal owns data loading; selector remains presentational
+ * Loads the master option sets used by relational selectors.
  */
 async function loadAvailableTags() {
   try {
@@ -315,9 +299,9 @@ async function loadAvailableTags() {
 
 async function loadAssignedTags(creatureId: string) {
   try {
-    const tags = await getCreatureTags(creatureId)
+    const tags: PlayableTag[] = await getCreatureTags(creatureId)
     assignedTags.value = tags
-    selectedTagIds.value = tags.map((tag: any) => tag.id)
+    selectedTagIds.value = tags.map((tag) => tag.id)
   } catch (error) {
     console.error('Failed to load assigned creature tags:', error)
     assignedTags.value = []
@@ -325,10 +309,25 @@ async function loadAssignedTags(creatureId: string) {
   }
 }
 
+onMounted(async () => {
+  await loadAvailableTags()
+})
+
 /**
- * =========================================================
+ * ---------------------------------------------------------
+ * Formatting
+ * ---------------------------------------------------------
+ *
+ * Lightweight formatter for nullable backend date strings.
+ */
+function formatDate(dateStr: string | null) {
+  return dateStr ? new Date(dateStr).toLocaleDateString() : '—'
+}
+
+/**
+ * ---------------------------------------------------------
  * Modal Controls
- * =========================================================
+ * ---------------------------------------------------------
  */
 function closeModal() {
   store.clearSelectedCreature()
@@ -342,19 +341,16 @@ function handleBack() {
 }
 
 /**
- * =========================================================
+ * ---------------------------------------------------------
  * Save Handler
- * =========================================================
+ * ---------------------------------------------------------
  *
  * Save order:
  * 1. scalar creature fields
  * 2. creature tag assignments
  *
- * Notes:
- * - This mirrors the canonical Playables save pattern:
- *   scalar update first, then relational replace-all updates
- * - Successful save triggers shared Content table refresh
- * - The modal closes after persistence completes
+ * This mirrors the canonical Playables save pattern:
+ * scalar update first, then relational replace-all updates.
  */
 async function handleSave() {
   if (!editableCreature.value) return
@@ -380,6 +376,7 @@ async function handleSave() {
     }
 
     closeModal()
+    toastStore.showToast('Creature updated successfully.', 'success')
   } catch (error) {
     console.error(error)
     submitError.value = 'Failed to save creature changes.'

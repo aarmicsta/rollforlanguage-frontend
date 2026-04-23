@@ -28,7 +28,7 @@
       Displays the current Content dashboard context and the
       available domain pills.
     -->
-    <ContentDashboardContextBar activeDomain="creatures" />
+    <ContentContextBar />
 
     <!--
       ---------------------------------------------------------
@@ -58,10 +58,10 @@
       Centralized Content Modal Rendering
       ---------------------------------------------------------
 
-      All major create/edit workflows will remain mounted
-      centrally through the Content modal container.
+      All major create/edit workflows remain mounted centrally
+      through the Content modal container.
     -->
-    <ContentDashboardModalContainer />
+    <ContentModalContainer />
   </div>
 </template>
 
@@ -82,17 +82,16 @@
  * Notes:
  * - This view is intentionally thin.
  * - Business logic and modal state orchestration live elsewhere:
- *   - context bar reflects active domain
+ *   - context bar reflects active Content domain
  *   - sidebar tools dispatch actions
- *   - contentDashboardStore will own state
- *   - ContentManagementSurface will reflect active table state
- *   - ContentDashboardModalContainer will render workflow modals
+ *   - contentStore owns shared Content dashboard state
+ *   - ContentManagementSurface reflects active table state
+ *   - ContentModalContainer renders centralized workflow modals
  */
-
-import ContentDashboardContextBar from '@/features/admin/content/components/ContentContextBar.vue'
+import ContentContextBar from '@/features/admin/content/components/ContentContextBar.vue'
 import ContentMetricsWidget from '@/features/admin/content/components/ContentMetricsWidget.vue'
 import ContentTableWidget from '@/features/admin/content/components/ContentTableWidget.vue'
 import ContentManagementSurface from '@/features/admin/content/components/system/ContentManagementSurface.vue'
-import ContentDashboardModalContainer from '@/features/admin/content/components/system/ContentModalContainer.vue'
+import ContentModalContainer from '@/features/admin/content/components/system/ContentModalContainer.vue'
 import DashboardWidgetGrid from '@/features/admin/dashboard/components/DashboardWidgetGrid.vue'
 </script>

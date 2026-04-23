@@ -4,10 +4,25 @@
     Content Modal Container
     =========================================================
 
-    Renders Content-domain modals based on shared store state.
+    Centralized rendering layer for all Content-related modals.
+
+    Responsibilities:
+    - mount all modal components for the Content dashboard
+    - control visibility via Content store state
+    - decouple modal rendering from table and sidebar interactions
+
+    Notes:
+    - table interactions set selected records in the store
+    - store state determines which modals are visible
+    - this container owns all modal mounting for the Content domain
   -->
 
-  <CreatureEditModal v-if="selectedCreature" />
+  <!--
+    ---------------------------------------------------------
+    Edit Modals
+    ---------------------------------------------------------
+  -->
+  <CreatureEditModal />
 </template>
 
 <script setup lang="ts">
@@ -16,27 +31,6 @@
  * Imports
  * =========================================================
  */
-import { computed } from 'vue'
+
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
-import { useContentStore } from '@/features/admin/content/stores/contentStore'
-
-
-/**
- * =========================================================
- * Store
- * =========================================================
- *
- * The Content modal container is fully store-driven.
- */
-const store = useContentStore()
-
-/**
- * =========================================================
- * Selected Records
- * =========================================================
- *
- * Temporary computed bridge used to confirm that centralized
- * modal-layer access to selected creature state is working.
- */
-const selectedCreature = computed(() => store.selectedCreature)
 </script>
