@@ -63,6 +63,9 @@ function handleAction(action: string) {
       break
 
     case 'createCreature':
+      store.openCreateCreatureModal()
+      break
+
     case 'createItem':
       console.log(`[ContentSidebarTools] create action: ${action}`)
       break
