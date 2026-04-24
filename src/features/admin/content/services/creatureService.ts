@@ -31,6 +31,11 @@ export interface CreatureListItem {
   displayName: string
   description: string | null
 
+  creatureTypeId: string
+  sizeCategoryId: string
+  intelligenceCategoryId: string | null
+  threatLevelId: string | null
+
   creatureType: string
   sizeCategory: string
   intelligenceCategory: string | null
@@ -62,6 +67,10 @@ export interface CreateCreaturePayload {
 export interface UpdateCreaturePayload {
   displayName: string
   description: string | null
+  creatureTypeId: string
+  sizeCategoryId: string
+  intelligenceCategoryId: string | null
+  threatLevelId: string | null
   isActive: boolean
 }
 
@@ -94,6 +103,30 @@ export interface SizeCategoryOption {
   displayName: string
   description: string | null
   sizeRank: number | null
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface IntelligenceCategoryOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  intelligenceRank: number | null
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface ThreatLevelOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  threatRank: number | null
+  recommendedLevelMin: number | null
+  recommendedLevelMax: number | null
   isActive: boolean
   sortOrder: number
 }
@@ -192,6 +225,26 @@ export async function getCreatureTypes(): Promise<CreatureTypeOption[]> {
  */
 export async function getSizeCategories(): Promise<SizeCategoryOption[]> {
   const response = await axiosInstance.get('/admin/size-categories')
+
+  return response.data.data
+}
+
+/**
+ * Fetch canonical intelligence category options for admin forms.
+ */
+export async function getIntelligenceCategories(): Promise<
+  IntelligenceCategoryOption[]
+> {
+  const response = await axiosInstance.get('/admin/intelligence-categories')
+
+  return response.data.data
+}
+
+/**
+ * Fetch canonical threat level category options for admin forms.
+ */
+export async function getThreatLevels(): Promise<ThreatLevelOption[]> {
+  const response = await axiosInstance.get('/admin/threat-levels')
 
   return response.data.data
 }

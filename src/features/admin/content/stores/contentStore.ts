@@ -50,6 +50,11 @@ export interface ContentCreatureRecord {
   displayName: string
   description: string | null
 
+  creatureTypeId: string
+  sizeCategoryId: string
+  intelligenceCategoryId: string | null
+  threatLevelId: string | null
+
   creatureType: string
   sizeCategory: string
   intelligenceCategory: string | null

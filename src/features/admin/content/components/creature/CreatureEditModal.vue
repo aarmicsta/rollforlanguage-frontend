@@ -79,23 +79,75 @@
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Creature Type</p>
-          <p>{{ editableCreature.creatureType }}</p>
+          <label class="mb-1 block text-xs text-gray-500">Creature Type</label>
+          <select
+            v-model="editableCreature.creatureTypeId"
+            :disabled="isSubmitting || isLoadingReferenceOptions"
+            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+          >
+            <option value="">Select creature type...</option>
+            <option
+              v-for="type in availableCreatureTypes"
+              :key="type.id"
+              :value="type.id"
+            >
+              {{ type.displayName }}
+            </option>
+          </select>
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Size Category</p>
-          <p>{{ editableCreature.sizeCategory }}</p>
+          <label class="mb-1 block text-xs text-gray-500">Size Category</label>
+          <select
+            v-model="editableCreature.sizeCategoryId"
+            :disabled="isSubmitting || isLoadingReferenceOptions"
+            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+          >
+            <option value="">Select size category...</option>
+            <option
+              v-for="size in availableSizeCategories"
+              :key="size.id"
+              :value="size.id"
+            >
+              {{ size.displayName }}
+            </option>
+          </select>
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Intelligence</p>
-          <p>{{ editableCreature.intelligenceCategory ?? '—' }}</p>
+          <label class="mb-1 block text-xs text-gray-500">Intelligence</label>
+          <select
+            v-model="editableCreature.intelligenceCategoryId"
+            :disabled="isSubmitting || isLoadingReferenceOptions"
+            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+          >
+            <option :value="null">Unassigned</option>
+            <option
+              v-for="category in availableIntelligenceCategories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.displayName }}
+            </option>
+          </select>
         </div>
 
         <div>
-          <p class="text-xs text-gray-500">Threat Level</p>
-          <p>{{ editableCreature.threatLevel ?? '—' }}</p>
+          <label class="mb-1 block text-xs text-gray-500">Threat Level</label>
+          <select
+            v-model="editableCreature.threatLevelId"
+            :disabled="isSubmitting || isLoadingReferenceOptions"
+            class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+          >
+            <option :value="null">Unassigned</option>
+            <option
+              v-for="level in availableThreatLevels"
+              :key="level.id"
+              :value="level.id"
+            >
+              {{ level.displayName }}
+            </option>
+          </select>
         </div>
 
         <div>
@@ -176,8 +228,16 @@ import { useToastStore } from '@/stores/ui/useToastStore'
 import CreatureTagAssignmentSelector from '@/features/admin/content/components/tag/CreatureTagAssignmentSelector.vue'
 import {
   getCreatureTags,
+  getCreatureTypes,
+  getIntelligenceCategories,
+  getSizeCategories,
+  getThreatLevels,
   updateCreature,
   updateCreatureTags,
+  type CreatureTypeOption,
+  type IntelligenceCategoryOption,
+  type SizeCategoryOption,
+  type ThreatLevelOption,
 } from '@/features/admin/content/services/creatureService'
 import {
   useContentStore,
@@ -233,6 +293,32 @@ const editableCreature = ref<ContentCreatureRecord | null>(null)
 const selectedTagIds = ref<string[]>([])
 const assignedTags = ref<PlayableTag[]>([])
 const availableTags = ref<PlayableTag[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Classification Reference State
+ * ---------------------------------------------------------
+ *
+ * Canonical option sets used by creature classification
+ * selectors in the edit workflow.
+ *
+ * Notes:
+ * - creature type and size category are required creature fields
+ * - intelligence category and threat level are optional creature fields
+ */
+const availableCreatureTypes = ref<CreatureTypeOption[]>([])
+const availableSizeCategories = ref<SizeCategoryOption[]>([])
+const availableIntelligenceCategories = ref<IntelligenceCategoryOption[]>([])
+const availableThreatLevels = ref<ThreatLevelOption[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Reference Loading State
+ * ---------------------------------------------------------
+ *
+ * Tracks loading state for classification option retrieval.
+ */
+const isLoadingReferenceOptions = ref(false)
 
 /**
  * ---------------------------------------------------------
@@ -309,8 +395,62 @@ async function loadAssignedTags(creatureId: string) {
   }
 }
 
+/**
+ * ---------------------------------------------------------
+ * Load Classification Reference Options
+ * ---------------------------------------------------------
+ *
+ * Loads canonical creature classification option sets used by
+ * the edit modal.
+ *
+ * Sources:
+ * - creature types
+ * - size categories
+ * - intelligence categories
+ * - threat levels
+ *
+ * Notes:
+ * - failures fall back to empty arrays to prevent modal breakage
+ * - validation remains handled by required select bindings and
+ *   backend schema expectations
+ */
+async function loadReferenceOptions() {
+  try {
+    isLoadingReferenceOptions.value = true
+
+    const [
+      creatureTypes,
+      sizeCategories,
+      intelligenceCategories,
+      threatLevels,
+    ] = await Promise.all([
+      getCreatureTypes(),
+      getSizeCategories(),
+      getIntelligenceCategories(),
+      getThreatLevels(),
+    ])
+
+    availableCreatureTypes.value = creatureTypes
+    availableSizeCategories.value = sizeCategories
+    availableIntelligenceCategories.value = intelligenceCategories
+    availableThreatLevels.value = threatLevels
+  } catch (error) {
+    console.error('Failed to load creature classification options:', error)
+
+    availableCreatureTypes.value = []
+    availableSizeCategories.value = []
+    availableIntelligenceCategories.value = []
+    availableThreatLevels.value = []
+  } finally {
+    isLoadingReferenceOptions.value = false
+  }
+}
+
 onMounted(async () => {
-  await loadAvailableTags()
+  await Promise.all([
+    loadAvailableTags(),
+    loadReferenceOptions(),
+  ])
 })
 
 /**
@@ -362,6 +502,11 @@ async function handleSave() {
     const updated = await updateCreature(editableCreature.value.id, {
       displayName: editableCreature.value.displayName,
       description: editableCreature.value.description ?? null,
+      creatureTypeId: editableCreature.value.creatureTypeId,
+      sizeCategoryId: editableCreature.value.sizeCategoryId,
+      intelligenceCategoryId:
+        editableCreature.value.intelligenceCategoryId || null,
+      threatLevelId: editableCreature.value.threatLevelId || null,
       isActive: editableCreature.value.isActive ?? false,
     })
 
