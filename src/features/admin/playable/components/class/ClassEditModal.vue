@@ -358,7 +358,7 @@ async function handleSave() {
     )
 
     if (response.data) {
-      store.selectedClass = response.data
+      store.setSelectedClass(response.data)
     }
 
     store.refreshPlayableList()

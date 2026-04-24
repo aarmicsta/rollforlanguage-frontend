@@ -308,6 +308,7 @@ function closeModal() {
   if (store.isSubmitting) return
 
   resetForm()
+  store.submitError = null
   store.closeCreatePassiveModal()
 }
 
@@ -335,9 +336,9 @@ async function handleCreate() {
 
     store.refreshPlayableList()
     closeModal()
-  } catch (err) {
-    console.error(err)
-    store.submitError = 'Failed to create passive'
+  } catch (error) {
+    console.error(error)
+    store.submitError = 'Failed to create passive.'
   } finally {
     store.isSubmitting = false
   }

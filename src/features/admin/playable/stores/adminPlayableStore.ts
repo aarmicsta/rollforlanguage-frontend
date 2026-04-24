@@ -258,6 +258,33 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
 
   /**
    * ---------------------------------------------------------
+   * Canonical Entity Selection Actions
+   * ---------------------------------------------------------
+   *
+   * Explicit setters for canonical edit targets.
+   *
+   * These are primarily used after successful edit operations
+   * when a modal needs to refresh the selected record without
+   * reopening or closing the workflow.
+   */
+  function setSelectedSpecies(species: PlayableSpeciesEditItem | null) {
+    selectedSpecies.value = species
+  }
+
+  function setSelectedClass(classItem: PlayableClassEditItem | null) {
+    selectedClass.value = classItem
+  }
+
+  function setSelectedStat(stat: PlayableStatEditItem | null) {
+    selectedStat.value = stat
+  }
+
+  function setSelectedPassive(passive: PlayablePassiveEditItem | null) {
+    selectedPassive.value = passive
+  }
+
+  /**
+   * ---------------------------------------------------------
    * Create Modal Actions
    * ---------------------------------------------------------
    *
@@ -447,6 +474,12 @@ export const useAdminPlayableStore = defineStore('adminPlayableStore', () => {
     selectedClass,
     selectedStat,
     selectedPassive,
+
+    // Canonical entity selection actions
+    setSelectedSpecies,
+    setSelectedClass,
+    setSelectedStat,
+    setSelectedPassive,
 
     // Unified row selection
     selectedStatModifierRow,

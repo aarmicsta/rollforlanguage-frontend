@@ -7,15 +7,17 @@
     Dedicated edit surface for a creature's base stat values.
 
     Responsibilities:
-    - load editable base stat rows for the selected creature
-    - display one numeric input per canonical stat definition
-    - persist base stat values through Content-domain services
+    - edit core scalar creature fields
+    - edit creature classification fields
+    - manage tag assignment for the creature
+    - persist creature edits through Content-domain services
 
     Notes:
-    - this modal edits base stat values only
-    - it does not model derived/final stats
-    - future modifiers, scaling, and variant layers should build
-      on top of these base values rather than replacing them
+    - visibility is controlled by explicit Content store modal state
+    - selectedCreature provides the edit target, but does not control visibility
+    - local editable copy is used to prevent direct mutation
+    - relational and reference data are loaded by the modal and passed into
+      presentational selector components
   -->
   <AdminModal
     :visible="store.showCreatureBaseStatsModal"
@@ -181,11 +183,18 @@ const editableStats = ref<CreatureBaseStatEditRow[]>([])
  * ---------------------------------------------------------
  * Request / Submission State
  * ---------------------------------------------------------
+ *
+ * Loading state remains local because it only applies to this
+ * modal's base-stat retrieval lifecycle.
+ *
+ * Submission state is delegated to the Content store so submit
+ * behavior remains consistent across Content-domain modals.
  */
 const loading = ref(false)
 const loadError = ref('')
-const isSubmitting = ref(false)
-const submitError = ref('')
+
+const isSubmitting = computed(() => store.isSubmitting)
+const submitError = computed(() => store.submitError)
 
 /**
  * ---------------------------------------------------------
@@ -201,7 +210,7 @@ watch(
     if (!visible || !creatureId) {
       editableStats.value = []
       loadError.value = ''
-      submitError.value = ''
+      store.clearSubmitError()
       return
     }
 
@@ -218,7 +227,7 @@ watch(
 async function loadBaseStats(creatureId: string) {
   loading.value = true
   loadError.value = ''
-  submitError.value = ''
+  store.clearSubmitError()
 
   try {
     const stats = await getCreatureBaseStats(creatureId)
@@ -240,9 +249,10 @@ async function loadBaseStats(creatureId: string) {
 function closeModal() {
   store.closeCreatureBaseStatsModal()
   store.clearSelectedCreature()
+  store.clearSubmitError()
+
   editableStats.value = []
   loadError.value = ''
-  submitError.value = ''
 }
 
 function handleBack() {
@@ -263,8 +273,8 @@ async function handleSave() {
   if (!selectedCreature.value) return
 
   try {
-    isSubmitting.value = true
-    submitError.value = ''
+    store.setSubmitting(true)
+    store.clearSubmitError()
 
     await updateCreatureBaseStats(
       selectedCreature.value.id,
@@ -282,9 +292,9 @@ async function handleSave() {
     toastStore.showToast('Creature base stats updated successfully.', 'success')
   } catch (error) {
     console.error('Failed to save creature base stats:', error)
-    submitError.value = 'Failed to save creature base stats.'
+    store.setSubmitError('Failed to save creature base stats.')
   } finally {
-    isSubmitting.value = false
+    store.setSubmitting(false)
   }
 }
 </script>

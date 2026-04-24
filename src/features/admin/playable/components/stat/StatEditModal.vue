@@ -267,14 +267,14 @@ async function handleSave() {
       sortOrder: editableStat.value.sortOrder ?? 0,
     })
 
-    store.selectedStat = {
+    store.setSelectedStat({
       ...updated,
       description: updated.description ?? null,
       isActive: updated.isActive ?? false,
       sortOrder: updated.sortOrder ?? 0,
       createdAt: updated.createdAt ?? null,
       updatedAt: updated.updatedAt ?? null,
-    }
+    })
 
     store.refreshPlayableList()
     closeModal()

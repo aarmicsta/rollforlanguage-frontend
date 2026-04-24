@@ -319,7 +319,7 @@ async function handleSave() {
     )
 
     if (response.data) {
-      store.selectedSpecies = response.data
+      store.setSelectedSpecies(response.data)
     }
 
     store.refreshPlayableList()
