@@ -12,21 +12,22 @@
     - auto-generate canonical helper fields from displayName
     - allow manual override of generated name/slug
     - optionally assign tags during initial creation
+    - optionally assign base stats during initial creation
     - submit the create payload to the backend
 
     Notes:
     - this mirrors the established Playables create-modal pattern
     - required classification fields are loaded from canonical
       reference tables via backend lookup endpoints
-    - tag assignment occurs only after the creature record has
-      been successfully created and returned by the backend
-    - assignment UI is intentionally collapsed by default to
+    - tag and base stat assignment occur only after the creature
+      record has been successfully created and returned
+    - optional sections are intentionally collapsed by default to
       preserve a clean, low-friction core create flow
   -->
   <AdminModal
     :visible="store.showCreateCreatureModal"
     title="Create Creature"
-    size="4xl"
+    size="5xl"
     @close="closeModal"
   >
     <form
@@ -37,9 +38,6 @@
         ---------------------------------------------------------
         Display Name
         ---------------------------------------------------------
-
-        Primary admin-facing input. Canonical helper fields are
-        generated from this until manually overridden.
       -->
       <div>
         <label class="mb-1 block text-xs text-gray-500">Display Name</label>
@@ -56,9 +54,6 @@
         ---------------------------------------------------------
         Canonical Identity Fields
         ---------------------------------------------------------
-
-        These auto-generate from displayName by default, but may
-        be edited manually before submission.
       -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
@@ -96,9 +91,6 @@
         ---------------------------------------------------------
         Required Classification Fields
         ---------------------------------------------------------
-
-        These fields are required by the creature schema and are
-        populated from canonical backend reference lookups.
       -->
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
@@ -171,50 +163,110 @@
 
       <!--
         ---------------------------------------------------------
-        Optional Assignments
+        Optional Tags
         ---------------------------------------------------------
-
-        Assignments are intentionally hidden by default so the
-        modal preserves a clean, low-friction core create flow.
-
-        When expanded, this section allows the admin to assign
-        canonical tags during initial creation.
       -->
       <div class="rounded border dark:border-neutral-700">
         <button
           type="button"
           :disabled="isSubmitting"
           class="flex w-full items-center justify-between px-4 py-3 text-left"
-          @click="toggleAssignments"
+          @click="toggleTagAssignment"
         >
           <div>
             <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-              Assignments
+              Optional Tags
             </h3>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Optionally assign tags during initial creature creation.
+              Assign canonical tags during initial creature creation.
             </p>
           </div>
 
           <span class="text-xs text-gray-500 dark:text-gray-400">
-            {{ showAssignments ? 'Hide' : 'Show' }}
+            {{ showTagAssignment ? 'Hide' : 'Show' }}
           </span>
         </button>
 
         <div
-          v-if="showAssignments"
+          v-if="showTagAssignment"
           class="border-t px-4 py-4 dark:border-neutral-700"
         >
-          <!--
-            The parent owns layout constraints for scrolling so the
-            selector component itself remains reusable across contexts.
-          -->
           <div class="max-h-72 overflow-y-auto pr-1">
             <CreatureTagAssignmentSelector
               v-model="selectedTagIds"
               :available-tags="availableTags"
               :disabled="isSubmitting"
             />
+          </div>
+        </div>
+      </div>
+
+      <!--
+        ---------------------------------------------------------
+        Optional Base Stats
+        ---------------------------------------------------------
+      -->
+      <div class="rounded border dark:border-neutral-700">
+        <button
+          type="button"
+          :disabled="isSubmitting"
+          class="flex w-full items-center justify-between px-4 py-3 text-left"
+          @click="toggleBaseStats"
+        >
+          <div>
+            <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              Optional Base Stats
+            </h3>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Set initial base stat values for this creature.
+            </p>
+          </div>
+
+          <span class="text-xs text-gray-500 dark:text-gray-400">
+            {{ showBaseStats ? 'Hide' : 'Show' }}
+          </span>
+        </button>
+
+        <div
+          v-if="showBaseStats"
+          class="border-t px-4 py-4 dark:border-neutral-700"
+        >
+          <div class="max-h-72 overflow-y-auto pr-1">
+            <div
+              v-for="stat in baseStatRows"
+              :key="stat.statId"
+              class="grid grid-cols-1 gap-3 border-b py-3 last:border-b-0 dark:border-neutral-700 md:grid-cols-[1fr_10rem]"
+            >
+              <div>
+                <p class="font-medium text-gray-800 dark:text-gray-100">
+                  {{ stat.statDisplayName }}
+                </p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  {{ stat.statSlug }}
+                </p>
+              </div>
+
+              <div>
+                <label class="mb-1 block text-xs text-gray-500">
+                  Base Value
+                </label>
+                <input
+                  v-model.number="stat.baseValue"
+                  type="number"
+                  step="1"
+                  :disabled="isSubmitting"
+                  class="w-full rounded border px-3 py-2 text-sm text-gray-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-gray-100"
+                  placeholder="—"
+                />
+              </div>
+            </div>
+
+            <p
+              v-if="!baseStatRows.length"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
+              No canonical stats available.
+            </p>
           </div>
         </div>
       </div>
@@ -282,14 +334,7 @@
  * - sizeCategoryId
  * - isActive
  * - optional initial tag assignment
- *
- * Notes:
- * - `name` and `slug` are auto-generated from displayName until
- *   manually edited by the admin
- * - creatureTypeId and sizeCategoryId are required by schema
- * - backend is expected to generate the canonical `id`
- * - relational tag assignment occurs only after the creature
- *   record has been successfully created and returned
+ * - optional initial base stat assignment
  */
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
@@ -299,33 +344,26 @@ import {
   createCreature,
   getCreatureTypes,
   getSizeCategories,
+  updateCreatureBaseStats,
   updateCreatureTags,
+  type CreatureBaseStatEditRow,
   type CreatureTypeOption,
   type SizeCategoryOption,
 } from '@/features/admin/content/services/creatureService'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
+import {
+  getPlayableStats,
+  type PlayableStat,
+} from '@/features/admin/playable/services/playableStatService'
 import {
   getPlayableTags,
   type PlayableTag,
 } from '@/features/admin/playable/services/playableTagService'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
-/**
- * ---------------------------------------------------------
- * Store / Global Feedback
- * ---------------------------------------------------------
- */
 const store = useContentStore()
 const toastStore = useToastStore()
 
-/**
- * ---------------------------------------------------------
- * Local Form State
- * ---------------------------------------------------------
- *
- * `name` and `slug` begin as generated helpers derived from
- * displayName, but may be manually overridden before submit.
- */
 const form = reactive({
   displayName: '',
   name: '',
@@ -336,81 +374,54 @@ const form = reactive({
   isActive: true,
 })
 
-/**
- * Tracks whether the admin has manually overridden the
- * auto-generated helper fields.
- */
 const nameManuallyEdited = ref(false)
 const slugManuallyEdited = ref(false)
 
-/**
- * ---------------------------------------------------------
- * Assignment UI State
- * ---------------------------------------------------------
- *
- * These refs support optional tag assignment during the
- * initial creature creation workflow.
- *
- * Design notes:
- * - assignment UI is collapsed by default
- * - selections persist while the modal remains open
- * - selector remains presentational-only; this modal owns
- *   loading and submission flow
- */
-const showAssignments = ref(false)
+const showTagAssignment = ref(false)
+const showBaseStats = ref(false)
 
 const availableTags = ref<PlayableTag[]>([])
 const selectedTagIds = ref<string[]>([])
+const baseStatRows = ref<CreatureBaseStatEditRow[]>([])
 
-/**
- * ---------------------------------------------------------
- * Reference Lookup State
- * ---------------------------------------------------------
- *
- * Required reference options used to satisfy schema-valid
- * creature creation.
- */
 const availableCreatureTypes = ref<CreatureTypeOption[]>([])
 const availableSizeCategories = ref<SizeCategoryOption[]>([])
 const isLoadingReferenceOptions = ref(false)
 const referenceLoadError = ref('')
 
-/**
- * ---------------------------------------------------------
- * Submission State
- * ---------------------------------------------------------
- */
 const isSubmitting = ref(false)
 const submitError = ref('')
 
-/**
- * ---------------------------------------------------------
- * loadReferenceOptions
- * ---------------------------------------------------------
- *
- * Loads required classification options and optional tag
- * options for the create modal.
- */
 async function loadReferenceOptions() {
   try {
     isLoadingReferenceOptions.value = true
     referenceLoadError.value = ''
 
-    const [creatureTypes, sizeCategories, tags] = await Promise.all([
+    const [creatureTypes, sizeCategories, tags, stats] = await Promise.all([
       getCreatureTypes(),
       getSizeCategories(),
       getPlayableTags(false),
+      getPlayableStats(),
     ])
 
     availableCreatureTypes.value = creatureTypes
     availableSizeCategories.value = sizeCategories
     availableTags.value = tags
+    baseStatRows.value = stats.map((stat: PlayableStat) => ({
+      statId: stat.id,
+      statName: stat.name,
+      statSlug: stat.slug,
+      statDisplayName: stat.displayName,
+      baseValue: null,
+      sortOrder: stat.sortOrder ?? null,
+    }))
   } catch (error) {
     console.error('Failed to load creature create reference options:', error)
 
     availableCreatureTypes.value = []
     availableSizeCategories.value = []
     availableTags.value = []
+    baseStatRows.value = []
     referenceLoadError.value =
       'Failed to load required creature create options.'
   } finally {
@@ -422,20 +433,14 @@ onMounted(() => {
   loadReferenceOptions()
 })
 
-/**
- * ---------------------------------------------------------
- * Assignment Section Toggle
- * ---------------------------------------------------------
- */
-function toggleAssignments() {
-  showAssignments.value = !showAssignments.value
+function toggleTagAssignment() {
+  showTagAssignment.value = !showTagAssignment.value
 }
 
-/**
- * ---------------------------------------------------------
- * Normalization Helpers
- * ---------------------------------------------------------
- */
+function toggleBaseStats() {
+  showBaseStats.value = !showBaseStats.value
+}
+
 function normalizeToName(value: string): string {
   return value
     .trim()
@@ -456,14 +461,6 @@ function normalizeToSlug(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
-/**
- * ---------------------------------------------------------
- * Auto-Generation Sync
- * ---------------------------------------------------------
- *
- * displayName drives name/slug until those fields are manually
- * edited by the admin.
- */
 watch(
   () => form.displayName,
   (value) => {
@@ -477,11 +474,6 @@ watch(
   }
 )
 
-/**
- * ---------------------------------------------------------
- * Validation
- * ---------------------------------------------------------
- */
 const isFormValid = computed(() => {
   return (
     form.displayName.trim().length > 0 &&
@@ -492,14 +484,6 @@ const isFormValid = computed(() => {
   )
 })
 
-/**
- * ---------------------------------------------------------
- * Reset / Close
- * ---------------------------------------------------------
- *
- * Resets both scalar form fields and optional assignment state
- * so each modal session starts clean.
- */
 function resetForm() {
   form.displayName = ''
   form.name = ''
@@ -512,8 +496,15 @@ function resetForm() {
   nameManuallyEdited.value = false
   slugManuallyEdited.value = false
 
-  showAssignments.value = false
+  showTagAssignment.value = false
+  showBaseStats.value = false
+
   selectedTagIds.value = []
+  baseStatRows.value = baseStatRows.value.map((stat) => ({
+    ...stat,
+    baseValue: null,
+  }))
+
   submitError.value = ''
   referenceLoadError.value = ''
 }
@@ -523,26 +514,18 @@ function closeModal() {
   resetForm()
 }
 
-/**
- * ---------------------------------------------------------
- * Submit
- * ---------------------------------------------------------
- *
- * Create flow:
- * 1. create the core creature record
- * 2. if selected, assign tags via replace-all endpoint
- * 3. refresh the creature table
- * 4. close modal
- * 5. show success toast
- *
- * Important:
- * - tag assignment is optional
- * - assignment call is only made when there is at least one
- *   selected tag ID
- *
- * Current dependency note:
- * - this requires backend POST /admin/creatures to exist
- */
+function getEnteredBaseStats() {
+  return baseStatRows.value
+    .filter(
+      (stat) =>
+        typeof stat.baseValue === 'number' && !Number.isNaN(stat.baseValue)
+    )
+    .map((stat) => ({
+      statId: stat.statId,
+      baseValue: stat.baseValue,
+    }))
+}
+
 async function handleCreate() {
   if (!isFormValid.value) return
 
@@ -568,6 +551,12 @@ async function handleCreate() {
       await updateCreatureTags(createdCreature.id, {
         tagIds: selectedTagIds.value,
       })
+    }
+
+    const enteredBaseStats = getEnteredBaseStats()
+
+    if (enteredBaseStats.length > 0) {
+      await updateCreatureBaseStats(createdCreature.id, enteredBaseStats)
     }
 
     store.refreshContentList()
