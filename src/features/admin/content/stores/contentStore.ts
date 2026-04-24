@@ -1,72 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import type {
+  ContentCreatureRecord,
+  ContentDomain,
+  ContentManagementSurface,
+} from '@/features/admin/content/types/contentTypes'
 
-/**
- * =========================================================
- * Content Store
- * =========================================================
- *
- * Responsibilities
- * - own shared dashboard state for the Content admin domain
- * - coordinate active domain / active management surface
- * - hold selected records for management workflows
- * - control Content-domain modal visibility
- *
- * Current Scope
- * - active content domain
- * - active management surface
- * - selected creature
- * - creature create modal visibility
- *
- * Notes
- * - This store is being expanded incrementally using the
- *   Playables dashboard as the canonical reference model
- * - Creature create/edit visibility is explicitly store-controlled
- * - selectedCreature provides edit context but does not control
- *   modal visibility
- * =========================================================
- */
 
-export type ContentDomain = 'creatures' | 'items'
-export type ContentManagementSurface = 'creatures' | 'creatureStats' | 'items'
-
-/**
- * ---------------------------------------------------------
- * Creature Browse Record
- * ---------------------------------------------------------
- *
- * Shared store-facing creature shape used for table
- * selection workflows.
- *
- * Notes:
- * - This mirrors the current admin creature browse payload
- * - It is defined locally in the store for now so the store
- *   can own creature selection state without importing from
- *   the service layer
- */
-export interface ContentCreatureRecord {
-  id: string
-  name: string
-  slug: string
-  displayName: string
-  description: string | null
-
-  creatureTypeId: string
-  sizeCategoryId: string
-  intelligenceCategoryId: string | null
-  threatLevelId: string | null
-
-  creatureType: string
-  sizeCategory: string
-  intelligenceCategory: string | null
-  threatLevel: string | null
-
-  iconMediaAssetId: string | null
-  isActive: boolean | null
-  sortOrder: number | null
-  createdAt: string | null
-  updatedAt: string | null
-}
 
 export const useContentStore = defineStore('content', () => {
   /**

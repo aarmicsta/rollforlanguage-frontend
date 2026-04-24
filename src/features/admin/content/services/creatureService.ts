@@ -17,36 +17,7 @@
  */
 
 import { axiosInstance } from '@/services/apiClient'
-
-/**
- * ---------------------------------------------------------
- * Creature Browse Types
- * ---------------------------------------------------------
- */
-
-export interface CreatureListItem {
-  id: string
-  name: string
-  slug: string
-  displayName: string
-  description: string | null
-
-  creatureTypeId: string
-  sizeCategoryId: string
-  intelligenceCategoryId: string | null
-  threatLevelId: string | null
-
-  creatureType: string
-  sizeCategory: string
-  intelligenceCategory: string | null
-  threatLevel: string | null
-
-  iconMediaAssetId: string | null
-  isActive: boolean | null
-  sortOrder: number | null
-  createdAt: string | null
-  updatedAt: string | null
-}
+import type { CreatureListItem } from '@/features/admin/content/types/contentTypes'
 
 /**
  * ---------------------------------------------------------

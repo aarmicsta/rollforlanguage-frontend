@@ -1,22 +1,75 @@
-// src/features/admin/services/playablePassiveService.ts
-
 /**
- * Playable Passive Admin Service
+ * =========================================================
+ * Playable Passive Service (Admin)
+ * =========================================================
  *
- * Responsibilities:
- * - interact with backend playable passive admin endpoints
- * - provide typed API calls for passive creation, retrieval, and updates
+ * This service provides all frontend API interactions related
+ * to canonical playable passive definitions within the admin
+ * portal.
  *
- * Notes:
- * - operates on canonical passive definitions (`playable_passives`)
- * - does NOT manage assignment relationships
- * - aligned with backend response pattern (`{ message, data }` for mutations)
+ * Scope of this file:
+ * - Fetching playable passives for admin browse views
+ * - Creating canonical playable passive definitions
+ * - Updating canonical playable passive definitions
+ *
+ * Architectural Notes:
+ * ---------------------------------------------------------
+ * 1. Separation of Concerns
+ *    This file ONLY handles canonical playable passive
+ *    definition API calls.
+ *
+ *    It does NOT manage:
+ *    - class passive assignments
+ *    - species passive assignments
+ *    - passive selector state
+ *
+ *    Assignment workflows are handled through class/species
+ *    services because those relationships belong to junction
+ *    tables, not the passive definition itself.
+ *
+ * 2. Canonical Passives vs Assignments
+ *    Passives defined here represent reusable canonical traits,
+ *    abilities, or effects that may later be assigned to
+ *    playable classes and species.
+ *
+ *    Entity-specific passive assignment belongs in separate
+ *    class/species assignment endpoints.
+ *
+ * 3. Response Shape
+ *    The browse endpoint currently returns the passive array
+ *    directly.
+ *
+ *    Mutation endpoints return:
+ *      {
+ *        message: string,
+ *        data: PlayablePassive
+ *      }
+ *
+ *    This service preserves the current backend contract while
+ *    exposing clean typed frontend functions.
+ *
+ * =========================================================
  */
 
 import { axiosInstance } from '@/services/apiClient'
 
 /**
- * Canonical playable passive definition.
+ * ---------------------------------------------------------
+ * PlayablePassive
+ * ---------------------------------------------------------
+ *
+ * Frontend shape for a canonical playable passive definition
+ * as returned by the admin passive endpoints.
+ *
+ * Notes:
+ * - `id` is the stable canonical identifier used by the backend.
+ * - `name` is the internal canonical name.
+ * - `slug` is the URL-safe/public-facing identifier.
+ * - `displayName` is the admin/player-facing label.
+ * - `description` provides admin-facing context where present.
+ * - `effectText` describes the passive's gameplay effect.
+ * - `effectType` supports grouping/filtering in selector UIs.
+ * - `sortOrder` controls display ordering where applicable.
  */
 export interface PlayablePassive {
   id: string
@@ -33,7 +86,20 @@ export interface PlayablePassive {
 }
 
 /**
- * Payload for creating a new passive.
+ * ---------------------------------------------------------
+ * CreatePlayablePassivePayload
+ * ---------------------------------------------------------
+ *
+ * Payload used to create a canonical playable passive
+ * definition.
+ *
+ * Notes:
+ * - `name` and `slug` are canonical/internal identifiers.
+ * - `displayName` is the admin/player-facing label.
+ * - `description`, `effectText`, and `effectType` are optional
+ *   because not every passive may need all descriptive fields.
+ * - `isActive` is optional because the backend can apply its
+ *   default active-state behavior.
  */
 export interface CreatePlayablePassivePayload {
   displayName: string
@@ -46,7 +112,18 @@ export interface CreatePlayablePassivePayload {
 }
 
 /**
- * Payload for updating an existing passive.
+ * ---------------------------------------------------------
+ * UpdatePlayablePassivePayload
+ * ---------------------------------------------------------
+ *
+ * Payload used to update an existing canonical playable
+ * passive definition.
+ *
+ * Notes:
+ * - `displayName` is required by the current edit flow.
+ * - descriptive/effect fields may be updated when supplied.
+ * - `isActive` and `sortOrder` may also be updated when
+ *   supported by the calling UI.
  */
 export interface UpdatePlayablePassivePayload {
   displayName: string
@@ -59,41 +136,118 @@ export interface UpdatePlayablePassivePayload {
 
 /**
  * ---------------------------------------------------------
- * GET: Fetch all playable passives
+ * getPlayablePassives
  * ---------------------------------------------------------
+ *
+ * Fetches the full browse list of playable passive definitions.
+ *
+ * Endpoint:
+ * GET /admin/playable-passives
+ *
+ * Returns:
+ * - an array of canonical playable passive definitions
+ *
+ * Typical usage:
+ * - passive browse table
+ * - passive selector reference loading
+ * - refresh after passive creation/editing
  */
 export async function getPlayablePassives(): Promise<PlayablePassive[]> {
-  const response = await axiosInstance.get('/admin/playable-passives')
+  const response = await axiosInstance.get<PlayablePassive[]>(
+    '/admin/playable-passives'
+  )
+
   return response.data
 }
 
 /**
  * ---------------------------------------------------------
- * POST: Create a new playable passive
+ * createPlayablePassive
  * ---------------------------------------------------------
+ *
+ * Creates a new canonical playable passive definition.
+ *
+ * Endpoint:
+ * POST /admin/playable-passives
+ *
+ * Payload:
+ * - displayName
+ * - name
+ * - slug
+ * - description
+ * - effectText
+ * - effectType
+ * - isActive
+ *
+ * Returns:
+ * - the created passive record from `data`
  */
 export async function createPlayablePassive(
   payload: CreatePlayablePassivePayload
 ): Promise<PlayablePassive> {
-  const response = await axiosInstance.post(
-    '/admin/playable-passives',
-    payload
-  )
+  const response = await axiosInstance.post<{
+    message: string
+    data: PlayablePassive
+  }>('/admin/playable-passives', payload)
+
   return response.data.data
 }
 
 /**
  * ---------------------------------------------------------
- * PATCH: Update a playable passive
+ * updatePlayablePassive
  * ---------------------------------------------------------
+ *
+ * Updates an existing canonical playable passive definition.
+ *
+ * Endpoint:
+ * PATCH /admin/playable-passives/:id
+ *
+ * Payload:
+ * - displayName
+ * - description
+ * - effectText
+ * - effectType
+ * - isActive
+ * - sortOrder
+ *
+ * Returns:
+ * - the updated passive record from `data`
  */
 export async function updatePlayablePassive(
   id: string,
   payload: UpdatePlayablePassivePayload
 ): Promise<PlayablePassive> {
-  const response = await axiosInstance.patch(
-    `/admin/playable-passives/${id}`,
-    payload
-  )
+  const response = await axiosInstance.patch<{
+    message: string
+    data: PlayablePassive
+  }>(`/admin/playable-passives/${id}`, payload)
+
   return response.data.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * playablePassiveService
+ * ---------------------------------------------------------
+ *
+ * Convenience service export used by components/stores that
+ * prefer object-style access over named imports.
+ *
+ * This keeps passive-related API calls grouped together in a
+ * single namespace:
+ *
+ * playablePassiveService.getPlayablePassives()
+ * playablePassiveService.createPlayablePassive(...)
+ * playablePassiveService.updatePlayablePassive(...)
+ *
+ * Note:
+ * Both named exports and the grouped service object are kept
+ * available so the calling code can use whichever style fits
+ * the surrounding pattern best.
+ */
+export const playablePassiveService = {
+  getPlayablePassives,
+  createPlayablePassive,
+  updatePlayablePassive,
 }
