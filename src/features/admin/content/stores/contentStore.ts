@@ -28,6 +28,7 @@ import { ref } from 'vue'
  */
 
 export type ContentDomain = 'creatures' | 'items'
+export type ContentManagementSurface = 'creatures' | 'creatureStats' | 'items'
 
 /**
  * ---------------------------------------------------------
@@ -86,7 +87,7 @@ export const useContentStore = defineStore('content', () => {
    * Determines which table (if any) is currently visible
    * in the Content dashboard surface.
    */
-  const activeManagementSurface = ref<string | null>(null)
+  const activeManagementSurface = ref<ContentManagementSurface | null>(null)
 
   /**
    * ---------------------------------------------------------
@@ -113,6 +114,7 @@ export const useContentStore = defineStore('content', () => {
    * - creature create modal
    */
   const showCreateCreatureModal = ref(false)
+  const showEditCreatureModal = ref(false)
   const showCreatureBaseStatsModal = ref(false)
 
   /**
@@ -125,7 +127,20 @@ export const useContentStore = defineStore('content', () => {
    * Components can watch this value and re-fetch their data
    * whenever a Content-domain mutation completes.
    */
-  const lastContentRefresh = ref(0)
+  const lastContentRefresh = ref<number | null>(null)
+
+  /**
+   * ---------------------------------------------------------
+   * Shared Submission State
+   * ---------------------------------------------------------
+   *
+   * Store-owned submission and error state for Content-domain
+   * modal workflows.
+   *
+   * Mirrors the canonical Playables / Users dashboard pattern.
+   */
+  const isSubmitting = ref(false)
+  const submitError = ref('')
 
   /**
    * ---------------------------------------------------------
@@ -153,8 +168,16 @@ export const useContentStore = defineStore('content', () => {
   /**
    * Set the currently active management surface.
    */
-  function setActiveManagementSurface(surface: string) {
+  function setActiveManagementSurface(surface: ContentManagementSurface) {
     activeManagementSurface.value = surface
+  }
+
+  /**
+   * Toggle the currently active management surface.
+   */
+  function toggleManagementSurface(surface: ContentManagementSurface) {
+    activeManagementSurface.value =
+      activeManagementSurface.value === surface ? null : surface
   }
 
   /**
@@ -179,6 +202,22 @@ export const useContentStore = defineStore('content', () => {
   }
 
   /**
+   * Open the creature edit modal for a selected creature.
+   */
+  function openEditCreatureModal(creature: ContentCreatureRecord) {
+    selectedCreature.value = creature
+    showEditCreatureModal.value = true
+  }
+
+  /**
+   * Close the creature edit modal.
+   */
+  function closeEditCreatureModal() {
+    showEditCreatureModal.value = false
+    selectedCreature.value = null
+  }
+
+  /**
    * Open the creature create modal.
    */
   function openCreateCreatureModal() {
@@ -196,7 +235,7 @@ export const useContentStore = defineStore('content', () => {
    * Trigger a Content-domain refresh signal for browse views.
    */
   function refreshContentList() {
-    lastContentRefresh.value++
+    lastContentRefresh.value = Date.now()
   }
 
   function openCreatureBaseStatsModal() {
@@ -205,6 +244,27 @@ export const useContentStore = defineStore('content', () => {
 
   function closeCreatureBaseStatsModal() {
     showCreatureBaseStatsModal.value = false
+  }
+
+  /**
+   * Set shared Content submission state.
+   */
+  function setSubmitting(value: boolean) {
+    isSubmitting.value = value
+  }
+
+  /**
+   * Set shared Content submission error message.
+   */
+  function setSubmitError(message: string) {
+    submitError.value = message
+  }
+
+  /**
+   * Clear shared Content submission error message.
+   */
+  function clearSubmitError() {
+    submitError.value = ''
   }
 
   return {
@@ -229,5 +289,17 @@ export const useContentStore = defineStore('content', () => {
     showCreatureBaseStatsModal,
     openCreatureBaseStatsModal,
     closeCreatureBaseStatsModal,
+
+    toggleManagementSurface,
+
+    showEditCreatureModal,
+    openEditCreatureModal,
+    closeEditCreatureModal,
+
+    isSubmitting,
+    submitError,
+    setSubmitting,
+    setSubmitError,
+    clearSubmitError,
   }
 })

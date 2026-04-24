@@ -181,7 +181,7 @@ async function fetchCreatures() {
  * shared Content-store selection state.
  */
 function handleRowClick(creature: CreatureListItem) {
-  store.setSelectedCreature(creature)
+  store.openEditCreatureModal(creature)
 }
 
 /**

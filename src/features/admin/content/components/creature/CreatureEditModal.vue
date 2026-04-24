@@ -20,7 +20,7 @@
       presentational selector components
   -->
   <AdminModal
-    :visible="!!store.selectedCreature"
+    :visible="store.showEditCreatureModal"
     title="Edit Creature"
     size="4xl"
     @close="closeModal"
@@ -223,7 +223,7 @@
  * Imports
  * =========================================================
  */
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import CreatureTagAssignmentSelector from '@/features/admin/content/components/tag/CreatureTagAssignmentSelector.vue'
 import {
@@ -267,6 +267,17 @@ const emit = defineEmits<{ (e: 'back'): void }>()
  */
 const store = useContentStore()
 const toastStore = useToastStore()
+
+/**
+ * ---------------------------------------------------------
+ * Shared Submission State
+ * ---------------------------------------------------------
+ *
+ * Mirrors Content store-owned submission state into this
+ * modal for template readability.
+ */
+const isSubmitting = computed(() => store.isSubmitting)
+const submitError = computed(() => store.submitError)
 
 /**
  * ---------------------------------------------------------
@@ -322,17 +333,6 @@ const isLoadingReferenceOptions = ref(false)
 
 /**
  * ---------------------------------------------------------
- * Submission State
- * ---------------------------------------------------------
- *
- * Local submission and error state for the creature edit
- * workflow.
- */
-const isSubmitting = ref(false)
-const submitError = ref('')
-
-/**
- * ---------------------------------------------------------
  * Watch: Selected Creature
  * ---------------------------------------------------------
  *
@@ -343,7 +343,7 @@ watch(
   () => store.selectedCreature,
   async (value) => {
     editableCreature.value = value ? { ...value } : null
-    submitError.value = ''
+    store.clearSubmitError()
 
     if (!value) {
       assignedTags.value = []
@@ -470,9 +470,9 @@ function formatDate(dateStr: string | null) {
  * ---------------------------------------------------------
  */
 function closeModal() {
-  store.clearSelectedCreature()
+  store.closeEditCreatureModal()
   editableCreature.value = null
-  submitError.value = ''
+  store.clearSubmitError()
 }
 
 function handleBack() {
@@ -496,8 +496,8 @@ async function handleSave() {
   if (!editableCreature.value) return
 
   try {
-    isSubmitting.value = true
-    submitError.value = ''
+    store.setSubmitting(true)
+    store.clearSubmitError()
 
     const updated = await updateCreature(editableCreature.value.id, {
       displayName: editableCreature.value.displayName,
@@ -524,9 +524,9 @@ async function handleSave() {
     toastStore.showToast('Creature updated successfully.', 'success')
   } catch (error) {
     console.error(error)
-    submitError.value = 'Failed to save creature changes.'
+    store.setSubmitError('Failed to save creature changes.')
   } finally {
-    isSubmitting.value = false
+    store.setSubmitting(false)
   }
 }
 </script>

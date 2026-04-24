@@ -7,7 +7,7 @@
     Primary Content admin creation surface for a new creature.
 
     Responsibilities:
-    - collect the minimum required creature identity fields
+    - collect required creature identity fields
     - collect required creature classification fields
     - auto-generate canonical helper fields from displayName
     - allow manual override of generated name/slug
@@ -16,13 +16,11 @@
     - submit the create payload to the backend
 
     Notes:
-    - this mirrors the established Playables create-modal pattern
-    - required classification fields are loaded from canonical
-      reference tables via backend lookup endpoints
-    - tag and base stat assignment occur only after the creature
-      record has been successfully created and returned
-    - optional sections are intentionally collapsed by default to
-      preserve a clean, low-friction core create flow
+    - mirrors the established Playables create-modal pattern
+    - visibility is controlled by the Content store
+    - shared submission state is owned by the Content store
+    - optional tag/base stat assignment occurs only after the
+      creature record has been successfully created
   -->
   <AdminModal
     :visible="store.showCreateCreatureModal"
@@ -323,18 +321,21 @@
  * Creature Create Modal
  * =========================================================
  *
- * This modal creates a new creature record.
+ * Creates a new creature record and optionally attaches
+ * initial relational data after creation.
  *
  * Current scope:
- * - displayName
- * - name
- * - slug
- * - description
- * - creatureTypeId
- * - sizeCategoryId
- * - isActive
- * - optional initial tag assignment
- * - optional initial base stat assignment
+ * - creature identity
+ * - required creature classification
+ * - active status
+ * - optional tag assignment
+ * - optional base stat assignment
+ *
+ * Architectural Notes:
+ * - visibility is controlled by the Content store
+ * - submission/error state is owned by the Content store
+ * - reference data is loaded locally because it is modal-specific
+ * - tag/base stat assignment occurs after the creature exists
  */
 
 import { computed, onMounted, reactive, ref, watch } from 'vue'
@@ -361,9 +362,46 @@ import {
 } from '@/features/admin/playable/services/playableTagService'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
+/**
+ * ---------------------------------------------------------
+ * Stores
+ * ---------------------------------------------------------
+ *
+ * `store`
+ * - owns shared Content dashboard state
+ * - controls modal visibility
+ * - owns shared submission/error state
+ *
+ * `toastStore`
+ * - displays global success/error feedback
+ */
 const store = useContentStore()
 const toastStore = useToastStore()
 
+/**
+ * ---------------------------------------------------------
+ * Shared Submission State
+ * ---------------------------------------------------------
+ *
+ * Mirrors Content store-owned submission state into this
+ * modal for template readability.
+ */
+const isSubmitting = computed(() => store.isSubmitting)
+const submitError = computed(() => store.submitError)
+
+/**
+ * ---------------------------------------------------------
+ * Creature Identity Form State
+ * ---------------------------------------------------------
+ *
+ * Local create-form state for required creature identity and
+ * classification fields.
+ *
+ * Notes:
+ * - displayName drives automatic name/slug generation
+ * - name and slug may be manually overridden
+ * - creatureTypeId and sizeCategoryId are required
+ */
 const form = reactive({
   displayName: '',
   name: '',
@@ -374,24 +412,93 @@ const form = reactive({
   isActive: true,
 })
 
+/**
+ * ---------------------------------------------------------
+ * Manual Identity Override Flags
+ * ---------------------------------------------------------
+ *
+ * Prevent automatic name/slug generation from overwriting
+ * deliberate user edits.
+ */
 const nameManuallyEdited = ref(false)
 const slugManuallyEdited = ref(false)
 
+/**
+ * ---------------------------------------------------------
+ * Optional Section Visibility
+ * ---------------------------------------------------------
+ *
+ * Controls collapsed/expanded state for optional create-time
+ * assignment sections.
+ */
 const showTagAssignment = ref(false)
 const showBaseStats = ref(false)
 
+/**
+ * ---------------------------------------------------------
+ * Tag Assignment State
+ * ---------------------------------------------------------
+ *
+ * `availableTags`
+ * - canonical tag options loaded from the Playables tag service
+ *
+ * `selectedTagIds`
+ * - selected tag IDs to attach after creature creation
+ */
 const availableTags = ref<PlayableTag[]>([])
 const selectedTagIds = ref<string[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Base Stat Assignment State
+ * ---------------------------------------------------------
+ *
+ * Editable base stat rows generated from canonical stat
+ * definitions.
+ *
+ * Notes:
+ * - only entered numeric values are submitted
+ * - blank/null values are treated as unassigned
+ */
 const baseStatRows = ref<CreatureBaseStatEditRow[]>([])
 
+/**
+ * ---------------------------------------------------------
+ * Classification Reference State
+ * ---------------------------------------------------------
+ *
+ * Canonical option sets used by required classification
+ * selectors.
+ */
 const availableCreatureTypes = ref<CreatureTypeOption[]>([])
 const availableSizeCategories = ref<SizeCategoryOption[]>([])
+
+/**
+ * ---------------------------------------------------------
+ * Reference Loading State
+ * ---------------------------------------------------------
+ *
+ * Tracks reference option loading separately from submission.
+ */
 const isLoadingReferenceOptions = ref(false)
 const referenceLoadError = ref('')
 
-const isSubmitting = ref(false)
-const submitError = ref('')
-
+/**
+ * ---------------------------------------------------------
+ * Load Reference Options
+ * ---------------------------------------------------------
+ *
+ * Loads all reference data required by the create modal:
+ * - creature types
+ * - size categories
+ * - playable tags
+ * - playable stats
+ *
+ * Notes:
+ * - creature type and size are required for create
+ * - tags and base stats are optional post-create assignments
+ * - failures clear local option arrays to prevent stale UI
+ */
 async function loadReferenceOptions() {
   try {
     isLoadingReferenceOptions.value = true
@@ -429,10 +536,23 @@ async function loadReferenceOptions() {
   }
 }
 
+/**
+ * ---------------------------------------------------------
+ * Lifecycle
+ * ---------------------------------------------------------
+ *
+ * Load create-modal reference options when the modal component
+ * is mounted.
+ */
 onMounted(() => {
   loadReferenceOptions()
 })
 
+/**
+ * ---------------------------------------------------------
+ * Optional Section Toggles
+ * ---------------------------------------------------------
+ */
 function toggleTagAssignment() {
   showTagAssignment.value = !showTagAssignment.value
 }
@@ -441,6 +561,16 @@ function toggleBaseStats() {
   showBaseStats.value = !showBaseStats.value
 }
 
+/**
+ * ---------------------------------------------------------
+ * Name Normalization
+ * ---------------------------------------------------------
+ *
+ * Converts display labels into canonical internal names.
+ *
+ * Example:
+ * - "Cave Troll" -> "cave_troll"
+ */
 function normalizeToName(value: string): string {
   return value
     .trim()
@@ -451,6 +581,16 @@ function normalizeToName(value: string): string {
     .replace(/^_+|_+$/g, '')
 }
 
+/**
+ * ---------------------------------------------------------
+ * Slug Normalization
+ * ---------------------------------------------------------
+ *
+ * Converts display labels into URL-safe slugs.
+ *
+ * Example:
+ * - "Cave Troll" -> "cave-troll"
+ */
 function normalizeToSlug(value: string): string {
   return value
     .trim()
@@ -461,6 +601,14 @@ function normalizeToSlug(value: string): string {
     .replace(/^-+|-+$/g, '')
 }
 
+/**
+ * ---------------------------------------------------------
+ * Watch: Display Name
+ * ---------------------------------------------------------
+ *
+ * Auto-generates name and slug while preserving manual
+ * overrides once the user edits either field directly.
+ */
 watch(
   () => form.displayName,
   (value) => {
@@ -474,6 +622,13 @@ watch(
   }
 )
 
+/**
+ * ---------------------------------------------------------
+ * Form Validity
+ * ---------------------------------------------------------
+ *
+ * Minimum schema-valid create requirements.
+ */
 const isFormValid = computed(() => {
   return (
     form.displayName.trim().length > 0 &&
@@ -484,6 +639,18 @@ const isFormValid = computed(() => {
   )
 })
 
+/**
+ * ---------------------------------------------------------
+ * Reset Form
+ * ---------------------------------------------------------
+ *
+ * Restores create-modal state after close or successful create.
+ *
+ * Notes:
+ * - keeps loaded reference option arrays intact
+ * - clears selected optional assignments
+ * - resets base stat input values without discarding stat rows
+ */
 function resetForm() {
   form.displayName = ''
   form.name = ''
@@ -505,15 +672,33 @@ function resetForm() {
     baseValue: null,
   }))
 
-  submitError.value = ''
+  store.clearSubmitError()
   referenceLoadError.value = ''
 }
 
+/**
+ * ---------------------------------------------------------
+ * Close Modal
+ * ---------------------------------------------------------
+ *
+ * Closes the create modal and clears local form state.
+ */
 function closeModal() {
   store.closeCreateCreatureModal()
   resetForm()
 }
 
+/**
+ * ---------------------------------------------------------
+ * Entered Base Stats
+ * ---------------------------------------------------------
+ *
+ * Extracts only intentionally entered numeric base stat values.
+ *
+ * Notes:
+ * - `0` is preserved as a valid intentional value
+ * - null/blank/NaN values are omitted
+ */
 function getEnteredBaseStats() {
   return baseStatRows.value
     .filter(
@@ -526,12 +711,27 @@ function getEnteredBaseStats() {
     }))
 }
 
+/**
+ * ---------------------------------------------------------
+ * Create Handler
+ * ---------------------------------------------------------
+ *
+ * Save order:
+ * 1. create core creature record
+ * 2. optionally attach selected tags
+ * 3. optionally attach entered base stats
+ *
+ * Notes:
+ * - relational assignments require the created creature ID
+ * - shared submission/error state is owned by the Content store
+ * - refresh signal updates Content browse surfaces after success
+ */
 async function handleCreate() {
   if (!isFormValid.value) return
 
   try {
-    isSubmitting.value = true
-    submitError.value = ''
+    store.setSubmitting(true)
+    store.clearSubmitError()
 
     const createdCreature = await createCreature({
       displayName: form.displayName.trim(),
@@ -564,9 +764,9 @@ async function handleCreate() {
     toastStore.showToast('Creature created successfully.', 'success')
   } catch (error) {
     console.error(error)
-    submitError.value = 'Failed to create creature.'
+    store.setSubmitError('Failed to create creature.')
   } finally {
-    isSubmitting.value = false
+    store.setSubmitting(false)
   }
 }
 </script>
