@@ -21,9 +21,9 @@ import { ref } from 'vue'
  * Notes
  * - This store is being expanded incrementally using the
  *   Playables dashboard as the canonical reference model
- * - Edit visibility for creatures is currently driven by
- *   selectedCreature presence
- * - Create visibility is explicitly store-controlled
+ * - Creature create/edit visibility is explicitly store-controlled
+ * - selectedCreature provides edit context but does not control
+ *   modal visibility
  * =========================================================
  */
 
@@ -96,6 +96,11 @@ export const useContentStore = defineStore('content', () => {
    *
    * Holds the currently selected content-domain record for
    * workflow actions such as editing.
+   *
+   * Notes:
+   * - selectedCreature provides edit context for CreatureEditModal
+   * - selectedCreature does NOT control modal visibility
+   * - showEditCreatureModal owns explicit edit modal visibility
    *
    * Current scope:
    * - creatures only
@@ -239,7 +244,7 @@ export const useContentStore = defineStore('content', () => {
   }
 
   function openCreatureBaseStatsModal() {
-  showCreatureBaseStatsModal.value = true
+    showCreatureBaseStatsModal.value = true
   }
 
   function closeCreatureBaseStatsModal() {

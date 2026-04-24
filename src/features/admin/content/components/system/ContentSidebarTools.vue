@@ -3,10 +3,25 @@
     <button
       v-for="tool in tools"
       :key="tool.action"
-      class="flex w-full items-center gap-2 rounded px-4 py-2 text-left transition group
-             bg-white text-black dark:bg-black dark:text-white
-             border border-transparent hover:ring-4 hover:ring-offset-2 focus:outline-none"
-      :style="{ '--tw-ring-color': accentValue }"
+      :class="[
+        'flex w-full items-center gap-2 rounded px-4 py-2 text-left transition group',
+        'bg-white text-black dark:bg-black dark:text-white',
+        'border border-transparent hover:ring-4 hover:ring-offset-2 focus:outline-none',
+        isManagementSurfaceAction(tool.action) && isActionActive(tool.action)
+          ? 'bg-gray-200 font-medium dark:bg-neutral-800'
+          : '',
+      ]"
+      :style="
+        isManagementSurfaceAction(tool.action) && isActionActive(tool.action)
+          ? {
+              '--tw-ring-color': accentValue,
+              borderLeft: `4px solid ${accentValue}`,
+            }
+          : {
+              '--tw-ring-color': accentValue,
+              borderLeft: '4px solid transparent',
+            }
+      "
       type="button"
       @click="handleAction(tool.action)"
     >
@@ -51,19 +66,47 @@ const tools = computed(() => {
   return contentTools[store.activeContentDomain]
 })
 
+/**
+ * ---------------------------------------------------------
+ * Active-State Helpers
+ * ---------------------------------------------------------
+ *
+ * Persistent management-surface tools receive active-state
+ * styling when their corresponding Content surface is open.
+ *
+ * Create actions remain one-off workflow triggers and do not
+ * present an active state.
+ */
+function isManagementSurfaceAction(action: string): boolean {
+  return ['editCreatures', 'editCreatureStats', 'editItems'].includes(action)
+}
+
+function isActionActive(action: string): boolean {
+  switch (action) {
+    case 'editCreatures':
+      return store.activeManagementSurface === 'creatures'
+    case 'editCreatureStats':
+      return store.activeManagementSurface === 'creatureStats'
+    case 'editItems':
+      return store.activeManagementSurface === 'items'
+    default:
+      return false
+  }
+}
+
 // Action handler
 function handleAction(action: string) {
   switch (action) {
     case 'editCreatures':
-      store.setActiveManagementSurface('creatures')
+      store.toggleManagementSurface('creatures')
       break
 
     case 'editCreatureStats':
-      store.setActiveManagementSurface('creatureStats')
+      store.toggleManagementSurface('creatureStats')
       break
 
     case 'editItems':
-      store.setActiveManagementSurface('items')
+      store.toggleManagementSurface('items')
       break
 
     case 'createCreature':
