@@ -35,8 +35,8 @@
       </h2>
 
       <button
-        class="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
         type="button"
+        class="rounded bg-gray-300 px-3 py-2 text-sm text-gray-800 hover:bg-gray-400 dark:bg-neutral-700 dark:text-gray-100 dark:hover:bg-neutral-600"
         @click="store.clearActiveManagementSurface()"
       >
         Close

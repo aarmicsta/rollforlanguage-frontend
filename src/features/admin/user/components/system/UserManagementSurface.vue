@@ -18,21 +18,18 @@
   -->
   <section
     v-if="store.activeManagementSurface"
-    class="rounded border bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-black"
+    class="mt-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
   >
     <!--
       ---------------------------------------------------------
       Surface Header
       ---------------------------------------------------------
     -->
-    <div class="mb-4 flex items-start justify-between gap-4 border-b pb-4 dark:border-neutral-800">
+    <div class="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-neutral-700">
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
           {{ surfaceTitle }}
         </h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ surfaceDescription }}
-        </p>
       </div>
 
       <button
@@ -52,7 +49,7 @@
       The parent management surface owns scroll containment so
       the table component can focus on browse-and-select logic.
     -->
-    <div class="max-h-[50vh] overflow-y-auto pr-1">
+    <div class="max-h-[50vh] overflow-y-auto p-4">
       <UserTable v-if="store.activeManagementSurface === 'users'" />
     </div>
   </section>
@@ -89,14 +86,6 @@ const store = useUserDashboardStore()
 const surfaceTitle = computed(() => {
   if (store.activeManagementSurface === 'users') {
     return 'User Table'
-  }
-
-  return ''
-})
-
-const surfaceDescription = computed(() => {
-  if (store.activeManagementSurface === 'users') {
-    return 'Browse and select users for editing.'
   }
 
   return ''
