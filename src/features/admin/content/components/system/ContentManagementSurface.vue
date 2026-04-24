@@ -47,6 +47,8 @@
     <div class="max-h-[50vh] overflow-y-auto">
       <CreatureTable v-if="activeSurface === 'creatures'" />
 
+      <CreatureBaseStatsTable v-else-if="activeSurface === 'creatureStats'" />
+
       <div v-else-if="activeSurface === 'items'" class="p-4">
         <p class="text-sm text-gray-700 dark:text-gray-300">
           Placeholder surface for future item management tables.
@@ -74,6 +76,7 @@
  */
 
 import { computed } from 'vue'
+import CreatureBaseStatsTable from '@/features/admin/content/components/creature/CreatureBaseStatsTable.vue'
 import CreatureTable from '@/features/admin/content/components/creature/CreatureTable.vue'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
 
@@ -107,6 +110,8 @@ const surfaceTitle = computed(() => {
   switch (activeSurface.value) {
     case 'creatures':
       return 'Creature Table'
+    case 'creatureStats':
+      return 'Creature Stats Table'
     case 'items':
       return 'Item Table'
     default:

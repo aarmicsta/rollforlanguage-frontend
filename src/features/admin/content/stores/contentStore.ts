@@ -108,6 +108,7 @@ export const useContentStore = defineStore('content', () => {
    * - creature create modal
    */
   const showCreateCreatureModal = ref(false)
+  const showCreatureBaseStatsModal = ref(false)
 
   /**
    * ---------------------------------------------------------
@@ -193,6 +194,14 @@ export const useContentStore = defineStore('content', () => {
     lastContentRefresh.value++
   }
 
+  function openCreatureBaseStatsModal() {
+  showCreatureBaseStatsModal.value = true
+  }
+
+  function closeCreatureBaseStatsModal() {
+    showCreatureBaseStatsModal.value = false
+  }
+
   return {
     activeContentDomain,
     setActiveContentDomain,
@@ -211,5 +220,9 @@ export const useContentStore = defineStore('content', () => {
 
     lastContentRefresh,
     refreshContentList,
+
+    showCreatureBaseStatsModal,
+    openCreatureBaseStatsModal,
+    closeCreatureBaseStatsModal,
   }
 })

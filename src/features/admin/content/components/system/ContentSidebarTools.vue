@@ -58,6 +58,10 @@ function handleAction(action: string) {
       store.setActiveManagementSurface('creatures')
       break
 
+    case 'editCreatureStats':
+      store.setActiveManagementSurface('creatureStats')
+      break
+
     case 'editItems':
       store.setActiveManagementSurface('items')
       break

@@ -30,6 +30,10 @@ export const contentTools: Record<ContentDomain, ContentTool[]> = {
       name: 'Creature Table',
       action: 'editCreatures',
     },
+    {
+      name: 'Creature Stats Table',
+      action: 'editCreatureStats',
+    },
   ],
   items: [
     {

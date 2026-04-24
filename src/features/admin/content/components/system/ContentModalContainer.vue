@@ -30,6 +30,7 @@
     ---------------------------------------------------------
   -->
   <CreatureEditModal />
+  <CreatureBaseStatsEditModal />
 </template>
 
 <script setup lang="ts">
@@ -39,6 +40,7 @@
  * =========================================================
  */
 
+import CreatureBaseStatsEditModal from '@/features/admin/content/components/creature/CreatureBaseStatsEditModal.vue'
 import CreatureCreateModal from '@/features/admin/content/components/creature/CreatureCreateModal.vue'
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
 </script>

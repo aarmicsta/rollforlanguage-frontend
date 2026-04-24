@@ -195,3 +195,78 @@ export async function getSizeCategories(): Promise<SizeCategoryOption[]> {
 
   return response.data.data
 }
+
+/**
+ * ---------------------------------------------------------
+ * Creature Base Stats Types
+ * ---------------------------------------------------------
+ */
+
+export interface CreatureBaseStatsTableRow {
+  creatureId: string
+  creatureDisplayName: string
+  creatureType: string
+  sizeCategory: string
+  assignedStatCount: number
+  updatedAt: string | null
+}
+
+export interface CreatureBaseStatEditRow {
+  statId: string
+  statName: string
+  statSlug: string
+  statDisplayName: string
+  baseValue: number | null
+  sortOrder: number | null
+}
+
+/**
+ * =========================================================
+ * Creature Base Stats
+ * =========================================================
+ */
+
+/**
+ * ---------------------------------------------------------
+ * Get Creature Base Stats Table
+ * ---------------------------------------------------------
+ */
+export async function getCreatureBaseStatsTable(): Promise<
+  CreatureBaseStatsTableRow[]
+> {
+  const res = await axiosInstance.get('/admin/creature-base-stats')
+  return res.data.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * Get Creature Base Stats
+ * ---------------------------------------------------------
+ */
+export async function getCreatureBaseStats(
+  creatureId: string
+): Promise<CreatureBaseStatEditRow[]> {
+  const res = await axiosInstance.get(
+    `/admin/creatures/${creatureId}/base-stats`
+  )
+  return res.data.data
+}
+
+/**
+ * ---------------------------------------------------------
+ * Update Creature Base Stats
+ * ---------------------------------------------------------
+ */
+export async function updateCreatureBaseStats(
+  creatureId: string,
+  stats: Array<{
+    statId: string
+    baseValue: number | null
+  }>
+): Promise<CreatureBaseStatEditRow[]> {
+  const res = await axiosInstance.patch(
+    `/admin/creatures/${creatureId}/base-stats`,
+    { stats }
+  )
+  return res.data.data
+}
