@@ -66,7 +66,6 @@ import DashboardWidgetGrid from '@/features/admin/dashboard/components/Dashboard
 import FlaggedUsersWidget from '@/features/admin/user/components/FlaggedUsersWidget.vue'
 import UserManagementSurface from '@/features/admin/user/components/system/UserManagementSurface.vue'
 import UserDashboardModalContainer from '@/features/admin/user/components/system/UserModalContainer.vue'
-import UserDashboardSidebarTools from '@/features/admin/user/components/system/UserSidebarTools.vue'
 import UserMetricsWidget from '@/features/admin/user/components/UserMetricsWidget.vue'
 import UserTableWidget from '@/features/admin/user/components/UserTableWidget.vue'
 </script>
