@@ -25,7 +25,11 @@
       type="button"
       @click="handleAction(tool.action)"
     >
-      <AppIcon :name="getToolIcon(tool.action)" class="text-lg" />
+      <AppIcon
+        :name="getToolIcon(tool.action)"
+        library="iconify"
+        class="text-lg"
+      />
       <span>{{ tool.name }}</span>
     </button>
   </div>
