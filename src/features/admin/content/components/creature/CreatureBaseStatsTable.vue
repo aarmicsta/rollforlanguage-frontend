@@ -163,10 +163,17 @@ function handleRowClick(row: CreatureBaseStatsTableRow) {
     slug: '',
     displayName: row.creatureDisplayName,
     description: null,
+
+    creatureTypeId: row.creatureTypeId,
+    sizeCategoryId: row.sizeCategoryId,
+    intelligenceCategoryId: row.intelligenceCategoryId,
+    threatLevelId: row.threatLevelId,
+
     creatureType: row.creatureType,
     sizeCategory: row.sizeCategory,
-    intelligenceCategory: null,
-    threatLevel: null,
+    intelligenceCategory: row.intelligenceCategory,
+    threatLevel: row.threatLevel,
+
     iconMediaAssetId: null,
     isActive: null,
     sortOrder: null,

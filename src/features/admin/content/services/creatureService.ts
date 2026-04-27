@@ -229,8 +229,17 @@ export async function getThreatLevels(): Promise<ThreatLevelOption[]> {
 export interface CreatureBaseStatsTableRow {
   creatureId: string
   creatureDisplayName: string
+
+  creatureTypeId: string
+  sizeCategoryId: string
+  intelligenceCategoryId: string | null
+  threatLevelId: string | null
+
   creatureType: string
   sizeCategory: string
+  intelligenceCategory: string | null
+  threatLevel: string | null
+
   assignedStatCount: number
   updatedAt: string | null
 }
