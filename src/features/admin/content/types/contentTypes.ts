@@ -39,7 +39,12 @@
  *
  * Top-level Content dashboard domain options.
  */
-export type ContentDomain = 'creatures' | 'items'
+export type ContentDomain =
+  | 'creatures'
+  | 'items'
+  | 'factions'
+  | 'organizations'
+  | 'locations'
 
 /**
  * ---------------------------------------------------------

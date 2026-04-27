@@ -93,22 +93,34 @@ export const useContentStore = defineStore('content', () => {
    * ---------------------------------------------------------
    */
 
-  /**
-   * Set the active Content domain and synchronize the
-   * management surface accordingly.
-   */
-  function setActiveContentDomain(domain: ContentDomain) {
-    activeContentDomain.value = domain
+/**
+ * Set the active Content domain and synchronize the
+ * management surface accordingly.
+ *
+ * Notes:
+ * - implemented domains may activate a management surface
+ * - placeholder domains clear the active surface until their
+ *   systems are built
+ */
+function setActiveContentDomain(domain: ContentDomain) {
+  activeContentDomain.value = domain
 
-    switch (domain) {
-      case 'creatures':
-        activeManagementSurface.value = 'creatures'
-        break
-      case 'items':
-        activeManagementSurface.value = 'items'
-        break
-    }
+  switch (domain) {
+    case 'creatures':
+      activeManagementSurface.value = 'creatures'
+      break
+
+    case 'items':
+      activeManagementSurface.value = 'items'
+      break
+
+    case 'factions':
+    case 'organizations':
+    case 'locations':
+      activeManagementSurface.value = null
+      break
   }
+}
 
   /**
    * Set the currently active management surface.

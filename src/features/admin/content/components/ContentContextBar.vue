@@ -31,29 +31,19 @@
     <!-- Domain Pills -->
     <div class="flex flex-wrap items-center gap-3 px-4 py-3">
       <button
+        v-for="domain in contentDomains"
+        :key="domain.key"
         type="button"
-        :class="getPillClasses('creatures')"
+        :disabled="!domain.isSelectable"
+        :class="getPillClasses(domain)"
         :style="
-          store.activeContentDomain === 'creatures'
+          store.activeContentDomain === domain.key
             ? { '--tw-ring-color': accentValue }
             : {}
         "
-        @click="store.setActiveContentDomain('creatures')"
+        @click="handleDomainClick(domain)"
       >
-        Creatures
-      </button>
-
-      <button
-        type="button"
-        :class="getPillClasses('items')"
-        :style="
-          store.activeContentDomain === 'items'
-            ? { '--tw-ring-color': accentValue }
-            : {}
-        "
-        @click="store.setActiveContentDomain('items')"
-      >
-        Items
+        {{ domain.label }}
       </button>
     </div>
   </section>
@@ -69,6 +59,7 @@ import { computed, inject } from 'vue'
 import type { ComputedRef } from 'vue'
 
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
+import type { ContentDomain } from '@/features/admin/content/types/contentTypes'
 import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboardThemes'
 
 /**
@@ -76,7 +67,11 @@ import type { DashboardTheme } from '@/features/admin/dashboard/config/dashboard
  * Types
  * =========================================================
  */
-type ContentDomain = 'creatures' | 'items'
+interface ContentDomainPill {
+  key: ContentDomain
+  label: string
+  isSelectable: boolean
+}
 
 /**
  * =========================================================
@@ -101,6 +96,34 @@ const dashboardThemeRef =
 
 const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
 
+const contentDomains: ContentDomainPill[] = [
+  {
+    key: 'creatures',
+    label: 'Creatures',
+    isSelectable: true,
+  },
+  {
+    key: 'items',
+    label: 'Items',
+    isSelectable: true,
+  },
+  {
+    key: 'factions',
+    label: 'Factions',
+    isSelectable: false,
+  },
+  {
+    key: 'organizations',
+    label: 'Organizations',
+    isSelectable: false,
+  },
+  {
+    key: 'locations',
+    label: 'Locations',
+    isSelectable: false,
+  },
+]
+
 /**
  * =========================================================
  * Derived Labels
@@ -110,7 +133,10 @@ const accentValue = dashboardThemeRef?.value?.accentValue ?? '#3b82f6'
  * header label.
  */
 const activeDomainLabel = computed(() => {
-  return store.activeContentDomain === 'creatures' ? 'Creatures' : 'Items'
+  return (
+    contentDomains.find((domain) => domain.key === store.activeContentDomain)
+      ?.label ?? 'Unknown'
+  )
 })
 
 /**
@@ -120,15 +146,26 @@ const activeDomainLabel = computed(() => {
  *
  * Returns the visual class stack for Content-domain pills.
  */
-function getPillClasses(domain: ContentDomain): string[] {
-  const isActive = store.activeContentDomain === domain
+function getPillClasses(domain: ContentDomainPill): string[] {
+  const isActive = store.activeContentDomain === domain.key
 
   return [
     'rounded-full px-4 py-2 text-sm font-medium transition border',
-    'bg-gray-200 text-gray-800 dark:bg-neutral-700 dark:text-gray-200',
     isActive
-      ? 'ring-2 border-transparent'
-      : 'border-gray-300 dark:border-neutral-600',
+      ? 'bg-gray-200 text-gray-800 ring-2 border-transparent dark:bg-neutral-700 dark:text-gray-200'
+      : '',
+    !isActive && domain.isSelectable
+      ? 'bg-gray-200 text-gray-800 border-gray-300 hover:bg-gray-300 dark:bg-neutral-700 dark:text-gray-200 dark:border-neutral-600 dark:hover:bg-neutral-600'
+      : '',
+    !domain.isSelectable
+      ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 opacity-70 dark:border-neutral-800 dark:bg-neutral-800 dark:text-neutral-500'
+      : '',
   ]
+}
+
+function handleDomainClick(domain: ContentDomainPill) {
+  if (!domain.isSelectable) return
+
+  store.setActiveContentDomain(domain.key)
 }
 </script>
