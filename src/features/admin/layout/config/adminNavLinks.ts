@@ -23,13 +23,13 @@ export const adminNavLinks: AdminNavLink[] = [
     icon: 'Users',
     library: 'lucide',
   },
-  {
-    name: 'Campaigns',
-    routeName: AppRouteNames.AdminCampaigns,
-    path: AppRoutePaths.AdminCampaigns,
-    icon: 'mdi:sword-cross',
-    library: 'iconify',
-  },
+  // {
+  //   name: 'Campaigns',
+  //   routeName: AppRouteNames.AdminCampaigns,
+  //   path: AppRoutePaths.AdminCampaigns,
+  //   icon: 'mdi:sword-cross',
+  //   library: 'iconify',
+  // },
   {
     name: 'Playables',
     routeName: AppRouteNames.AdminPlayables,
@@ -44,11 +44,11 @@ export const adminNavLinks: AdminNavLink[] = [
     icon: 'BookOpenIcon',
     library: 'heroicons',
   },
-  {
-    name: 'System',
-    routeName: AppRouteNames.AdminSystem,
-    path: AppRoutePaths.AdminSystem,
-    icon: 'ServerCog',
-    library: 'lucide',
-  },
+  // {
+  //   name: 'System',
+  //   routeName: AppRouteNames.AdminSystem,
+  //   path: AppRoutePaths.AdminSystem,
+  //   icon: 'ServerCog',
+  //   library: 'lucide',
+  // },
 ]
