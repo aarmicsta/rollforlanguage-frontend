@@ -4,20 +4,23 @@
     Creature Edit Modal
     =========================================================
 
-    Primary Content admin editing surface for a single
-    creature record.
+    Edit workflow for canonical creature records.
 
     Responsibilities:
-    - edit core scalar creature fields
-    - manage tag assignment for the creature
-    - display read-only creature metadata and classifications
-    - persist creature edits through Content-domain services
+    - load editable creature data into local state
+    - submit scalar updates (identity + classification)
+    - submit relational updates (tags)
+    - trigger content refresh on successful save
+
+    Visibility:
+    - controlled explicitly by Content store state:
+      store.showEditCreatureModal
+    - selectedCreature provides the editing context only
 
     Notes:
-    - visibility is controlled by selectedCreature store state
-    - local editable copy is used to prevent direct mutation
-    - relational data is loaded by the modal and passed into
-      presentational selector components
+    - selectedCreature establishes which creature is being edited
+    - modal visibility is intentionally decoupled from selection
+    - closing the modal does not implicitly clear selection
   -->
   <AdminModal
     :visible="store.showEditCreatureModal"
@@ -239,10 +242,8 @@ import {
   type SizeCategoryOption,
   type ThreatLevelOption,
 } from '@/features/admin/content/services/creatureService'
-import {
-  useContentStore,
-  type ContentCreatureRecord,
-} from '@/features/admin/content/stores/contentStore'
+import { useContentStore } from '@/features/admin/content/stores/contentStore'
+import type { ContentCreatureRecord } from '@/features/admin/content/types/contentTypes'
 import {
   getPlayableTags,
   type PlayableTag,
