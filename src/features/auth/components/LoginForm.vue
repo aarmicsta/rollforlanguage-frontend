@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { isNavigationFailure, NavigationFailureType, useRouter } from 'vue-router'
+import { AppRouteNames } from '@/router/routes'
 import InputField from '@/components/atoms/InputField.vue'
 import LoadingSpinner from '@/components/atoms/LoadingSpinner.vue'
 import ErrorBanner from '@/components/molecules/ErrorBanner.vue'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -22,13 +24,13 @@ const submit = async () => {
 
   try {
     if (user?.roles?.includes('superadmin') || user?.roles?.includes('admin')) {
-      await router.replace('/admin/dashboard')
+      await router.replace({ name: AppRouteNames.AdminDashboard })
     } else if (user?.roles?.includes('teacher')) {
-      await router.replace('/teacher-dashboard')
+      await router.replace({ name: AppRouteNames.TeacherDashboard })
     } else if (user?.roles?.includes('student')) {
-      await router.replace('/dashboard')
+      await router.replace({ name: AppRouteNames.StudentDashboard })
     } else if (user) {
-      await router.replace('/')
+      await router.replace({ name: AppRouteNames.Landing })
     } else {
       errorMessage.value = authStore.authError || 'Invalid email or password.'
     }
