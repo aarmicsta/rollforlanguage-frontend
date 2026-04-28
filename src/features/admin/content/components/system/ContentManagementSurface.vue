@@ -49,13 +49,7 @@
 
       <CreatureBaseStatsTable v-else-if="activeSurface === 'creatureStats'" />
 
-      <!-- <ItemTable v-else-if="activeSurface === 'items'" /> -->
-
-      <div v-else-if="activeSurface === 'items'" class="p-4">
-        <p class="text-sm text-gray-700 dark:text-gray-300">
-          Placeholder surface for future item management tables.
-        </p>
-      </div>
+      <ItemTable v-else-if="activeSurface === 'items'" />
     </div>
   </section>
 </template>
@@ -80,7 +74,7 @@
 import { computed } from 'vue'
 import CreatureBaseStatsTable from '@/features/admin/content/components/creature/CreatureBaseStatsTable.vue'
 import CreatureTable from '@/features/admin/content/components/creature/CreatureTable.vue'
-// import ItemTable from '@features/admin/content/components/item/ItemTable.vue'
+import ItemTable from '@/features/admin/content/components/item/ItemTable.vue'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
 
 /**
