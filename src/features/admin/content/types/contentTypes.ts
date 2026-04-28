@@ -104,3 +104,121 @@ export interface ContentCreatureRecord {
  * contracts and store selection state cannot drift apart.
  */
 export type CreatureListItem = ContentCreatureRecord
+
+
+/**
+ * ---------------------------------------------------------
+ * Content Item Record
+ * ---------------------------------------------------------
+ *
+ * Shared frontend shape for an item record returned by future
+ * admin item browse/update endpoints.
+ *
+ * Notes:
+ * - includes both raw classification IDs and display labels
+ * - raw IDs support edit workflows
+ * - display labels support browse/table rendering
+ * - equipment slot assignment remains relational and is loaded
+ *   separately when needed
+ */
+export interface ContentItemRecord {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+
+  itemTypeId: string
+  rarityLevelId: string
+
+  itemType: string
+  rarityLevel: string
+
+  baseValue: number
+  weight: string
+  maxStackSize: number
+
+  iconMediaAssetId: string | null
+  isActive: boolean | null
+  sortOrder: number | null
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+/**
+ * ---------------------------------------------------------
+ * ItemListItem
+ * ---------------------------------------------------------
+ *
+ * Service/table-facing alias for the Content item browse
+ * record shape.
+ *
+ * This intentionally aliases ContentItemRecord so service
+ * contracts and store selection state cannot drift apart.
+ */
+export type ItemListItem = ContentItemRecord
+
+/**
+ * ---------------------------------------------------------
+ * Item Reference Options
+ * ---------------------------------------------------------
+ *
+ * Canonical option shapes used by future item create/edit
+ * forms.
+ */
+export interface ItemTypeOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  itemCategory: string | null
+  isEquippable: boolean
+  isConsumable: boolean
+  isCraftingMaterial: boolean
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface RarityLevelOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  rarityRank: number | null
+  colorHex: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+export interface EquipmentSlotOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  slotCategory: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+/**
+ * ---------------------------------------------------------
+ * Item Equipment Slot Assignment
+ * ---------------------------------------------------------
+ *
+ * Resolved equipment slot assignment shape for item create/edit
+ * workflows.
+ *
+ * Notes:
+ * - only equippable items are expected to use slot assignment
+ * - non-equippable items may have an empty assignment set
+ */
+export interface ItemEquipmentSlotAssignment {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  slotCategory: string | null
+}

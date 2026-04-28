@@ -3,10 +3,9 @@ import { ref } from 'vue'
 import type {
   ContentCreatureRecord,
   ContentDomain,
+  ContentItemRecord,
   ContentManagementSurface,
 } from '@/features/admin/content/types/contentTypes'
-
-
 
 export const useContentStore = defineStore('content', () => {
   /**
@@ -34,33 +33,43 @@ export const useContentStore = defineStore('content', () => {
    * Selected Records
    * ---------------------------------------------------------
    *
-   * Holds the currently selected content-domain record for
+   * Holds the currently selected content-domain records for
    * workflow actions such as editing.
    *
    * Notes:
    * - selectedCreature provides edit context for CreatureEditModal
-   * - selectedCreature does NOT control modal visibility
-   * - showEditCreatureModal owns explicit edit modal visibility
+   * - selectedItem provides edit context for ItemEditModal
+   *
+   * - selected records DO NOT control modal visibility
+   * - explicit modal state flags own visibility
    *
    * Current scope:
-   * - creatures only
+   * - creatures
+   * - items (MVP foundation)
    */
   const selectedCreature = ref<ContentCreatureRecord | null>(null)
+  const selectedItem = ref<ContentItemRecord | null>(null)
 
   /**
    * ---------------------------------------------------------
    * Modal Visibility
    * ---------------------------------------------------------
    *
-   * Explicit visibility state for Content-domain create
-   * workflows.
+   * Explicit visibility state for Content-domain modal workflows.
+   *
+   * Notes:
+   * - visibility is store-controlled (not inferred)
+   * - each domain owns its own create/edit modal state
    *
    * Current scope:
-   * - creature create modal
+   * - creature create/edit/base stats modals
+   * - item create/edit modals (MVP foundation)
    */
   const showCreateCreatureModal = ref(false)
   const showEditCreatureModal = ref(false)
   const showCreatureBaseStatsModal = ref(false)
+  const showCreateItemModal = ref(false)
+  const showEditItemModal = ref(false)
 
   /**
    * ---------------------------------------------------------
@@ -93,34 +102,34 @@ export const useContentStore = defineStore('content', () => {
    * ---------------------------------------------------------
    */
 
-/**
- * Set the active Content domain and synchronize the
- * management surface accordingly.
- *
- * Notes:
- * - implemented domains may activate a management surface
- * - placeholder domains clear the active surface until their
- *   systems are built
- */
-function setActiveContentDomain(domain: ContentDomain) {
-  activeContentDomain.value = domain
+  /**
+   * Set the active Content domain and synchronize the
+   * management surface accordingly.
+   *
+   * Notes:
+   * - implemented domains may activate a management surface
+   * - placeholder domains clear the active surface until their
+   *   systems are built
+   */
+  function setActiveContentDomain(domain: ContentDomain) {
+    activeContentDomain.value = domain
 
-  switch (domain) {
-    case 'creatures':
-      activeManagementSurface.value = 'creatures'
-      break
+    switch (domain) {
+      case 'creatures':
+        activeManagementSurface.value = 'creatures'
+        break
 
-    case 'items':
-      activeManagementSurface.value = 'items'
-      break
+      case 'items':
+        activeManagementSurface.value = 'items'
+        break
 
-    case 'factions':
-    case 'organizations':
-    case 'locations':
-      activeManagementSurface.value = null
-      break
+      case 'factions':
+      case 'organizations':
+      case 'locations':
+        activeManagementSurface.value = null
+        break
+    }
   }
-}
 
   /**
    * Set the currently active management surface.
@@ -189,6 +198,50 @@ function setActiveContentDomain(domain: ContentDomain) {
   }
 
   /**
+   * Set the currently selected item record.
+   */
+  function setSelectedItem(item: ContentItemRecord | null) {
+    selectedItem.value = item
+  }
+
+  /**
+   * Clear the currently selected item record.
+   */
+  function clearSelectedItem() {
+    selectedItem.value = null
+  }
+
+  /**
+   * Open the item edit modal for a selected item.
+   */
+  function openEditItemModal(item: ContentItemRecord) {
+    selectedItem.value = item
+    showEditItemModal.value = true
+  }
+
+  /**
+   * Close the item edit modal.
+   */
+  function closeEditItemModal() {
+    showEditItemModal.value = false
+    selectedItem.value = null
+  }
+
+  /**
+   * Open the item create modal.
+   */
+  function openCreateItemModal() {
+    showCreateItemModal.value = true
+  }
+
+  /**
+   * Close the item create modal.
+   */
+  function closeCreateItemModal() {
+    showCreateItemModal.value = false
+  }
+
+  /**
    * Trigger a Content-domain refresh signal for browse views.
    */
   function refreshContentList() {
@@ -236,9 +289,21 @@ function setActiveContentDomain(domain: ContentDomain) {
     setSelectedCreature,
     clearSelectedCreature,
 
+    selectedItem,
+    setSelectedItem,
+    clearSelectedItem,
+
     showCreateCreatureModal,
     openCreateCreatureModal,
     closeCreateCreatureModal,
+
+    showCreateItemModal,
+    openCreateItemModal,
+    closeCreateItemModal,
+
+    showEditItemModal,
+    openEditItemModal,
+    closeEditItemModal,
 
     lastContentRefresh,
     refreshContentList,

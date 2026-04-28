@@ -21,16 +21,31 @@
     ---------------------------------------------------------
     Create Modals
     ---------------------------------------------------------
+
+    Implemented:
+    - CreatureCreateModal
+
+    Pre-wired (inactive):
+    - ItemCreateModal
   -->
   <CreatureCreateModal />
+  <!-- <ItemCreateModal /> -->
 
   <!--
     ---------------------------------------------------------
     Edit Modals
     ---------------------------------------------------------
+
+    Implemented:
+    - CreatureEditModal
+    - CreatureBaseStatsEditModal
+
+    Pre-wired (inactive):
+    - ItemEditModal
   -->
   <CreatureEditModal />
   <CreatureBaseStatsEditModal />
+  <!-- <ItemEditModal /> -->
 </template>
 
 <script setup lang="ts">
@@ -43,4 +58,6 @@
 import CreatureBaseStatsEditModal from '@/features/admin/content/components/creature/CreatureBaseStatsEditModal.vue'
 import CreatureCreateModal from '@/features/admin/content/components/creature/CreatureCreateModal.vue'
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
+// import ItemCreateModal from '@/features/admin/content/components/item/ItemCreateModal.vue'
+// import ItemEditModal from '@/features/admin/content/components/item/ItemEditModal.vue'
 </script>

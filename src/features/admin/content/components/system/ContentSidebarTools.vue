@@ -163,8 +163,7 @@ function isActionActive(action: string): boolean {
  *
  * Notes:
  * - table actions toggle management surfaces
- * - implemented create actions open modal workflows
- * - unimplemented Item actions remain logged placeholders
+ * - create actions open store-controlled modal workflows
  */
 function handleAction(action: string) {
   switch (action) {
@@ -185,7 +184,7 @@ function handleAction(action: string) {
       break
 
     case 'createItem':
-      console.log(`[ContentSidebarTools] create action: ${action}`)
+      store.openCreateItemModal()
       break
 
     default:
