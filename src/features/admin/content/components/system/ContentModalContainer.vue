@@ -29,7 +29,7 @@
     - ItemCreateModal
   -->
   <CreatureCreateModal />
-  <!-- <ItemCreateModal /> -->
+  <ItemCreateModal />
 
   <!--
     ---------------------------------------------------------
@@ -58,6 +58,6 @@
 import CreatureBaseStatsEditModal from '@/features/admin/content/components/creature/CreatureBaseStatsEditModal.vue'
 import CreatureCreateModal from '@/features/admin/content/components/creature/CreatureCreateModal.vue'
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
-// import ItemCreateModal from '@/features/admin/content/components/item/ItemCreateModal.vue'
+import ItemCreateModal from '@/features/admin/content/components/item/ItemCreateModal.vue'
 // import ItemEditModal from '@/features/admin/content/components/item/ItemEditModal.vue'
 </script>
