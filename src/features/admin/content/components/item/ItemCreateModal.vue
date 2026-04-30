@@ -339,6 +339,11 @@
  * - equipment slot assignment occurs after the item exists
  */
 
+ /**
+ * =========================================================
+ * Imports
+ * =========================================================
+ */
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useToastStore } from '@/stores/ui/useToastStore'
 import {
@@ -360,6 +365,14 @@ import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
  * ---------------------------------------------------------
  * Stores
  * ---------------------------------------------------------
+ *
+ * `store`
+ * - owns shared Content dashboard state
+ * - controls modal visibility
+ * - owns shared submission/error state
+ *
+ * `toastStore`
+ * - displays global success/error feedback
  */
 const store = useContentStore()
 const toastStore = useToastStore()
@@ -368,6 +381,9 @@ const toastStore = useToastStore()
  * ---------------------------------------------------------
  * Shared Submission State
  * ---------------------------------------------------------
+ *
+ * Mirrors Content store-owned submission state into this
+ * modal for template readability.
  */
 const isSubmitting = computed(() => store.isSubmitting)
 const submitError = computed(() => store.submitError)
@@ -376,6 +392,15 @@ const submitError = computed(() => store.submitError)
  * ---------------------------------------------------------
  * Item Identity Form State
  * ---------------------------------------------------------
+ *
+ * Local create-form state for required item identity,
+ * classification, economy, and physical fields.
+ *
+ * Notes:
+ * - displayName drives automatic name/slug generation
+ * - name and slug may be manually overridden
+ * - itemTypeId and rarityLevelId are required
+ * - weight is stored as a string to match backend decimal shape
  */
 const form = reactive({
   displayName: '',
@@ -394,6 +419,9 @@ const form = reactive({
  * ---------------------------------------------------------
  * Manual Identity Override Flags
  * ---------------------------------------------------------
+ *
+ * Prevent automatic name/slug generation from overwriting
+ * deliberate user edits.
  */
 const nameManuallyEdited = ref(false)
 const slugManuallyEdited = ref(false)
@@ -402,6 +430,9 @@ const slugManuallyEdited = ref(false)
  * ---------------------------------------------------------
  * Optional Section Visibility
  * ---------------------------------------------------------
+ *
+ * Controls collapsed/expanded state for optional create-time
+ * assignment sections.
  */
 const showEquipmentSlots = ref(false)
 
@@ -409,6 +440,16 @@ const showEquipmentSlots = ref(false)
  * ---------------------------------------------------------
  * Equipment Slot Assignment State
  * ---------------------------------------------------------
+ *
+ * `availableEquipmentSlots`
+ * - canonical equipment slot options loaded from backend
+ *
+ * `selectedEquipmentSlotIds`
+ * - selected slot IDs to attach after item creation
+ *
+ * Notes:
+ * - non-equippable items may have no equipment slots
+ * - assignment occurs after the core item record exists
  */
 const availableEquipmentSlots = ref<EquipmentSlotOption[]>([])
 const selectedEquipmentSlotIds = ref<string[]>([])
@@ -417,6 +458,9 @@ const selectedEquipmentSlotIds = ref<string[]>([])
  * ---------------------------------------------------------
  * Classification Reference State
  * ---------------------------------------------------------
+ *
+ * Canonical option sets used by required item classification
+ * selectors.
  */
 const availableItemTypes = ref<ItemTypeOption[]>([])
 const availableRarityLevels = ref<RarityLevelOption[]>([])
@@ -425,6 +469,8 @@ const availableRarityLevels = ref<RarityLevelOption[]>([])
  * ---------------------------------------------------------
  * Reference Loading State
  * ---------------------------------------------------------
+ *
+ * Tracks reference option loading separately from submission.
  */
 const isLoadingReferenceOptions = ref(false)
 const referenceLoadError = ref('')
@@ -433,6 +479,16 @@ const referenceLoadError = ref('')
  * ---------------------------------------------------------
  * Load Reference Options
  * ---------------------------------------------------------
+ *
+ * Loads all reference data required by the create modal:
+ * - item types
+ * - rarity levels
+ * - equipment slots
+ *
+ * Notes:
+ * - item type and rarity are required for create
+ * - equipment slots are optional post-create assignments
+ * - failures clear local option arrays to prevent stale UI
  */
 async function loadReferenceOptions() {
   try {
@@ -460,6 +516,14 @@ async function loadReferenceOptions() {
   }
 }
 
+/**
+ * ---------------------------------------------------------
+ * Lifecycle
+ * ---------------------------------------------------------
+ *
+ * Load create-modal reference options when the modal component
+ * is mounted.
+ */
 onMounted(() => {
   loadReferenceOptions()
 })
@@ -477,6 +541,11 @@ function toggleEquipmentSlots() {
  * ---------------------------------------------------------
  * Name Normalization
  * ---------------------------------------------------------
+ *
+ * Converts display labels into canonical internal names.
+ *
+ * Example:
+ * - "Iron Sword" -> "iron_sword"
  */
 function normalizeToName(value: string): string {
   return value
@@ -492,6 +561,11 @@ function normalizeToName(value: string): string {
  * ---------------------------------------------------------
  * Slug Normalization
  * ---------------------------------------------------------
+ *
+ * Converts display labels into URL-safe slugs.
+ *
+ * Example:
+ * - "Iron Sword" -> "iron-sword"
  */
 function normalizeToSlug(value: string): string {
   return value
@@ -507,6 +581,9 @@ function normalizeToSlug(value: string): string {
  * ---------------------------------------------------------
  * Watch: Display Name
  * ---------------------------------------------------------
+ *
+ * Auto-generates name and slug while preserving manual
+ * overrides once the user edits either field directly.
  */
 watch(
   () => form.displayName,
@@ -525,6 +602,8 @@ watch(
  * ---------------------------------------------------------
  * Form Validity
  * ---------------------------------------------------------
+ *
+ * Minimum schema-valid create requirements.
  */
 const isFormValid = computed(() => {
   return (
@@ -543,6 +622,13 @@ const isFormValid = computed(() => {
  * ---------------------------------------------------------
  * Reset Form
  * ---------------------------------------------------------
+ *
+ * Restores create-modal state after close or successful create.
+ *
+ * Notes:
+ * - keeps loaded reference option arrays intact
+ * - clears selected optional assignments
+ * - resets identity/economy fields to safe defaults
  */
 function resetForm() {
   form.displayName = ''
@@ -570,6 +656,8 @@ function resetForm() {
  * ---------------------------------------------------------
  * Close Modal
  * ---------------------------------------------------------
+ *
+ * Closes the create modal and clears local form state.
  */
 function closeModal() {
   store.closeCreateItemModal()
@@ -584,6 +672,11 @@ function closeModal() {
  * Save order:
  * 1. create core item record
  * 2. optionally attach selected equipment slots
+ *
+ * Notes:
+ * - relational assignments require the created item ID
+ * - shared submission/error state is owned by the Content store
+ * - refresh signal updates Content browse surfaces after success
  */
 async function handleCreate() {
   if (!isFormValid.value) return
