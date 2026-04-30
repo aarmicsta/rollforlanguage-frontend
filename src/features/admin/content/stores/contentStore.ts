@@ -124,6 +124,9 @@ export const useContentStore = defineStore('content', () => {
         break
 
       case 'factions':
+        activeManagementSurface.value = 'factions'
+        break
+
       case 'organizations':
       case 'locations':
         activeManagementSurface.value = null

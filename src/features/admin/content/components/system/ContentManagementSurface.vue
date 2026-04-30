@@ -50,6 +50,8 @@
       <CreatureBaseStatsTable v-else-if="activeSurface === 'creatureStats'" />
 
       <ItemTable v-else-if="activeSurface === 'items'" />
+
+      <FactionTable v-else-if="activeSurface === 'factions'" />
     </div>
   </section>
 </template>
@@ -74,6 +76,7 @@
 import { computed } from 'vue'
 import CreatureBaseStatsTable from '@/features/admin/content/components/creature/CreatureBaseStatsTable.vue'
 import CreatureTable from '@/features/admin/content/components/creature/CreatureTable.vue'
+import FactionTable from '@/features/admin/content/components/faction/FactionTable.vue'
 import ItemTable from '@/features/admin/content/components/item/ItemTable.vue'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
 
@@ -111,6 +114,8 @@ const surfaceTitle = computed(() => {
       return 'Creature Stats Table'
     case 'items':
       return 'Item Table'
+    case 'factions':
+      return 'Faction Table'
     default:
       return ''
   }

@@ -110,7 +110,7 @@ const contentDomains: ContentDomainPill[] = [
   {
     key: 'factions',
     label: 'Factions',
-    isSelectable: false,
+    isSelectable: true,
   },
   {
     key: 'organizations',

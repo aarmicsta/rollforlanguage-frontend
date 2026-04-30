@@ -53,7 +53,11 @@ export type ContentDomain =
  *
  * Management surface keys supported by the Content dashboard.
  */
-export type ContentManagementSurface = 'creatures' | 'creatureStats' | 'items'
+export type ContentManagementSurface =
+  | 'creatures'
+  | 'creatureStats'
+  | 'items'
+  | 'factions'
 
 /**
  * ---------------------------------------------------------
@@ -222,3 +226,43 @@ export interface ItemEquipmentSlotAssignment {
   displayName: string
   slotCategory: string | null
 }
+
+/**
+ * ---------------------------------------------------------
+ * Content Faction Record
+ * ---------------------------------------------------------
+ *
+ * Shared frontend shape for a faction record returned by
+ * future admin faction browse/update endpoints.
+ *
+ * Notes:
+ * - alignmentId stores the raw reference ID
+ * - alignment stores the hydrated display label from ref_alignments
+ * - tags remain relational and should be loaded separately later
+ */
+export interface ContentFactionRecord {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+
+  alignmentId: string | null
+  alignment: string | null
+
+  iconMediaAssetId: string | null
+  isActive: boolean | null
+  sortOrder: number | null
+  createdAt: string | null
+  updatedAt: string | null
+}
+
+/**
+ * ---------------------------------------------------------
+ * FactionListItem
+ * ---------------------------------------------------------
+ *
+ * Service/table-facing alias for the Content faction browse
+ * record shape.
+ */
+export type FactionListItem = ContentFactionRecord
