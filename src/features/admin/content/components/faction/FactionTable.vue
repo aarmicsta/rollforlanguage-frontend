@@ -12,9 +12,11 @@
     - no data fetching yet
   -->
     <AdminTableShell
-    :loading="false"
-    :error="''"
-    :is-empty="!factions.length"
+      :loading="loading"
+      :error="error"
+      :is-empty="!factions.length"
+      loading-message="Loading factions..."
+      empty-message="No factions found."
     >
         <table class="min-w-full text-sm text-left">
             <!-- Header -->
@@ -47,41 +49,39 @@
  * Imports
  * =========================================================
  */
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import FactionTableRow from '@/features/admin/content/components/faction/FactionTableRow.vue'
+import { getFactions } from '@/features/admin/content/services/factionService'
 import type { FactionListItem } from '@/features/admin/content/types/contentTypes'
 import AdminTableShell from '@/features/admin/shared/components/table/AdminTableShell.vue'
 
 /**
  * ---------------------------------------------------------
- * Local Mock Data (Temporary)
+ * Faction Data (Live)
  * ---------------------------------------------------------
  *
- * Provides a minimal in-component dataset used to:
- * - validate table structure and column layout
- * - test row rendering and spacing
- * - simulate real data before backend integration
- *
- * Notes:
- * - This will be removed once factionService + API endpoints exist
- * - Shape mirrors ContentFactionRecord to prevent drift
+ * Fetches faction records from backend admin endpoint.
  */
-const factions = ref<FactionListItem[]>([
-  {
-    id: 'demo-faction-1',
-    name: 'iron_circle',
-    slug: 'iron-circle',
-    displayName: 'Iron Circle',
-    description: 'A disciplined faction used to validate table layout.',
-    alignmentId: null,
-    alignment: null,
-    iconMediaAssetId: null,
-    isActive: true,
-    sortOrder: 0,
-    createdAt: null,
-    updatedAt: null,
-  },
-])
+const factions = ref<FactionListItem[]>([])
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+async function fetchFactions() {
+  try {
+    loading.value = true
+    error.value = null
+
+    const data = await getFactions()
+    factions.value = data
+  } catch (err) {
+    console.error(err)
+    error.value = 'Failed to load factions.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchFactions)
 
 /**
  * ---------------------------------------------------------

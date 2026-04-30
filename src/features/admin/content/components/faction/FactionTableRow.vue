@@ -59,12 +59,13 @@
 
     <!-- Updated -->
     <td class="px-3 py-2 text-gray-500">
-      {{ faction.updatedAt ?? '—' }}
+      {{ formatDisplayDate(faction.updatedAt) }}
     </td>
   </tr>
 </template>
 
 <script setup lang="ts">
+import { formatDisplayDate } from '@/utils/dateFormat'
 import type { FactionListItem } from '@/features/admin/content/types/contentTypes'
 
 defineProps<{
@@ -75,4 +76,5 @@ defineProps<{
 defineEmits<{
   (e: 'select', id: string): void
 }>()
+
 </script>
