@@ -49,7 +49,7 @@
  * Imports
  * =========================================================
  */
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import FactionTableRow from '@/features/admin/content/components/faction/FactionTableRow.vue'
 import { getFactions } from '@/features/admin/content/services/factionService'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
@@ -83,7 +83,16 @@ async function fetchFactions() {
   }
 }
 
+/**
+ * ---------------------------------------------------------
+ * Lifecycle / Refresh Sync
+ * ---------------------------------------------------------
+ *
+ * Loads faction records on mount and refreshes the table
+ * whenever a Content-domain mutation completes.
+ */
 onMounted(fetchFactions)
+watch(() => store.lastContentRefresh, fetchFactions)
 
 function handleSelect(id: string) {
   const faction = factions.value.find((f) => f.id === id) ?? null

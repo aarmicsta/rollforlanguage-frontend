@@ -28,3 +28,24 @@ export async function getFactions(): Promise<FactionListItem[]> {
 
   return response.data.data
 }
+
+/**
+ * ---------------------------------------------------------
+ * Update Faction
+ * ---------------------------------------------------------
+ */
+export async function updateFaction(
+  id: string,
+  payload: {
+    displayName: string
+    description: string | null
+    isActive: boolean
+  }
+) {
+  const response = await axiosInstance.patch(
+    `/admin/factions/${id}`,
+    payload
+  )
+
+  return response.data.data
+}
