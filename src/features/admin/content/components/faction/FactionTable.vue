@@ -32,11 +32,11 @@
 
             <tbody>
                 <FactionTableRow
-                    v-for="faction in factions"
-                    :key="faction.id"
-                    :faction="faction"
-                    :is-selected="selectedFactionId === faction.id"
-                    @select="selectedFactionId = $event"
+                  v-for="faction in factions"
+                  :key="faction.id"
+                  :faction="faction"
+                  :is-selected="store.selectedFaction?.id === faction.id"
+                  @select="handleSelect"
                 />
             </tbody>
         </table>
@@ -52,6 +52,7 @@
 import { onMounted, ref } from 'vue'
 import FactionTableRow from '@/features/admin/content/components/faction/FactionTableRow.vue'
 import { getFactions } from '@/features/admin/content/services/factionService'
+import { useContentStore } from '@/features/admin/content/stores/contentStore'
 import type { FactionListItem } from '@/features/admin/content/types/contentTypes'
 import AdminTableShell from '@/features/admin/shared/components/table/AdminTableShell.vue'
 
@@ -65,6 +66,7 @@ import AdminTableShell from '@/features/admin/shared/components/table/AdminTable
 const factions = ref<FactionListItem[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
+const store = useContentStore()
 
 async function fetchFactions() {
   try {
@@ -83,17 +85,11 @@ async function fetchFactions() {
 
 onMounted(fetchFactions)
 
-/**
- * ---------------------------------------------------------
- * Selected Faction (Temporary)
- * ---------------------------------------------------------
- *
- * Local selection state used to:
- * - validate row selection styling
- * - mirror ItemTable behavior
- *
- * Notes:
- * - Will later be replaced by Content store selection
- */
-const selectedFactionId = ref<string | null>(null)
+function handleSelect(id: string) {
+  const faction = factions.value.find((f) => f.id === id) ?? null
+
+  if (!faction) return
+
+  store.openEditFactionModal(faction)
+}
 </script>

@@ -5,6 +5,7 @@ import type {
   ContentDomain,
   ContentItemRecord,
   ContentManagementSurface,
+  ContentFactionRecord,
 } from '@/features/admin/content/types/contentTypes'
 
 export const useContentStore = defineStore('content', () => {
@@ -49,6 +50,7 @@ export const useContentStore = defineStore('content', () => {
    */
   const selectedCreature = ref<ContentCreatureRecord | null>(null)
   const selectedItem = ref<ContentItemRecord | null>(null)
+  const selectedFaction = ref<ContentFactionRecord | null>(null)
 
   /**
    * ---------------------------------------------------------
@@ -70,6 +72,7 @@ export const useContentStore = defineStore('content', () => {
   const showCreatureBaseStatsModal = ref(false)
   const showCreateItemModal = ref(false)
   const showEditItemModal = ref(false)
+  const showEditFactionModal = ref(false)
 
   /**
    * ---------------------------------------------------------
@@ -245,6 +248,36 @@ export const useContentStore = defineStore('content', () => {
   }
 
   /**
+   * Set the currently selected faction record.
+   */
+  function setSelectedFaction(faction: ContentFactionRecord | null) {
+    selectedFaction.value = faction
+  }
+
+  /**
+   * Clear the currently selected faction record.
+   */
+  function clearSelectedFaction() {
+    selectedFaction.value = null
+  }
+
+  /**
+   * Open the faction edit modal for a selected faction.
+   */
+  function openEditFactionModal(faction: ContentFactionRecord) {
+    selectedFaction.value = faction
+    showEditFactionModal.value = true
+  }
+
+  /**
+   * Close the faction edit modal.
+   */
+  function closeEditFactionModal() {
+    showEditFactionModal.value = false
+    selectedFaction.value = null
+  }
+
+  /**
    * Trigger a Content-domain refresh signal for browse views.
    */
   function refreshContentList() {
@@ -307,6 +340,14 @@ export const useContentStore = defineStore('content', () => {
     showEditItemModal,
     openEditItemModal,
     closeEditItemModal,
+
+    selectedFaction,
+    setSelectedFaction,
+    clearSelectedFaction,
+
+    showEditFactionModal,
+    openEditFactionModal,
+    closeEditFactionModal,
 
     lastContentRefresh,
     refreshContentList,

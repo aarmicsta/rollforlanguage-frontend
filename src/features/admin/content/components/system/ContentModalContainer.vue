@@ -46,6 +46,7 @@
   <CreatureEditModal />
   <CreatureBaseStatsEditModal />
   <ItemEditModal />
+  <FactionEditModal />
 </template>
 
 <script setup lang="ts">
@@ -58,6 +59,7 @@
 import CreatureBaseStatsEditModal from '@/features/admin/content/components/creature/CreatureBaseStatsEditModal.vue'
 import CreatureCreateModal from '@/features/admin/content/components/creature/CreatureCreateModal.vue'
 import CreatureEditModal from '@/features/admin/content/components/creature/CreatureEditModal.vue'
+import FactionEditModal from '@/features/admin/content/components/faction/FactionEditModal.vue'
 import ItemCreateModal from '@/features/admin/content/components/item/ItemCreateModal.vue'
 import ItemEditModal from '@/features/admin/content/components/item/ItemEditModal.vue'
 </script>
