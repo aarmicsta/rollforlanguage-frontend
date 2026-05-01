@@ -42,6 +42,7 @@ export async function updateFaction(
   payload: {
     displayName: string
     description: string | null
+    alignmentId: string | null
     isActive: boolean
   }
 ) {

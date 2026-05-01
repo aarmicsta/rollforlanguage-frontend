@@ -240,6 +240,7 @@ async function handleSave() {
     const updated = await updateFaction(store.selectedFaction.id, {
       displayName: editableFaction.value.displayName,
       description: editableFaction.value.description,
+      alignmentId: editableFaction.value.alignmentId,
       isActive: editableFaction.value.isActive,
     })
 
