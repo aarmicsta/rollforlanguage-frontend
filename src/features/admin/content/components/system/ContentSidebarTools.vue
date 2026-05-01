@@ -117,6 +117,9 @@ function getToolIcon(action: string): string {
 
     case 'editCreatureStats':
       return 'mdi:chart-bar'
+    
+    case 'editFactions':
+      return 'mdi:table'
 
     default:
       return 'mdi:tools'
@@ -135,7 +138,12 @@ function getToolIcon(action: string): string {
  * present an active state.
  */
 function isManagementSurfaceAction(action: string): boolean {
-  return ['editCreatures', 'editCreatureStats', 'editItems'].includes(action)
+  return [
+    'editCreatures',
+    'editCreatureStats',
+    'editItems',
+    'editFactions',
+  ].includes(action)
 }
 
 function isActionActive(action: string): boolean {
@@ -148,6 +156,9 @@ function isActionActive(action: string): boolean {
 
     case 'editItems':
       return store.activeManagementSurface === 'items'
+
+    case 'editFactions':
+      return store.activeManagementSurface === 'factions'
 
     default:
       return false
@@ -185,6 +196,10 @@ function handleAction(action: string) {
 
     case 'createItem':
       store.openCreateItemModal()
+      break
+    
+    case 'editFactions':
+      store.toggleManagementSurface('factions')
       break
 
     default:

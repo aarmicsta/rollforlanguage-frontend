@@ -13,7 +13,7 @@
  * =========================================================
  */
 
-import type { ContentDomain } from '@/features/admin/content/stores/contentStore'
+import type { ContentDomain } from '@/features/admin/content/types/contentTypes'
 
 export interface ContentTool {
   name: string
@@ -45,4 +45,14 @@ export const contentTools: Record<ContentDomain, ContentTool[]> = {
       action: 'editItems',
     },
   ],
+  factions: [
+    {
+      name: 'Faction Table',
+      action: 'editFactions',
+    },
+  ],
+
+  organizations: [],
+
+  locations: [],
 }
