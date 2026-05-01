@@ -49,3 +49,13 @@ export async function updateFaction(
 
   return response.data.data
 }
+
+/**
+ * ---------------------------------------------------------
+ * Alignment Options
+ * ---------------------------------------------------------
+ */
+export async function getAlignments() {
+  const response = await axiosInstance.get('/admin/alignments')
+  return response.data.data
+}

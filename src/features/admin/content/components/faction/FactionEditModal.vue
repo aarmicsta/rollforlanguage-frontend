@@ -50,7 +50,22 @@
 
         <div>
           <p class="text-xs text-gray-400">Alignment</p>
-          <p>{{ store.selectedFaction.alignment ?? '—' }}</p>
+
+          <select
+            v-if="editableFaction"
+            v-model="editableFaction.alignmentId"
+            class="mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm text-gray-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-gray-100"
+          >
+            <option :value="null">— None —</option>
+
+            <option
+              v-for="alignment in alignments"
+              :key="alignment.id"
+              :value="alignment.id"
+            >
+              {{ alignment.displayName }}
+            </option>
+          </select>
         </div>
 
         <div>
@@ -120,9 +135,13 @@
  * Imports
  * =========================================================
  */
-import { ref, watch } from 'vue'
-import { updateFaction } from '@/features/admin/content/services/factionService'
+import { onMounted, ref, watch } from 'vue'
+import { 
+  updateFaction,
+  getAlignments,
+} from '@/features/admin/content/services/factionService'
 import { useContentStore } from '@/features/admin/content/stores/contentStore'
+import type { AlignmentOption } from '@/features/admin/content/types/contentTypes'
 import AdminModal from '@/features/admin/shared/components/AdminModal.vue'
 
 /**
@@ -162,6 +181,13 @@ const isSubmitting = ref(false)
 const submitError = ref('')
 
 /**
+ * ---------------------------------------------------------
+ * Alignment Options
+ * ---------------------------------------------------------
+ */
+const alignments = ref<AlignmentOption[]>([])
+
+/**
  * Sync editable state when selected faction changes
  */
 watch(
@@ -176,6 +202,7 @@ watch(
       displayName: faction.displayName,
       description: faction.description,
       isActive: faction.isActive ?? false,
+      alignmentId: string | null,
     }
   },
   { immediate: true }
@@ -226,4 +253,12 @@ async function handleSave() {
     isSubmitting.value = false
   }
 }
+
+onMounted(async () => {
+  try {
+    alignments.value = await getAlignments()
+  } catch (error) {
+    console.error('Failed to load alignments', error)
+  }
+})
 </script>

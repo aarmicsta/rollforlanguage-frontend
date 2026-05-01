@@ -259,6 +259,25 @@ export interface ContentFactionRecord {
 
 /**
  * ---------------------------------------------------------
+ * Alignment Option
+ * ---------------------------------------------------------
+ *
+ * Canonical alignment reference option used by Content-domain
+ * forms such as faction editing.
+ */
+export interface AlignmentOption {
+  id: string
+  name: string
+  slug: string
+  displayName: string
+  description: string | null
+  alignmentAxis: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+/**
+ * ---------------------------------------------------------
  * FactionListItem
  * ---------------------------------------------------------
  *
