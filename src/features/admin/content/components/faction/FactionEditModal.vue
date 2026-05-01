@@ -157,17 +157,20 @@ const store = useContentStore()
 
 /**
  * =========================================================
- * Store
+ * Editable Faction (Local State)
  * =========================================================
  *
- * Provides:
- * - selectedFaction (source of truth)
- * - modal visibility state
+ * Local copy of the selected faction used for form editing.
+ *
+ * Why this exists:
+ * - prevents direct mutation of store state
+ * - allows safe editing before persistence
  */
 const editableFaction = ref<{
   displayName: string
   description: string | null
   isActive: boolean
+  alignmentId: string | null
 } | null>(null)
 
 /**
@@ -202,7 +205,7 @@ watch(
       displayName: faction.displayName,
       description: faction.description,
       isActive: faction.isActive ?? false,
-      alignmentId: string | null,
+      alignmentId: faction.alignmentId,
     }
   },
   { immediate: true }

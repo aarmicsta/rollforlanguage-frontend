@@ -12,7 +12,10 @@
  */
 
 import { axiosInstance } from '@/services/apiClient'
-import type { FactionListItem } from '@/features/admin/content/types/contentTypes'
+import type {
+  AlignmentOption,
+  FactionListItem,
+} from '@/features/admin/content/types/contentTypes'
 
 /**
  * ---------------------------------------------------------
@@ -55,7 +58,7 @@ export async function updateFaction(
  * Alignment Options
  * ---------------------------------------------------------
  */
-export async function getAlignments() {
+export async function getAlignments(): Promise<AlignmentOption[]> {
   const response = await axiosInstance.get('/admin/alignments')
   return response.data.data
 }
